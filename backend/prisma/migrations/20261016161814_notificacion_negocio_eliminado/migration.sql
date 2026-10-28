@@ -1,0 +1,1 @@
+ALTER TYPE "TipoNotificacion" ADD VALUE 'NEGOCIO_ELIMINADO';

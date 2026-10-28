@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil — Popayán GO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/popayan-go.css">
+</head>
+<body>
+
+<nav class="go-nav">
+  <div class="contenedor go-nav__fila">
+    <span class="go-nav__marca">Popayán <em>GO</em></span>
+    <div class="go-nav__tabs">
+      <a href="rutas.html">Rutas</a>
+      <a href="logros.html">Logros</a>
+      <a href="ranking.html">Leaderboard</a>
+      <a href="perfil.html" aria-current="page">Perfil</a>
+    </div>
+    <span class="go-nav__nivel" data-perfil-nivel>Nv —</span>
+  </div>
+</nav>
+
+<div class="go-fondo">
+  <header class="go-perfil-header">
+    <div class="go-avatar" data-perfil-avatar>🦅</div>
+    <h1 class="fuente-titulos" data-perfil-nombre>Explorador</h1>
+    <p class="go-perfil-header__bio" data-perfil-bio>Aún no has escrito una bio.</p>
+    <div class="go-stats-fila">
+      <div><strong data-perfil-visitas>0</strong><span>Visitas</span></div>
+      <div><strong data-perfil-puntos>0</strong><span>Puntos</span></div>
+      <div><strong data-perfil-posicion>—</strong><span>Ranking</span></div>
+    </div>
+    <a href="editar-perfil.html" class="boton boton-secundario" style="margin-top:1rem; display:inline-flex;">Editar perfil</a>
+  </header>
+
+  <div class="go-tabs" role="tablist">
+    <button type="button" role="tab" aria-selected="true" data-tab="rutas">Mis rutas</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="logros">Logros recientes</button>
+  </div>
+
+  <ul class="go-lista-rutas" data-panel="rutas">
+    <li><a href="rutas.html"><span style="font-size:1.5rem;">⛪</span><span class="go-lista-rutas__texto"><strong>Cargando tus rutas…</strong></span></a></li>
+  </ul>
+  <ul class="go-lista-rutas" data-panel="logros" hidden></ul>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/popayan-go-perfil.js"></script>
+</body>
+</html>

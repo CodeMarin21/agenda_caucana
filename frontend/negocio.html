@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Negocio — Agenda Caucana</title>
+<meta name="description" content="Conoce este restaurante, café o cocina tradicional de Popayán.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <a href="index.html" class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </a>
+    <nav class="nav-publico__links" aria-label="Navegación principal">
+      <a href="index.html">Explorar</a>
+      <a href="index.html#categorias">Categorías</a>
+      <a href="rutas.html">Rutas</a>
+      <a href="sabores.html" aria-current="page">Sabores</a>
+    </nav>
+    <div class="nav-publico__acciones">
+      <div class="a11y-panel-wrap">
+        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <div class="a11y-panel" data-a11y-panel role="menu">
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+        </div>
+      </div>
+      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
+      </select>
+      <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
+      <a href="organizador/registro.html" class="boton boton-primario">Registrar negocio</a>
+    </div>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
+  </div>
+  <div class="menu-movil" data-menu-movil>
+    <a href="index.html">Explorar</a>
+    <a href="index.html#categorias">Categorías</a>
+    <a href="rutas.html">Rutas</a>
+    <a href="sabores.html" aria-current="page">Sabores</a>
+    <a href="login.html">Mi perfil</a>
+    <a href="organizador/registro.html" class="boton boton-primario">Registrar negocio</a>
+  </div>
+</header>
+
+<main class="contenedor">
+  <nav class="migas" aria-label="Migas de pan">
+    <a href="index.html">Inicio</a> / <a href="sabores.html">Sabores</a> / <span data-negocio-miga>Negocio</span>
+  </nav>
+  <p data-negocio-estado aria-live="polite">Cargando negocio...</p>
+  <div class="negocio-detalle" data-negocio-detalle hidden>
+    <article>
+      <div class="negocio-detalle__imagen" data-negocio-imagen aria-label="Imagen del negocio"></div>
+      <p class="negocio-detalle__categoria" data-negocio-categoria></p>
+      <h1 class="fuente-titulos negocio-detalle__titulo" data-negocio-nombre></h1>
+      <p class="negocio-detalle__descripcion" data-negocio-descripcion></p>
+
+      <section class="negocio-seccion" data-negocio-carta-seccion hidden>
+        <h2 class="fuente-titulos">Nuestra carta</h2>
+        <div class="platos-grid" data-negocio-platos></div>
+      </section>
+
+      <section class="negocio-seccion">
+        <h2 class="fuente-titulos">Horario de atención</h2>
+        <p class="negocio-panel__horario" data-negocio-horario></p>
+      </section>
+
+      <section class="negocio-seccion">
+        <h2 class="fuente-titulos">Ubicación</h2>
+        <p data-negocio-direccion></p>
+        <div class="negocio-mapa" data-negocio-mapa></div>
+      </section>
+
+      <section class="negocio-seccion">
+        <h2 class="fuente-titulos">Reseñas</h2>
+        <div class="negocio-resenas" data-negocio-resenas></div>
+        <button type="button" class="boton boton-primario" data-abrir-resena style="margin-top:var(--espacio-md);">Escribir una reseña</button>
+      </section>
+    </article>
+
+    <aside class="negocio-panel">
+      <div class="negocio-rating-grande">
+        <span class="estrellas" data-rating-estrellas aria-label="Calificación"></span>
+        <strong data-rating-promedio>—</strong>
+        <span data-rating-total>Sin reseñas</span>
+      </div>
+      <dl class="negocio-contacto">
+        <div data-contacto-telefono hidden><dt>Teléfono</dt><dd><a data-negocio-telefono></a></dd></div>
+        <div data-contacto-whatsapp hidden><dt>WhatsApp</dt><dd><a data-negocio-whatsapp target="_blank" rel="noopener noreferrer">Escribir por WhatsApp</a></dd></div>
+        <div data-contacto-instagram hidden><dt>Instagram</dt><dd><a data-negocio-instagram target="_blank" rel="noopener noreferrer">Ver perfil</a></dd></div>
+        <div><dt>Precio promedio</dt><dd data-negocio-precio></dd></div>
+      </dl>
+      <p><strong>Horario de atención</strong></p>
+      <p class="negocio-panel__horario" data-negocio-horario-panel></p>
+      <a class="boton boton-primario" data-compartir-whatsapp target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a>
+      <a class="boton boton-secundario" data-como-llegar target="_blank" rel="noopener noreferrer">Cómo llegar</a>
+      <button type="button" class="boton boton-secundario negocio-panel__calificar" data-abrir-resena>Escribir una reseña</button>
+      <p data-estado-calificacion aria-live="polite"></p>
+    </aside>
+  </div>
+</main>
+
+<dialog class="modal-resena" data-modal-resena aria-labelledby="titulo-modal-resena">
+  <form data-form-resena>
+    <div class="modal-resena__cabecera">
+      <h2 id="titulo-modal-resena" class="fuente-titulos">Escribe tu reseña</h2>
+      <button type="button" class="modal-resena__cerrar" data-cerrar-resena aria-label="Cerrar">×</button>
+    </div>
+    <fieldset style="border:0;padding:0;">
+      <legend>¿Qué tal estuvo?</legend>
+      <div class="selector-estrellas" data-selector-estrellas role="group" aria-label="Calificación de 1 a 5 estrellas">
+        <button type="button" data-estrellas="1" aria-label="1 estrella" aria-pressed="false">★</button>
+        <button type="button" data-estrellas="2" aria-label="2 estrellas" aria-pressed="false">★</button>
+        <button type="button" data-estrellas="3" aria-label="3 estrellas" aria-pressed="false">★</button>
+        <button type="button" data-estrellas="4" aria-label="4 estrellas" aria-pressed="false">★</button>
+        <button type="button" data-estrellas="5" aria-label="5 estrellas" aria-pressed="false">★</button>
+      </div>
+    </fieldset>
+    <label for="comentario-resena">Comentario (opcional, máximo 500 caracteres)</label>
+    <textarea id="comentario-resena" data-comentario-resena maxlength="500"></textarea>
+    <p class="modal-resena__error" data-error-resena role="alert"></p>
+    <div class="modal-resena__acciones">
+      <button type="button" class="boton boton-secundario" data-cancelar-resena>Cancelar</button>
+      <button type="submit" class="boton boton-primario" data-enviar-resena>Enviar reseña</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast-negocio" data-toast-negocio role="status" aria-live="polite" hidden></div>
+
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+    </div>
+    <div class="footer__columnas">
+      <div class="footer__columna">
+        <p class="titulo-columna">Explorar</p>
+        <ul><li><a href="index.html">Eventos hoy</a></li><li><a href="index.html#categorias">Categorías</a></li><li><a href="rutas.html">Rutas históricas</a></li><li><a href="sabores.html">Sabores</a></li></ul>
+      </div>
+      <div class="footer__columna">
+        <p class="titulo-columna">Contacto</p>
+        <ul><li><a href="#">Instagram</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">Soporte</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+</footer>
+
+<button class="chat-flotante-boton" data-chat-boton aria-label="Pregúntale a la IA sobre este negocio u otros lugares">IA</button>
+<div class="chat-panel" data-chat-panel>
+  <div class="chat-panel__header">
+    <span>Pregúntale a la IA</span>
+    <button type="button" data-chat-cerrar aria-label="Cerrar chat" style="background:none;border:none;color:inherit;">Cerrar</button>
+  </div>
+  <div class="chat-panel__mensajes" data-chat-mensajes>
+    <div class="chat-mensaje chat-mensaje--ia">Puedo ayudarte con este lugar o con otras opciones para comer.</div>
+  </div>
+  <form class="chat-panel__form" data-chat-form>
+    <input type="text" data-chat-input placeholder="Pregúntame sobre este lugar o cualquier otra opción" autocomplete="off">
+    <button type="submit" aria-label="Enviar pregunta">Enviar</button>
+  </form>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/accesibilidad.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/negocio.js"></script>
+<script>
+  document.querySelector('[data-menu-movil-boton]').addEventListener('click', function () {
+    const abierto = document.querySelector('[data-menu-movil]').classList.toggle('abierto');
+    this.setAttribute('aria-expanded', String(abierto));
+  });
+</script>
+</body>
+</html>

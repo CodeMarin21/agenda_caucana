@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Recuperar contraseña — Agenda Caucana</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<div class="auth-layout">
+  <div class="auth-card">
+    <div class="auth-card__marca">
+      <a href="index.html"><span class="fuente-titulos">Agenda Caucana</span></a>
+      <p>Recupera el acceso a tu cuenta</p>
+    </div>
+
+    <h1>Recuperar contraseña</h1>
+    <p class="auth-card__subtitulo">Elige el tipo de cuenta que quieres recuperar.</p>
+
+    <!-- Paso 1: selector -->
+    <div id="selector">
+      <button type="button" class="boton boton-primario boton-bloque" data-tipo="jugador" style="margin-bottom:0.75rem;">
+        Soy jugador de Popayán GO
+      </button>
+      <button type="button" class="boton boton-secundario boton-bloque" data-tipo="organizador">
+        Soy organizador o administrador
+      </button>
+    </div>
+
+    <!-- Paso 2 (organizador/admin): formulario email -->
+    <form id="formEmail" hidden novalidate>
+      <p class="auth-card__subtitulo">
+        Te enviaremos un enlace de recuperación al correo asociado a tu cuenta.
+      </p>
+      <div class="form-grupo">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" required autocomplete="email" autofocus>
+      </div>
+      <button type="submit" class="boton boton-primario boton-bloque">Enviar enlace</button>
+      <p class="auth-card__mensaje" data-recuperar-mensaje role="status" aria-live="polite"></p>
+      <p style="margin-top:1rem;text-align:center;">
+        <a href="#" id="volverSelector">← Volver</a>
+      </p>
+    </form>
+
+    <p class="auth-card__pie">
+      <a href="login.html">Volver a iniciar sesión</a>
+    </p>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+(function () {
+  const selector = document.getElementById('selector');
+  const formEmail = document.getElementById('formEmail');
+  const mensaje = document.querySelector('[data-recuperar-mensaje]');
+
+  selector.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('[data-tipo]');
+    if (!boton) return;
+    if (boton.dataset.tipo === 'jugador') {
+      window.location.href = 'jugador/recuperar.html';
+      return;
+    }
+    selector.hidden = true;
+    formEmail.hidden = false;
+  });
+
+  document.getElementById('volverSelector').addEventListener('click', (evento) => {
+    evento.preventDefault();
+    formEmail.hidden = true;
+    selector.hidden = false;
+    mensaje.textContent = '';
+    mensaje.className = 'auth-card__mensaje';
+  });
+
+  formEmail.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const boton = formEmail.querySelector('button[type="submit"]');
+    boton.disabled = true;
+    mensaje.className = 'auth-card__mensaje';
+    mensaje.textContent = 'Enviando enlace...';
+    try {
+      const email = formEmail.email.value.trim();
+      await AC_API.solicitarReset(email);
+      mensaje.textContent = 'Si el correo está registrado, recibirás un enlace en unos minutos. Revisa también la carpeta de spam.';
+      mensaje.classList.add('auth-card__mensaje--ok');
+      formEmail.reset();
+    } catch (error) {
+      mensaje.textContent = `No se pudo enviar: ${error.message}`;
+      mensaje.classList.add('auth-card__mensaje--error');
+    } finally {
+      boton.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

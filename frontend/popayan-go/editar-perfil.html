@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar perfil — Popayán GO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/popayan-go.css">
+</head>
+<body>
+
+<nav class="go-nav">
+  <div class="contenedor go-nav__fila">
+    <a href="perfil.html" class="go-nav__volver" aria-label="Volver a mi perfil">←</a>
+    <span class="go-nav__marca">Editar perfil</span>
+    <span style="width:1.2rem;"></span>
+  </div>
+</nav>
+
+<div class="go-fondo">
+  <header class="go-perfil-header">
+    <div class="go-avatar" data-editar-avatar>🦅</div>
+    <div class="selector-avatar" data-selector-avatar style="justify-content:center; margin-top:0.5rem;">
+      <button type="button" class="avatar-opcion" data-avatar="🦅" aria-pressed="true">🦅</button>
+      <button type="button" class="avatar-opcion" data-avatar="⛪">⛪</button>
+      <button type="button" class="avatar-opcion" data-avatar="🌵">🌵</button>
+      <button type="button" class="avatar-opcion" data-avatar="🥁">🥁</button>
+      <button type="button" class="avatar-opcion" data-avatar="🎭">🎭</button>
+      <button type="button" class="avatar-opcion" data-avatar="🌄">🌄</button>
+    </div>
+    <label class="zona-carga" style="margin-top:0.9rem; max-width:22rem; margin-inline:auto; display:block;" for="fotoPerfil">
+      <strong>o sube una foto de perfil</strong>
+      JPG o PNG, hasta 3MB
+    </label>
+    <input id="fotoPerfil" type="file" accept="image/png,image/jpeg" style="margin-top:0.5rem;">
+  </header>
+
+  <form data-form-editar-perfil class="panel-cuerpo" style="max-width:28rem; margin:0 auto;">
+    <div class="form-grupo">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" name="descripcion" rows="3" maxlength="200" data-editar-bio-input placeholder="Cuéntale a otros exploradores quién eres..."></textarea>
+    </div>
+    <button type="submit" class="boton boton-go">Guardar cambios</button>
+    <p class="auth-card__mensaje" data-editar-perfil-mensaje></p>
+  </form>
+
+  <div class="bloque" style="max-width:28rem; margin:var(--espacio-md) auto 0; border:none;">
+    <div class="go-toggle-fila" style="border-bottom:none;">
+      <div>
+        <strong>Cuenta privada</strong>
+        <p>Solo los seguidores que apruebes podrán ver tus rutas y lugares favoritos. No afecta a tus seguidores actuales.</p>
+      </div>
+      <label class="go-switch">
+        <input type="checkbox" data-toggle-privacidad>
+        <span class="go-switch__riel"></span>
+      </label>
+    </div>
+    <p style="font-size:0.7rem; color:var(--tinta-40); padding:0 var(--espacio-md) var(--espacio-md);">
+      ⚠️ Este interruptor todavía es solo de interfaz — falta el endpoint del backend para guardar la privacidad de la cuenta.
+    </p>
+  </div>
+
+  <ul class="go-menu-ajustes">
+    <li><a href="rutas.html">Mis rutas <span>→</span></a></li>
+    <li><button type="button" disabled title="Pendiente de endpoint de seguridad">Seguridad <span>🛡️</span></button></li>
+    <li><button type="button" class="peligro" data-logout>Cerrar sesión <span>✕</span></button></li>
+  </ul>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/popayan-go-auth.js"></script>
+<script src="../js/popayan-go-editar-perfil.js"></script>
+</body>
+</html>

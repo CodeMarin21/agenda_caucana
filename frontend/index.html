@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Caucana — La cartelera cultural de Popayán</title>
+<meta name="description" content="Conciertos, arte, gastronomía y más — toda la agenda cultural de Popayán en un solo lugar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <a href="index.html" class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </a>
+    <nav class="nav-publico__links" aria-label="Navegación principal">
+      <a href="index.html" aria-current="page" data-i18n="nav.explorar">Explorar</a>
+      <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+      <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+      <a href="sabores.html">Sabores</a>
+    </nav>
+    <div class="nav-publico__acciones">
+      <div class="a11y-panel-wrap">
+        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <div class="a11y-panel" data-a11y-panel role="menu">
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+        </div>
+      </div>
+      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+      </select>
+      <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">👤</a>
+      <a href="login.html" class="boton boton-primario" data-i18n="nav.soyOrganizador">Soy organizador</a>
+    </div>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú" aria-expanded="false">☰</button>
+  </div>
+  <div class="menu-movil" data-menu-movil>
+    <a href="index.html" data-i18n="nav.explorar">Explorar</a>
+    <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+    <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+    <a href="sabores.html">Sabores</a>
+    <a href="login.html">Mi perfil</a>
+    <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+      <option value="es">ES</option>
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+    </select>
+    <a href="login.html" class="boton boton-primario" data-i18n="nav.soyOrganizador">Soy organizador</a>
+  </div>
+</header>
+
+<!-- HERO ANIMADO -->
+<section class="hero">
+  <img class="hero__fondo-imagen" src="assets/hero/hero-popayan.png" alt="Atardecer sobre el skyline colonial de Popayán con torcazas en vuelo">
+  <video class="hero__fondo-video" data-hero-video autoplay muted playsinline poster="assets/hero/hero-popayan.png">
+    <source src="assets/hero/hero-popayan-loop.mp4" type="video/mp4">
+  </video>
+  <div class="hero__scrim"></div>
+  <div class="hero__contenido">
+    <h1 class="hero__titulo">
+      <em data-i18n="hero.tituloLigero">Popayán</em>
+      <strong data-i18n="hero.tituloBold">en escena</strong>
+    </h1>
+  </div>
+</section>
+
+<main class="contenedor">
+
+  <!-- BUSCADOR -->
+  <section class="seccion-busqueda" style="text-align:center;">
+    <form class="buscador" data-form-busqueda role="search">
+      <label for="buscar" class="visualmente-oculto">Buscar eventos</label>
+      <input id="buscar" type="text" data-input-busqueda placeholder="Buscar eventos, lugares o artistas..." data-i18n="busqueda.placeholder" data-i18n-placeholder>
+      <button type="submit" class="boton boton-primario" data-i18n="busqueda.boton">Buscar</button>
+    </form>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filtros" data-pildoras id="categorias" role="group" aria-label="Filtrar por categoría">
+    <button class="pildora" type="button" data-categoria="" aria-pressed="true" data-i18n="filtros.todos">Todos</button>
+    <button class="pildora" type="button" data-categoria="musica" aria-pressed="false">Música</button>
+    <button class="pildora" type="button" data-categoria="arte" aria-pressed="false">Arte</button>
+    <button class="pildora" type="button" data-categoria="gastronomia" aria-pressed="false">Gastronomía</button>
+    <button class="pildora" type="button" data-categoria="teatro" aria-pressed="false">Teatro</button>
+    <button class="pildora" type="button" data-categoria="cine" aria-pressed="false">Cine</button>
+    <button class="pildora" type="button" data-categoria="talleres" aria-pressed="false">Talleres</button>
+    <button class="pildora" type="button" data-categoria="fiestas" aria-pressed="false">Fiestas</button>
+    <button class="pildora" type="button" data-categoria="historia" aria-pressed="false">Historia</button>
+    <button class="pildora" type="button" data-categoria="naturaleza" aria-pressed="false">Naturaleza</button>
+  </section>
+
+  <div class="barra-resultados">
+    <span data-contador-resultados>6 eventos destacados encontrados</span>
+    <div class="barra-resultados__orden">
+      <span>Esta semana ▾</span><span>Precio ▾</span><span>Más recientes ▾</span>
+    </div>
+  </div>
+
+  <!-- GRID DE EVENTOS -->
+  <section class="grid-eventos" data-grid-eventos aria-live="polite">
+    <a class="tarjeta-evento" href="evento.html?slug=noche-de-son-palenquero">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1533174000265-e8cb9968ba15?auto=format&fit=crop&q=80&w=600" alt="Noche de Son Palenquero" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-gratis">Gratis</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Música</p>
+        <h3 class="tarjeta-evento__titulo">Noche de Son Palenquero</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Claustro de Santo Domingo</span><span>🗓️ Sáb 14 Sep, 7:30 PM</span></p>
+      </div>
+    </a>
+    <a class="tarjeta-evento" href="evento.html?slug=festival-pipian-carantanta">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=600" alt="Festival del Pipián y la Carantanta" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-precio">$15.000</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Gastronomía</p>
+        <h3 class="tarjeta-evento__titulo">Festival del Pipián y la Carantanta</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Parque Caldas</span><span>🗓️ Dom 15 Sep, 10:00 AM</span></p>
+      </div>
+    </a>
+    <a class="tarjeta-evento" href="evento.html?slug=hamlet-en-el-claustro">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&q=80&w=600" alt="Hamlet en el Claustro" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-precio">$25.000</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Teatro</p>
+        <h3 class="tarjeta-evento__titulo">Hamlet en el Claustro</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Claustro del Carmen</span><span>🗓️ Lun 16 Sep, 8:00 PM</span></p>
+      </div>
+    </a>
+    <a class="tarjeta-evento" href="evento.html?slug=muralismo-vivo">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&q=80&w=600" alt="Muralismo Vivo: Intervención Urbana" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-gratis">Gratis</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Arte</p>
+        <h3 class="tarjeta-evento__titulo">Muralismo Vivo: Intervención Urbana</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Calle del Risco</span><span>🗓️ Mar 17 Sep, 9:00 AM</span></p>
+      </div>
+    </a>
+    <a class="tarjeta-evento" href="evento.html?slug=cine-al-parque">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=600" alt="Cine al Parque: Memoria y Territorio" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-gratis">Gratis</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Cine</p>
+        <h3 class="tarjeta-evento__titulo">Cine al Parque: Memoria y Territorio</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Teatro Guillermo Valencia</span><span>🗓️ Mié 18 Sep, 7:00 PM</span></p>
+      </div>
+    </a>
+    <a class="tarjeta-evento" href="evento.html?slug=taller-orfebreria-ancestral">
+      <div class="tarjeta-evento__imagen">
+        <img src="https://images.unsplash.com/photo-1610375461369-d613b564f4c4?auto=format&fit=crop&q=80&w=600" alt="Taller de Orfebrería Ancestral" loading="lazy">
+        <span class="etiqueta-flotante etiqueta-precio">$40.000</span>
+      </div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Talleres</p>
+        <h3 class="tarjeta-evento__titulo">Taller de Orfebrería Ancestral</h3>
+        <p class="tarjeta-evento__meta"><span>📍 Museo de Arte Religioso</span><span>🗓️ Jue 19 Sep, 3:00 PM</span></p>
+      </div>
+    </a>
+  </section>
+
+  <!-- RUTAS CULTURALES -->
+  <section id="rutas" style="padding: var(--espacio-lg) 0;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: var(--espacio-md);">
+      <h2 class="fuente-titulos" style="font-size:1.5rem;" data-i18n="rutasCulturales.titulo">Rutas culturales</h2>
+      <a href="rutas.html" style="font-size:0.85rem; font-weight:600; color:var(--color-terracota);" data-i18n="rutasCulturales.verTodas">Ver todas →</a>
+    </div>
+    <div class="grid-eventos" style="margin-bottom: var(--espacio-lg);">
+      <a class="tarjeta-evento" href="rutas.html#popayan-colonial">
+        <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&q=80&w=600" alt="Ruta Popayán Colonial" loading="lazy"></div>
+        <div class="tarjeta-evento__cuerpo"><h3 class="tarjeta-evento__titulo">Popayán Colonial</h3></div>
+      </a>
+      <a class="tarjeta-evento" href="rutas.html#camino-del-cafe">
+        <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&q=80&w=600" alt="Camino del Café" loading="lazy"></div>
+        <div class="tarjeta-evento__cuerpo"><h3 class="tarjeta-evento__titulo">Camino del Café</h3></div>
+      </a>
+      <a class="tarjeta-evento" href="rutas.html#sabores-del-cauca">
+        <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600" alt="Sabores del Cauca" loading="lazy"></div>
+        <div class="tarjeta-evento__cuerpo"><h3 class="tarjeta-evento__titulo">Sabores del Cauca</h3></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- SABORES -->
+  <section id="sabores" class="seccion-sabores-home">
+    <div class="seccion-sabores-home__cabecera">
+      <div>
+        <p class="cta-organizador__eyebrow">Gastronomía local</p>
+        <h2 class="fuente-titulos">Descubre dónde comer en Popayán</h2>
+      </div>
+      <a href="sabores.html" class="seccion-sabores-home__enlace">Ver todos los negocios</a>
+    </div>
+    <div class="grid-negocios grid-negocios--home" data-negocios-destacados aria-live="polite">
+      <p class="mensaje-carga-negocios">Descubriendo sabores de Popayán...</p>
+    </div>
+  </section>
+
+  <!-- CTA POPAYÁN GO -->
+  <section style="background:var(--color-tinta); color:var(--color-papel); padding:var(--espacio-xl) var(--espacio-lg); margin-bottom:var(--espacio-xl); display:flex; align-items:center; justify-content:space-between; gap:var(--espacio-lg); flex-wrap:wrap;">
+    <div style="max-width:32rem;">
+      <p style="color:var(--color-oro); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; font-weight:700; margin-bottom:0.5rem;" data-i18n="popayanGoCta.eyebrow">Nuevo · modo juego</p>
+      <h2 class="fuente-titulos" style="font-size:1.8rem; margin-bottom:0.6rem;">
+        <span data-i18n="popayanGoCta.tituloAntes">¿Ya recorriste estas rutas? Vuélvelo un juego con</span>
+        <em style="font-style:italic; color:var(--color-oro);" data-i18n="popayanGoCta.tituloEm">Popayán GO</em>
+      </h2>
+      <p style="color:rgba(241,230,211,0.7); font-size:0.9rem;" data-i18n="popayanGoCta.texto">Regístrate solo con un apodo — sin correo, sin datos personales. Gana puntos por cada lugar que visites, desbloquea insignias y compite en el ranking semanal.</p>
+    </div>
+    <div style="display:flex; gap:0.75rem; flex-shrink:0; flex-wrap:wrap;">
+      <a href="popayan-go/registro.html" class="boton" style="background:var(--color-oro); color:var(--color-tinta); font-weight:700;" data-i18n="popayanGoCta.botonPrimario">Crear mi pasaporte de jugador</a>
+      <a href="popayan-go/login.html" class="boton boton-secundario" style="border-color:rgba(241,230,211,0.3); color:var(--color-papel);" data-i18n="popayanGoCta.botonSecundario">Ya tengo cuenta</a>
+    </div>
+  </section>
+
+  <!-- CTA ORGANIZADORES -->
+  <section class="cta-organizador">
+    <div>
+      <p class="cta-organizador__eyebrow" data-i18n="organizadorCta.eyebrow">Para organizadores</p>
+      <h2 data-i18n="organizadorCta.titulo">¿Tienes un evento en Popayán?</h2>
+      <p data-i18n="organizadorCta.texto">Publícalo en Agenda Caucana y llega a quienes buscan activamente qué hacer en la ciudad.</p>
+    </div>
+    <div class="cta-organizador__acciones">
+      <a href="organizador/registro.html" class="boton boton-primario" data-i18n="organizadorCta.botonPrimario">Registrarme como organizador</a>
+      <a href="#" class="boton boton-secundario" style="border-color:rgba(241,230,211,0.3); color:var(--color-papel);" data-i18n="organizadorCta.botonSecundario">Ver cómo funciona</a>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p data-i18n="footer.descripcion">La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+    </div>
+    <div class="footer__columnas">
+      <div class="footer__columna">
+        <p class="titulo-columna" data-i18n="footer.explorar">Explorar</p>
+        <ul>
+          <li><a href="index.html">Eventos hoy</a></li>
+          <li><a href="index.html#categorias">Música</a></li>
+          <li><a href="index.html#categorias">Teatro</a></li>
+          <li><a href="rutas.html">Rutas históricas</a></li>
+          <li><a href="sabores.html">Sabores</a></li>
+        </ul>
+      </div>
+      <div class="footer__columna">
+        <p class="titulo-columna" data-i18n="footer.contacto">Contacto y redes</p>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">WhatsApp</a></li>
+          <li><a href="#">Prensa</a></li>
+          <li><a href="#">Soporte</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+</footer>
+
+<!-- CHAT IA -->
+<button class="chat-flotante-boton" data-chat-boton aria-label="Pregúntale a la IA sobre cualquier cosa de Popayán o de la agenda">
+  💬 <span class="chat-flotante-boton__texto" data-i18n="chat.titulo">Pregúntale a la IA</span>
+</button>
+<div class="chat-panel" data-chat-panel>
+  <div class="chat-panel__header">
+    <span data-i18n="chat.titulo">Pregúntale a la IA</span>
+    <button data-chat-cerrar aria-label="Cerrar chat" style="background:none;border:none;color:inherit;">✕</button>
+  </div>
+  <div class="chat-panel__mensajes" data-chat-mensajes>
+    <div class="chat-mensaje chat-mensaje--ia">¡Hola! Pregúntame qué hacer hoy en Popayán, o sobre cualquier evento de la agenda.</div>
+  </div>
+  <form class="chat-panel__form" data-chat-form>
+    <input type="text" data-chat-input data-i18n="chat.placeholder" data-i18n-placeholder placeholder="Escribe tu pregunta..." autocomplete="off">
+    <button type="submit">➤</button>
+  </form>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/accesibilidad.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/home.js"></script>
+<script>
+  document.querySelector('[data-menu-movil-boton]').addEventListener('click', function () {
+    document.querySelector('[data-menu-movil]').classList.toggle('abierto');
+  });
+</script>
+</body>
+</html>

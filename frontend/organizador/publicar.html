@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publicar Evento — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<style>
+  .panel-header h1,
+  .form-seccion h2 {
+    font-family: var(--fuente-titulos);
+  }
+  [data-form-publicar],
+  [data-form-publicar] label,
+  [data-form-publicar] input,
+  [data-form-publicar] select,
+  [data-form-publicar] textarea,
+  [data-form-publicar] button {
+    font-family: var(--fuente-cuerpo);
+  }
+  .form-seccion {
+    padding: var(--espacio-md) 0;
+    border-bottom: 1px solid var(--tinta-10);
+  }
+  .form-seccion:first-child { padding-top: 0; }
+  .form-seccion:last-of-type { border-bottom: 0; }
+  .form-seccion h2 {
+    margin-bottom: var(--espacio-md);
+    font-size: 1.15rem;
+  }
+  .form-etiqueta {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Plataforma de creadores</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="mis-eventos.html">🗓️ Mis eventos</a>
+      <a href="publicar.html" aria-current="page">➕ Publicar</a>
+      <a href="perfil.html">👤 Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">🚪 Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial" data-sidebar-inicial>··</span>
+      <div><strong data-sidebar-nombre>Cargando…</strong><span class="rol">Organizador</span></div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Publicar Evento</h1>
+      </div>
+      <a href="mis-eventos.html" class="boton boton-secundario boton-sm">← Volver a mis eventos</a>
+    </header>
+
+    <div class="panel-cuerpo">
+      <div class="bloque" style="max-width:44rem;">
+        <form data-form-publicar style="padding:var(--espacio-md);">
+          <section class="form-seccion">
+            <h2>Detalles del evento</h2>
+            <div class="form-grupo">
+              <label for="titulo">Título del evento *</label>
+              <input id="titulo" name="titulo" type="text" required
+                     placeholder="Ej. Gran Concierto de Música Andina"
+                     minlength="3" maxlength="200">
+            </div>
+            <div class="form-grupo">
+              <label for="descripcion">Descripción *</label>
+              <textarea id="descripcion" name="descripcion" required rows="4"
+                        minlength="10" maxlength="2000"
+                        placeholder="Describe el evento: qué habrá, quién participa, por qué vale la pena asistir."></textarea>
+              <p class="form-ayuda">Mínimo 10 caracteres.</p>
+            </div>
+            <div class="form-grupo">
+              <label for="categoriaId">Categoría *</label>
+              <select id="categoriaId" name="categoriaId" required disabled>
+                <option value="">Cargando categorías...</option>
+              </select>
+            </div>
+          </section>
+
+          <section class="form-seccion">
+            <h2>Fecha y hora</h2>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="fechaInicio">Fecha y hora de inicio *</label>
+                <input id="fechaInicio" name="fechaInicio" type="datetime-local" required>
+              </div>
+              <div class="form-grupo">
+                <label for="fechaFin">Fecha y hora de fin <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
+                <input id="fechaFin" name="fechaFin" type="datetime-local">
+              </div>
+            </div>
+          </section>
+
+          <section class="form-seccion">
+            <h2>Ubicación</h2>
+            <div class="form-fila">
+              <div class="form-grupo">
+                <label for="ciudadId">Ciudad *</label>
+                <select id="ciudadId" name="ciudadId" required disabled>
+                  <option value="">Cargando ciudades...</option>
+                </select>
+              </div>
+              <div class="form-grupo">
+                <label for="lugarId">Lugar / Escenario *</label>
+                <select id="lugarId" name="lugarId" required disabled>
+                  <option value="">Primero elige una ciudad</option>
+                  <option value="__otro__">Otro (escribir manualmente)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grupo">
+              <label for="lugarTexto">Nombre del lugar o escenario *</label>
+              <input id="lugarTexto" name="lugarTexto" type="text"
+                     placeholder="Nombre del lugar o escenario"
+                     minlength="3" maxlength="150" hidden>
+            </div>
+            <div class="form-grupo">
+              <label for="direccion">Dirección <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
+              <input id="direccion" name="direccion" type="text" maxlength="300"
+                     placeholder="Ej. Calle 5 # 4-70, Centro Histórico">
+            </div>
+          </section>
+
+          <section class="form-seccion">
+            <h2>Afiche</h2>
+            <div class="form-grupo">
+              <label for="imagen">Afiche del evento <span style="font-weight:400; color:var(--tinta-55);">(JPG, PNG o WebP, hasta 5MB)</span></label>
+              <input id="imagen" name="imagen" type="file" accept="image/jpeg,image/png,image/webp">
+              <div id="previewImagen" style="margin-top:0.75rem; display:none;">
+                <img id="previewImagenImg" alt="Vista previa del afiche" style="max-width:100%; max-height:14rem; border:1px solid var(--tinta-15);">
+              </div>
+            </div>
+          </section>
+
+          <section class="form-seccion">
+            <h2>Acceso</h2>
+            <div class="form-grupo">
+              <span class="form-etiqueta">Tipo de acceso</span>
+              <div class="radio-grupo" style="display:flex; gap:1.25rem;">
+                <label><input type="radio" name="tipoAcceso" value="libre" checked> Entrada libre</label>
+                <label><input type="radio" name="tipoAcceso" value="pago"> De pago</label>
+              </div>
+            </div>
+            <div class="form-grupo" id="grupoPrecio" style="display:none;">
+              <label for="precioReferencial">Precio referencial (COP)</label>
+              <input id="precioReferencial" name="precioReferencial" type="number" min="0" step="1000" placeholder="Ej. 15000">
+            </div>
+            <div class="form-grupo">
+              <label for="urlExternaBoletas">Enlace de ticketera <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
+              <input id="urlExternaBoletas" name="urlExternaBoletas" type="url"
+                     placeholder="https://ticketera.com/mi-evento">
+            </div>
+            <div class="form-grupo">
+              <label style="display:flex; align-items:center; gap:0.5rem;">
+                <input type="checkbox" name="esMayorDeEdad" value="true">
+                Evento solo para mayores de 18 años
+              </label>
+            </div>
+          </section>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:1.5rem;">
+            <p style="font-size:0.78rem; color:var(--tinta-55); margin:0;">
+              Los eventos publicados entran en revisión por el equipo administrador antes de ser mostrados en la agenda pública.
+            </p>
+            <button type="submit" class="boton boton-primario" style="flex-shrink:0;">Enviar para revisión</button>
+          </div>
+          <p data-form-publicar-mensaje style="margin-top:1rem; font-size:0.85rem;"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/admin.js"></script>
+<script src="../js/publicar.js"></script>
+</body>
+</html>

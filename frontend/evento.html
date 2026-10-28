@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detalle del evento — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <a href="index.html" class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </a>
+    <nav class="nav-publico__links" aria-label="Navegación principal">
+      <a href="index.html" data-i18n="nav.explorar">Explorar</a>
+      <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+      <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+      <a href="sabores.html">Sabores</a>
+    </nav>
+    <div class="nav-publico__acciones">
+      <div class="a11y-panel-wrap">
+        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <div class="a11y-panel" data-a11y-panel role="menu">
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+        </div>
+      </div>
+      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
+      </select>
+      <a href="login.html" class="avatar-perfil" title="Mi perfil">👤</a>
+      <a href="login.html" class="boton boton-primario" data-i18n="nav.soyOrganizador">Soy organizador</a>
+    </div>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú">☰</button>
+  </div>
+  <div class="menu-movil" data-menu-movil>
+    <a href="index.html" data-i18n="nav.explorar">Explorar</a>
+    <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+    <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+    <a href="sabores.html">Sabores</a>
+    <a href="login.html">Mi perfil</a>
+    <a href="login.html" class="boton boton-primario" data-i18n="nav.soyOrganizador">Soy organizador</a>
+  </div>
+</header>
+
+<main class="contenedor">
+  <nav class="migas" aria-label="Migas de pan" data-migas>
+    <a href="index.html">Inicio</a> / <a href="index.html#categorias" data-migas-categoria>—</a> / <span data-migas-titulo>—</span>
+  </nav>
+
+  <div class="evento-detalle">
+    <div>
+      <img class="evento-detalle__imagen" data-evento-imagen alt="" hidden>
+      <span class="evento-detalle__categoria" data-evento-categoria>—</span>
+      <h1 class="evento-detalle__titulo" data-evento-titulo>—</h1>
+      <p class="evento-detalle__subtitulo" data-evento-subtitulo></p>
+
+      <div class="evento-detalle__info-rapida">
+        <span>🗓️ <span data-evento-fecha>—</span></span>
+        <span>📍 <span data-evento-lugar>—</span></span>
+        <span>⏱️ <span data-evento-duracion>—</span></span>
+        <span data-evento-precio style="color:var(--color-terracota); font-weight:700;">—</span>
+      </div>
+
+      <div class="evento-detalle__cuerpo">
+        <h3>Sobre este evento</h3>
+        <p data-evento-descripcion></p>
+
+        <div class="evento-detalle__ficha">
+          <div><dt>Organiza:</dt> <dd data-evento-organiza>—</dd></div>
+          <div><dt>Categoría:</dt> <dd data-evento-categoria-ficha>—</dd></div>
+          <div><dt>Público:</dt> <dd data-evento-publico>—</dd></div>
+        </div>
+
+        <h3>Ubicación del evento</h3>
+        <p class="evento-detalle__lugar-nombre" data-evento-lugar-nombre>—</p>
+        <p class="evento-detalle__direccion" data-evento-direccion>—</p>
+        <div class="evento-detalle__mapa-embed" data-evento-mapa></div>
+      </div>
+    </div>
+
+    <aside class="panel-lateral">
+      <h3>Asiste a este evento</h3>
+      <dl>
+        <div><dt>Fecha y hora</dt><dd data-evento-fecha-lateral>—</dd></div>
+        <div><dt>Ubicación</dt><dd data-evento-lugar-corto>—</dd></div>
+        <div><dt>Acceso</dt><dd data-evento-precio-detalle>—</dd></div>
+      </dl>
+      <a class="boton boton-primario" data-evento-enlace-externo href="#" target="_blank" rel="noopener noreferrer">📍 Cómo llegar</a>
+      <button class="boton boton-secundario" data-chat-boton style="width:100%;">💬 Pregúntale a la IA</button>
+    </aside>
+  </div>
+
+  <section class="relacionados">
+    <h2>También te puede interesar</h2>
+    <div class="grid-eventos" data-relacionados></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural y gazeta patrimonial de Popayán. Promovemos el turismo de herencia, las expresiones artísticas y las tradiciones que definen al Cauca.</p>
+    </div>
+    <div class="footer__columnas">
+      <div class="footer__columna">
+        <p class="titulo-columna">Explorar</p>
+        <ul><li><a href="index.html">Eventos hoy</a></li><li><a href="index.html#categorias">Música</a></li><li><a href="index.html#categorias">Teatro</a></li><li><a href="rutas.html">Rutas históricas</a></li></ul>
+      </div>
+      <div class="footer__columna">
+        <p class="titulo-columna">Contacto</p>
+        <ul><li><a href="#">Instagram</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">Prensa</a></li><li><a href="#">Soporte</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+</footer>
+
+<button class="chat-flotante-boton" data-chat-boton aria-label="Pregúntale a la IA sobre cualquier cosa de Popayán o de este evento">
+  💬 <span class="chat-flotante-boton__texto">Pregúntale a la IA</span>
+</button>
+<div class="chat-panel" data-chat-panel>
+  <div class="chat-panel__header">
+    <span>Pregúntale a la IA</span>
+    <button data-chat-cerrar aria-label="Cerrar chat" style="background:none;border:none;color:inherit;">✕</button>
+  </div>
+  <div class="chat-panel__mensajes" data-chat-mensajes>
+    <div class="chat-mensaje chat-mensaje--ia">¿Tienes dudas sobre este evento? Pregúntame.</div>
+  </div>
+  <form class="chat-panel__form" data-chat-form>
+    <input type="text" data-chat-input placeholder="Escribe tu pregunta..." autocomplete="off">
+    <button type="submit">➤</button>
+  </form>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/accesibilidad.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/evento.js"></script>
+<script>
+  document.querySelector('[data-menu-movil-boton]').addEventListener('click', function () {
+    document.querySelector('[data-menu-movil]').classList.toggle('abierto');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+/* ==========================================================================
+   Agenda Caucana — Design Tokens
+   Sistema de diseño inspirado en la arquitectura colonial blanca de Popayán,
+   tejas de barro, retablos dorados y orfebrería. Nada de "SaaS kit" genérico:
+   bordes rectos, tipografía con carácter, color con intención.
+   ========================================================================== */
+
+:root {
+  /* Color */
+  --color-papel: #F1E6D3;      /* fondo base, papel/pared encalada */
+  --color-cal: #FFFDF8;        /* superficies, tarjetas */
+  --color-terracota: #B5502B;  /* acción primaria, tejas */
+  --color-terracota-hover: #96401F;
+  --color-tinta: #241B14;      /* texto, nav, sidebar */
+  --color-oro: #C89B3C;        /* insignias, pendientes, acentos */
+  --color-patina: #5F7A6A;     /* estado aprobado/verificado */
+  --color-rechazo: #8C3B2E;    /* rechazar/suspender — óxido, no rojo genérico */
+
+  /* Derivados con alpha (usar color-mix para tintas suaves) */
+  --tinta-05: rgba(36, 27, 20, 0.05);
+  --tinta-08: rgba(36, 27, 20, 0.08);
+  --tinta-10: rgba(36, 27, 20, 0.10);
+  --tinta-15: rgba(36, 27, 20, 0.15);
+  --tinta-40: rgba(36, 27, 20, 0.40);
+  --tinta-55: rgba(36, 27, 20, 0.55);
+  --tinta-70: rgba(36, 27, 20, 0.70);
+
+  /* Tipografía */
+  --fuente-titulos: 'Fraunces', serif;
+  --fuente-cuerpo: 'Libre Franklin', sans-serif;
+
+  /* Espaciado */
+  --espacio-xs: 0.5rem;
+  --espacio-sm: 0.75rem;
+  --espacio-md: 1.25rem;
+  --espacio-lg: 2rem;
+  --espacio-xl: 3.5rem;
+
+  /* Layout */
+  --ancho-maximo: 1280px;
+  --ancho-sidebar: 240px;
+
+  /* Bordes: rectos o mínimamente redondeados — nunca el radio genérico de 12-16px */
+  --radio: 2px;
+}

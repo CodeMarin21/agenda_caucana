@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutas culturales — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <div class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </div>
+    <nav class="nav-publico__links" aria-label="Navegación principal">
+      <a href="index.html">Explorar</a>
+      <a href="index.html#categorias">Categorías</a>
+      <a href="rutas.html" aria-current="page">Rutas</a>
+      <a href="login.html">Publicar evento</a>
+    </nav>
+    <div class="nav-publico__acciones">
+      <div class="a11y-panel-wrap">
+        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <div class="a11y-panel" data-a11y-panel role="menu">
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+        </div>
+      </div>
+      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+        <option value="es">ES</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+      </select>
+      <a href="login.html" class="avatar-perfil" title="Mi perfil">👤</a>
+      <a href="login.html" class="boton boton-primario">Soy organizador</a>
+    </div>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú">☰</button>
+  </div>
+  <div class="menu-movil" data-menu-movil>
+    <a href="index.html">Explorar</a>
+    <a href="index.html#categorias">Categorías</a>
+    <a href="rutas.html">Rutas</a>
+    <a href="login.html">Mi perfil</a>
+    <a href="login.html" class="boton boton-primario">Soy organizador</a>
+  </div>
+</header>
+
+<main class="contenedor" style="padding-top: var(--espacio-lg);">
+  <h1 class="fuente-titulos" style="font-size:2.2rem; margin-bottom:0.5rem;">Rutas culturales de Popayán</h1>
+  <p style="color:var(--tinta-55); max-width:38rem; margin-bottom:2rem;">
+    Recorridos a pie por el centro histórico y sus alrededores, pensados para descubrir
+    la Ciudad Blanca a tu ritmo. Más adelante, estas rutas serán el corazón de
+    <strong>Popayán GO</strong> — el modo de juego donde vas sumando puntos y
+    logros por cada lugar que visites.
+  </p>
+
+  <div class="grid-eventos" style="margin-bottom: var(--espacio-xl);">
+    <article class="tarjeta-evento" id="popayan-colonial">
+      <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&q=80&w=600" alt="Ruta Popayán Colonial"></div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Histórica</p>
+        <h3 class="tarjeta-evento__titulo">Popayán Colonial</h3>
+        <p class="tarjeta-evento__meta"><span>Catedral, claustros y el Puente del Humilladero.</span></p>
+      </div>
+    </article>
+    <article class="tarjeta-evento" id="camino-del-cafe">
+      <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&q=80&w=600" alt="Camino del Café"></div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Gastronómica</p>
+        <h3 class="tarjeta-evento__titulo">Camino del Café</h3>
+        <p class="tarjeta-evento__meta"><span>De la finca a la taza, con productores del Cauca.</span></p>
+      </div>
+    </article>
+    <article class="tarjeta-evento" id="sabores-del-cauca">
+      <div class="tarjeta-evento__imagen"><img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600" alt="Sabores del Cauca"></div>
+      <div class="tarjeta-evento__cuerpo">
+        <p class="tarjeta-evento__categoria">Gastronómica</p>
+        <h3 class="tarjeta-evento__titulo">Sabores del Cauca</h3>
+        <p class="tarjeta-evento__meta"><span>Pipián, carantanta y las recetas que definen la región.</span></p>
+      </div>
+    </article>
+  </div>
+
+  <h2 class="fuente-titulos" style="font-size:1.6rem; margin-bottom:1rem;">Lugares emblemáticos para visitar</h2>
+  <p style="color:var(--tinta-55); max-width:38rem; margin-bottom:1.5rem;">
+    Estos son algunos de los sitios que las rutas de arriba recorren. Cada uno con una razón
+    concreta para incluirlo en tu caminata y un poco de la historia detrás.
+  </p>
+
+  <div style="margin-bottom: var(--espacio-xl);">
+    <article class="lugar-card">
+      <div class="lugar-card__imagen"><img src="https://images.unsplash.com/photo-1591017683981-2b0c2c216861?auto=format&fit=crop&q=80&w=500" alt="Catedral Basílica Nuestra Señora de la Asunción"></div>
+      <div class="lugar-card__cuerpo">
+        <h3 class="lugar-card__titulo">Catedral Basílica Nuestra Señora de la Asunción</h3>
+        <p class="lugar-card__razon">Por qué visitarla: es el corazón simbólico de Popayán</p>
+        <p class="lugar-card__historia">Domina el costado del Parque Caldas y es el punto de referencia obligado del centro histórico. Cada Semana Santa —reconocida por la Unesco como Patrimonio Cultural Inmaterial— sus puertas marcan el inicio y el cierre de las procesiones que salen a recorrer la ciudad de madrugada.</p>
+      </div>
+    </article>
+
+    <article class="lugar-card">
+      <div class="lugar-card__imagen"><img src="https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?auto=format&fit=crop&q=80&w=500" alt="Iglesia de San Francisco"></div>
+      <div class="lugar-card__cuerpo">
+        <h3 class="lugar-card__titulo">Iglesia de San Francisco</h3>
+        <p class="lugar-card__razon">Por qué visitarla: la fachada barroca más monumental de la ciudad</p>
+        <p class="lugar-card__historia">Construida en el siglo XVIII y considerada uno de los mejores ejemplos del barroco tardío neogranadino en Colombia. En su torre cuelga una campana de gran tamaño fundida en oro y bronce, y de aquí parten algunas de las procesiones más importantes de la Semana Santa payanesa.</p>
+      </div>
+    </article>
+
+    <article class="lugar-card">
+      <div class="lugar-card__imagen"><img src="https://images.unsplash.com/photo-1558370781-d6196949e317?auto=format&fit=crop&q=80&w=500" alt="Puente del Humilladero"></div>
+      <div class="lugar-card__cuerpo">
+        <h3 class="lugar-card__titulo">Puente del Humilladero</h3>
+        <p class="lugar-card__razon">Por qué visitarlo: la postal más fotografiada de Popayán</p>
+        <p class="lugar-card__historia">Terminado en 1873 sobre doce arcos de ladrillo y calicanto, cruza el río Molino y durante décadas fue una de las principales entradas a la ciudad. Su nombre recuerda la fuerte pendiente que obligaba a los viajeros a caminar encorvados antes de que existiera el puente — de ahí el "humilladero".</p>
+      </div>
+    </article>
+
+    <article class="lugar-card">
+      <div class="lugar-card__imagen"><img src="https://images.unsplash.com/photo-1587135941948-670b381f08ce?auto=format&fit=crop&q=80&w=500" alt="Parque Caldas"></div>
+      <div class="lugar-card__cuerpo">
+        <h3 class="lugar-card__titulo">Parque Caldas</h3>
+        <p class="lugar-card__razon">Por qué visitarlo: el punto de partida natural de cualquier ruta</p>
+        <p class="lugar-card__historia">La plaza central de Popayán, nombrada en honor al científico payanés Francisco José de Caldas. A su alrededor se concentran la Catedral, la Torre del Reloj y buena parte de la arquitectura colonial mejor conservada del centro histórico.</p>
+      </div>
+    </article>
+
+    <article class="lugar-card">
+      <div class="lugar-card__imagen"><img src="https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&q=80&w=500" alt="Claustro de Santo Domingo"></div>
+      <div class="lugar-card__cuerpo">
+        <h3 class="lugar-card__titulo">Claustro de Santo Domingo</h3>
+        <p class="lugar-card__razon">Por qué visitarlo: patrimonio colonial hoy vivo con cultura</p>
+        <p class="lugar-card__historia">Antiguo convento dominico reconvertido en espacio cultural y universitario. Sus patios y arcadas coloniales hoy son escenario habitual de conciertos, muestras y eventos como los que encuentras en la agenda de esta misma página.</p>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+    </div>
+    <div class="footer__columnas">
+      <div class="footer__columna">
+        <p class="titulo-columna">Explorar</p>
+        <ul>
+          <li><a href="index.html">Eventos hoy</a></li>
+          <li><a href="index.html#categorias">Categorías</a></li>
+          <li><a href="rutas.html">Rutas</a></li>
+        </ul>
+      </div>
+      <div class="footer__columna">
+        <p class="titulo-columna">Contacto y redes</p>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">WhatsApp</a></li>
+          <li><a href="#">Soporte</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/accesibilidad.js"></script>
+<script>
+  document.querySelector('[data-menu-movil-boton]').addEventListener('click', function () {
+    document.querySelector('[data-menu-movil]').classList.toggle('abierto');
+  });
+</script>
+</body>
+</html>

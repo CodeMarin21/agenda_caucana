@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Eventos — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Plataforma de creadores</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="mis-eventos.html" aria-current="page">🗓️ Mis eventos</a>
+      <a href="publicar.html">➕ Publicar</a>
+      <a href="perfil.html">👤 Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">🚪 Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial" data-sidebar-inicial>AC</span>
+      <div>
+        <strong data-sidebar-nombre>Organizador</strong>
+        <span class="rol">Organizador</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Mis Eventos</h1>
+      </div>
+      <a href="publicar.html" class="boton boton-primario boton-sm">➕ Publicar nuevo evento</a>
+    </header>
+
+    <div class="panel-cuerpo">
+      <div class="bloque">
+        <div class="bloque__header">
+          <h2>Historial de publicaciones</h2>
+          <div class="bloque__acciones">
+            <select id="filtroCategoria" aria-label="Filtrar por categoría">
+              <option value="">Todas las categorías</option>
+            </select>
+            <select id="filtroFecha" aria-label="Filtrar por fecha">
+              <option value="">Todas las fechas</option>
+              <option value="proximos7">Próximos 7 días</option>
+              <option value="proximos30">Próximos 30 días</option>
+              <option value="pasados">Ya pasaron</option>
+            </select>
+            <select id="filtroEstado" aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="PENDIENTE">Pendientes</option>
+              <option value="APROBADO">Aprobados</option>
+              <option value="RECHAZADO">Rechazados</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Estado de carga -->
+        <p id="cargando" style="padding:1rem 0; color:var(--tinta-55);">Cargando eventos…</p>
+
+        <!-- Estado vacío -->
+        <div id="estadoVacio" hidden style="text-align:center; padding:3rem 1rem;">
+          <p style="font-size:3rem; margin:0 0 0.5rem;">📭</p>
+          <h3 style="margin:0 0 0.5rem;">Aún no has publicado eventos</h3>
+          <p style="color:var(--tinta-55); margin-bottom:1.5rem;">
+            Cuando publiques tu primer evento aparecerá aquí con su estado de revisión.
+          </p>
+          <a href="publicar.html" class="boton boton-primario">Publicar mi primer evento</a>
+        </div>
+
+        <!-- Sin resultados de filtro -->
+        <div id="sinResultados" hidden style="text-align:center; padding:2rem 1rem; color:var(--tinta-55);">
+          <p>No hay eventos que coincidan con los filtros seleccionados.</p>
+        </div>
+
+        <!-- Tabla -->
+        <div class="tabla-wrap" id="tablaWrap" hidden>
+          <table class="tabla" data-tabla-mis-eventos>
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Categoría</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th style="text-align:right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/mis-eventos.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title data-i18n="jugadorRecuperar.titulo_pagina">Recuperar cuenta de jugador — Agenda Caucana</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/base.css">
+</head>
+<body class="auth-layout">
+
+  <main class="auth-card">
+
+    <div class="auth-card__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p class="auth-card__subtitulo" data-i18n="jugadorRecuperar.marca_tagline">Popayán Go</p>
+    </div>
+
+    <!-- ═══════ PASO 1 — Identificación con username + código ═══════ -->
+    <div id="pasoIdentifica" class="paso">
+
+      <h1 data-i18n="jugadorRecuperar.titulo_paso1">Recupera tu cuenta de jugador</h1>
+      <p class="auth-card__subtitulo" data-i18n="jugadorRecuperar.intro_paso1">
+        Ingresa tu usuario y uno de los 8 códigos de recuperación que guardaste al registrarte.
+      </p>
+
+      <form id="formIdentifica" novalidate>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="campoUsername" data-i18n="jugadorRecuperar.username_label">Usuario</label>
+          <input
+            class="campo__input"
+            type="text"
+            id="campoUsername"
+            name="username"
+            autocomplete="username"
+            autofocus
+            required
+            aria-describedby="errorUsername">
+          <span class="campo__error" id="errorUsername" role="alert"></span>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="campoCodigo" data-i18n="jugadorRecuperar.codigo_label">Código de recuperación</label>
+          <input
+            class="campo__input campo__input--codigo"
+            type="text"
+            id="campoCodigo"
+            name="codigo"
+            inputmode="text"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            maxlength="9"
+            required
+            aria-describedby="errorCodigo"
+            data-i18n-placeholder="jugadorRecuperar.codigo_placeholder"
+            placeholder="XXXX-XXXX">
+          <span class="campo__error" id="errorCodigo" role="alert"></span>
+        </div>
+
+        <button class="boton boton-primario boton-bloque" type="submit" id="botonValidar">
+          <span class="boton__spinner" aria-hidden="true" hidden></span>
+          <span class="boton__texto" data-i18n="jugadorRecuperar.boton_validar">Validar código</span>
+        </button>
+
+      </form>
+
+      <p class="auth-card__mensaje" id="mensajePaso1" role="status" aria-live="polite" hidden></p>
+    </div>
+
+    <!-- ═══════ PASO 2 — Nueva contraseña ═══════ -->
+    <div id="pasoPassword" class="paso" hidden>
+
+      <h1 data-i18n="jugadorRecuperar.titulo_paso2">Crea tu nueva contraseña</h1>
+      <p class="auth-card__subtitulo" data-i18n="jugadorRecuperar.intro_paso2">
+        Tu código de recuperación ya se consumió. Esta es tu única oportunidad de definir la nueva contraseña.
+      </p>
+
+      <form id="formPassword" novalidate>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="campoPassword" data-i18n="jugadorRecuperar.password_label">Nueva contraseña</label>
+          <input
+            class="campo__input"
+            type="password"
+            id="campoPassword"
+            name="nuevaPassword"
+            autocomplete="new-password"
+            required
+            aria-describedby="fortalezaTexto errorPassword">
+
+          <div class="fortaleza" id="fortaleza" hidden>
+            <div class="fortaleza__barra" aria-hidden="true">
+              <span class="fortaleza__segmento" data-segmento="1"></span>
+              <span class="fortaleza__segmento" data-segmento="2"></span>
+              <span class="fortaleza__segmento" data-segmento="3"></span>
+              <span class="fortaleza__segmento" data-segmento="4"></span>
+            </div>
+            <span class="campo__ayuda" id="fortalezaTexto" aria-live="polite"></span>
+          </div>
+
+          <span class="campo__error" id="errorPassword" role="alert"></span>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="campoConfirmar" data-i18n="jugadorRecuperar.confirmar_label">Repite la contraseña</label>
+          <input
+            class="campo__input"
+            type="password"
+            id="campoConfirmar"
+            name="confirmarPassword"
+            autocomplete="new-password"
+            required
+            aria-describedby="errorConfirmar">
+          <span class="campo__error" id="errorConfirmar" role="alert"></span>
+        </div>
+
+        <button class="boton boton-primario boton-bloque" type="submit" id="botonGuardar">
+          <span class="boton__spinner" aria-hidden="true" hidden></span>
+          <span class="boton__texto" data-i18n="jugadorRecuperar.boton_guardar">Guardar contraseña</span>
+        </button>
+
+      </form>
+
+      <p class="auth-card__mensaje" id="mensajePaso2" role="status" aria-live="polite" hidden></p>
+    </div>
+
+    <div class="auth-card__pie">
+      <a href="../login.html" data-i18n="jugadorRecuperar.volver_login">Volver a iniciar sesión</a>
+      <a href="../recuperar.html" data-i18n="jugadorRecuperar.no_soy_jugador">¿No eres jugador?</a>
+    </div>
+
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/jugador-recuperar.js"></script>
+</body>
+</html>

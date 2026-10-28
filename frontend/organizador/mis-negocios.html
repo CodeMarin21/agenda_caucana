@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Negocios — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Espacio de sabores</p>
+    </div>
+    <nav class="sidebar__nav" aria-label="Navegación de negocios">
+      <a href="mis-negocios.html" aria-current="page">Mis negocios</a>
+      <a href="perfil.html">Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial" data-sidebar-inicial>AC</span>
+      <div>
+        <strong data-sidebar-nombre>Organizador</strong>
+        <span class="rol">Organizador</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header mis-negocios__panel-header">
+      <div class="mis-negocios__encabezado">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
+        <div>
+          <p class="mis-negocios__sobretitulo">Tu espacio gastronómico</p>
+          <h1>Mis negocios</h1>
+        </div>
+      </div>
+      <a href="../publicar-negocio.html" class="boton boton-primario boton-sm">Publicar nuevo negocio</a>
+    </header>
+
+    <main class="panel-cuerpo">
+      <section class="bloque" aria-labelledby="titulo-lista-negocios">
+        <div class="bloque__header">
+          <div>
+            <h2 id="titulo-lista-negocios">Tus espacios publicados</h2>
+            <p class="mis-negocios__ayuda">Consulta su estado y cómo se ven en Sabores.</p>
+          </div>
+          <div class="bloque__acciones filtros-negocios">
+            <select id="filtroCategoriaNegocio" aria-label="Filtrar por categoría">
+              <option value="">Todas las categorías</option>
+            </select>
+            <select id="filtroEstadoNegocio" aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="PENDIENTE">Pendientes</option>
+              <option value="APROBADO">Aprobados</option>
+              <option value="RECHAZADO">Rechazados</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mis-negocios__contenido">
+          <p id="cargandoNegocios" class="estado-carga" role="status" aria-live="polite">Cargando negocios…</p>
+
+          <div id="estadoErrorNegocios" class="estado-error" role="alert" hidden>
+            <h3>No pudimos cargar tus negocios</h3>
+            <p id="mensajeErrorNegocios"></p>
+            <button type="button" class="boton boton-secundario boton-sm" data-reintentar>Intentar de nuevo</button>
+          </div>
+
+          <div id="estadoVacioNegocios" class="estado-vacio-negocios" hidden>
+            <p class="estado-vacio-negocios__indice" aria-hidden="true">01</p>
+            <h3>Aún no has compartido un negocio</h3>
+            <p>Cuando publiques tu propuesta gastronómica, aquí podrás revisar su estado y abrir su ficha pública.</p>
+            <a href="../publicar-negocio.html" class="boton boton-primario">Publicar mi primer negocio</a>
+          </div>
+
+          <div id="sinResultadosNegocios" class="sin-resultados-negocios" hidden>
+            <p>No hay negocios que coincidan con los filtros seleccionados.</p>
+          </div>
+
+          <div id="gridNegocios" class="grid-negocios-panel" hidden></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/mis-negocios.js"></script>
+</body>
+</html>

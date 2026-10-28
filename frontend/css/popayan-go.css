@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Popayán GO — identidad propia dentro del sistema de Agenda Caucana.
+   Mismo lenguaje de "pasaporte del explorador" que ya usa el módulo de
+   gamificación, pero con fondo oscuro (noche de exploración) y acento oro
+   en vez del terracota del sitio público — así el usuario nota de inmediato
+   que cambió de "sitio informativo" a "modo juego".
+   ========================================================================== */
+
+.auth-layout--go {
+  background: var(--color-tinta);
+  background-image: radial-gradient(circle at 20% 20%, rgba(200,155,60,0.08), transparent 45%);
+}
+.auth-card--go {
+  background: #2D2318;
+  border-color: rgba(241,230,211,0.12);
+  color: var(--color-papel);
+}
+.auth-card--go h1, .auth-card--go label { color: var(--color-papel); }
+.auth-card--go .auth-card__subtitulo,
+.auth-card--go .form-ayuda,
+.auth-card--go .auth-card__pie { color: rgba(241,230,211,0.55); }
+.auth-card--go .form-grupo input,
+.auth-card--go .form-grupo textarea {
+  background: rgba(241,230,211,0.06);
+  border-color: rgba(241,230,211,0.18);
+  color: var(--color-papel);
+}
+.auth-card--go .form-grupo input::placeholder,
+.auth-card--go .form-grupo textarea::placeholder { color: rgba(241,230,211,0.35); }
+.auth-card--go .zona-carga { border-color: rgba(241,230,211,0.18); color: rgba(241,230,211,0.5); }
+.form-ayuda { font-size: 0.72rem; color: var(--tinta-40); margin-top: 0.3rem; }
+
+/* Botón propio de Popayán GO: oro en vez de terracota, para diferenciar del resto del sitio */
+.boton-go {
+  display: flex; width: 100%; align-items: center; justify-content: center;
+  background: var(--color-oro); color: var(--color-tinta);
+  border: none; padding: 0.85rem; font-weight: 700; font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+.boton-go:hover { background: #E0B85A; }
+
+/* Selector de avatar: cada opción es un "sello" circular, como las insignias */
+.selector-avatar {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+}
+.avatar-opcion {
+  width: 3rem; height: 3rem; border-radius: 50%;
+  border: 2px solid rgba(241,230,211,0.15);
+  background: rgba(241,230,211,0.05);
+  font-size: 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.avatar-opcion:hover { border-color: rgba(200,155,60,0.5); }
+.avatar-opcion[aria-pressed="true"] {
+  border-color: var(--color-oro);
+  background: rgba(200,155,60,0.15);
+  box-shadow: 0 0 0 2px rgba(200,155,60,0.25);
+}
+
+/* ==========================================================================
+   Popayán GO — pantallas internas del jugador (perfil, rutas, logros, ranking)
+   ========================================================================== */
+
+.go-nav {
+  background: var(--color-tinta);
+  color: var(--color-papel);
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid rgba(241,230,211,0.1);
+}
+.go-nav__fila { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+.go-nav__marca { font-family: var(--fuente-titulos); font-weight: 600; font-size: 1.05rem; color: var(--color-oro); }
+.go-nav__marca em { font-style: italic; }
+.go-nav__tabs { display: flex; gap: 1.5rem; font-size: 0.85rem; }
+.go-nav__tabs a { color: rgba(241,230,211,0.55); }
+.go-nav__tabs a[aria-current="page"] { color: var(--color-oro); font-weight: 700; }
+.go-nav__nivel {
+  background: rgba(200,155,60,0.15); border: 1px solid rgba(200,155,60,0.4);
+  color: var(--color-oro); font-size: 0.72rem; font-weight: 700;
+  padding: 0.3rem 0.6rem; border-radius: 999px;
+}
+.go-nav__volver { color: rgba(241,230,211,0.6); font-size: 1.2rem; }
+@media (max-width: 700px) { .go-nav__tabs { display: none; } }
+
+.go-fondo { background: var(--color-papel); min-height: 100vh; padding-bottom: 3rem; }
+
+.go-perfil-header { text-align: center; padding: var(--espacio-lg) var(--espacio-md); background: var(--color-cal); border-bottom: 1px solid var(--tinta-08); }
+.go-avatar {
+  width: 6.5rem; height: 6.5rem; border-radius: 50%;
+  border: 3px solid var(--color-oro);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; background: var(--color-papel);
+  margin: 0 auto 0.75rem; overflow: hidden;
+}
+.go-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.go-perfil-header h1 { font-size: 1.3rem; margin-bottom: 0.4rem; }
+.go-perfil-header__bio { font-size: 0.85rem; color: var(--tinta-55); max-width: 26rem; margin: 0 auto 0.75rem; }
+.go-stats-fila { display: flex; justify-content: center; gap: 2rem; margin-top: 0.5rem; }
+.go-stats-fila div { text-align: center; }
+.go-stats-fila strong { display: block; font-family: var(--fuente-titulos); font-size: 1.1rem; }
+.go-stats-fila span { font-size: 0.7rem; color: var(--tinta-40); text-transform: uppercase; letter-spacing: 0.03em; }
+
+.go-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--tinta-10); }
+.go-tabs button {
+  flex: 1; background: none; border: none; padding: 0.9rem; font-size: 0.85rem; font-weight: 600;
+  color: var(--tinta-40); border-bottom: 2px solid transparent;
+}
+.go-tabs button[aria-selected="true"] { color: var(--color-terracota); border-bottom-color: var(--color-terracota); }
+
+.go-lista-rutas { list-style: none; margin: 0; padding: 0; }
+.go-lista-rutas li a {
+  display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem var(--espacio-md);
+  border-bottom: 1px solid var(--tinta-08);
+}
+.go-lista-rutas__imagen { width: 2.6rem; height: 2.6rem; border-radius: 50%; object-fit: cover; background: var(--tinta-08); flex-shrink: 0; }
+.go-lista-rutas__texto { flex-grow: 1; }
+.go-lista-rutas__texto strong { display: block; font-size: 0.9rem; }
+.go-lista-rutas__texto span { font-size: 0.75rem; color: var(--color-terracota); font-weight: 600; }
+
+.go-toggle-fila { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: var(--espacio-md); border-bottom: 1px solid var(--tinta-08); }
+.go-toggle-fila strong { display: block; font-size: 0.88rem; margin-bottom: 0.3rem; }
+.go-toggle-fila p { font-size: 0.78rem; color: var(--tinta-55); }
+.go-switch { position: relative; width: 2.6rem; height: 1.5rem; flex-shrink: 0; }
+.go-switch input { opacity: 0; width: 0; height: 0; }
+.go-switch__riel { position: absolute; inset: 0; background: var(--tinta-15); border-radius: 999px; transition: .15s; cursor: pointer; }
+.go-switch__riel::before { content: ''; position: absolute; width: 1.1rem; height: 1.1rem; left: 0.2rem; top: 0.2rem; background: var(--color-cal); border-radius: 50%; transition: .15s; }
+.go-switch input:checked + .go-switch__riel { background: var(--color-terracota); }
+.go-switch input:checked + .go-switch__riel::before { transform: translateX(1.1rem); }
+
+.go-menu-ajustes { list-style: none; margin: 0; padding: var(--espacio-md); }
+.go-menu-ajustes li a, .go-menu-ajustes li button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: var(--color-cal); border: 1px solid var(--tinta-08);
+  padding: 1rem; margin-bottom: 0.6rem; font-size: 0.9rem; font-weight: 600; color: var(--color-tinta);
+}
+.go-menu-ajustes li button.peligro { color: var(--color-rechazo); }
+
+.go-ruta-card { background: var(--color-cal); border: 1px solid var(--tinta-08); padding: var(--espacio-md); margin-bottom: 0.9rem; }
+.go-ruta-card__header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
+.go-ruta-card__header h3 { font-size: 1rem; }
+.go-ruta-card__meta { font-size: 0.75rem; color: var(--tinta-55); margin-bottom: 0.6rem; }
+.go-barra { height: 8px; background: var(--tinta-08); border-radius: 999px; overflow: hidden; margin-bottom: 0.5rem; }
+.go-barra__relleno { height: 100%; border-radius: 999px; }
+.go-ruta-card__pie { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--tinta-55); }
+
+#go-mapa { height: 18rem; width: 100%; border: 1px solid var(--tinta-08); margin-bottom: var(--espacio-md); background: var(--tinta-05); }
+
+.go-logros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+@media (max-width: 640px) { .go-logros-grid { grid-template-columns: repeat(2, 1fr); } }
+.go-logro { background: var(--color-cal); border: 1px solid var(--tinta-08); padding: 1rem 0.6rem; text-align: center; }
+.go-logro__icono { font-size: 1.8rem; margin-bottom: 0.4rem; }
+.go-logro__nombre { font-size: 0.78rem; font-weight: 700; margin-bottom: 0.2rem; }
+.go-logro__meta { font-size: 0.68rem; color: var(--tinta-40); }
+.go-logro.bloqueado { opacity: 0.45; filter: grayscale(0.6); }
+
+.go-podio { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; padding: var(--espacio-lg) var(--espacio-md); background: var(--color-cal); border-bottom: 1px solid var(--tinta-08); }
+.go-podio__puesto { text-align: center; }
+.go-podio__avatar { width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--tinta-08); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 0.4rem; border: 3px solid var(--tinta-15); }
+.go-podio__puesto--1 .go-podio__avatar { width: 4.5rem; height: 4.5rem; font-size: 2rem; border-color: var(--color-oro); }
+.go-podio__nombre { font-size: 0.8rem; font-weight: 700; }
+.go-podio__label { font-size: 0.68rem; color: var(--color-terracota); font-weight: 700; text-transform: uppercase; }
+
+.go-fila-ranking { display: flex; align-items: center; gap: 0.9rem; padding: 0.8rem var(--espacio-md); border-bottom: 1px solid var(--tinta-08); }
+.go-fila-ranking__puesto { width: 1.6rem; font-family: var(--fuente-titulos); font-weight: 700; color: var(--tinta-40); }
+.go-fila-ranking__avatar { width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--tinta-08); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.go-fila-ranking__nombre { flex-grow: 1; font-size: 0.88rem; font-weight: 600; }
+.go-fila-ranking__nivel { font-size: 0.7rem; color: var(--tinta-40); }
+.go-fila-ranking__puntos { font-weight: 700; color: var(--color-terracota); font-size: 0.9rem; }
+
+.go-modal-overlay { position: fixed; inset: 0; background: rgba(36,27,20,0.55); z-index: 90; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.go-modal { background: var(--color-cal); max-width: 22rem; width: 100%; padding: var(--espacio-lg); text-align: center; }
+.go-modal__check { width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--color-patina); color: var(--color-cal); font-size: 1.6rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+.go-modal h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+.go-modal p { font-size: 0.85rem; color: var(--tinta-55); margin-bottom: 1rem; }
+.go-modal__chip { display: inline-block; background: var(--tinta-05); padding: 0.4rem 0.9rem; font-size: 0.78rem; font-weight: 700; color: var(--color-terracota); margin-bottom: 1.25rem; }
+.go-modal .boton { width: 100%; margin-bottom: 0.5rem; }body.modal-abierto {
+  overflow: hidden;
+}
+
+.modal-codigos__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacio-md);
+  background-color: var(--tinta-70);
+}
+
+.modal-codigos {
+  width: 100%;
+  max-width: 28rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--espacio-lg);
+  background-color: var(--color-cal);
+  border-radius: var(--radio);
+  box-shadow: 0 12px 32px var(--tinta-40);
+}
+
+.modal-codigos h2 {
+  margin: 0 0 var(--espacio-sm);
+  font-size: 1.4rem;
+  color: var(--color-tinta);
+}
+
+.modal-codigos__advertencia {
+  margin: 0 0 var(--espacio-md);
+  padding: var(--espacio-sm) var(--espacio-md);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-rechazo);
+  background-color: var(--color-papel);
+  border: 1px solid var(--color-rechazo);
+  border-left: 4px solid var(--color-terracota);
+  border-radius: var(--radio);
+}
+
+.modal-codigos__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--espacio-xs);
+  margin: 0 0 var(--espacio-md);
+  padding: 0;
+  list-style: none;
+}
+
+.modal-codigos__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-xs);
+  padding: 0.55rem 0.7rem;
+  background-color: var(--color-papel);
+  border: 1px solid var(--tinta-10);
+  border-radius: var(--radio);
+}
+
+.modal-codigos__valor {
+  font-family: var(--fuente-cuerpo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  color: var(--color-tinta);
+  /* Evita que un código largo empuje el botón "Copiar" fuera de la tarjeta. */
+  overflow-wrap: anywhere;
+}
+
+.boton-copiar {
+  flex-shrink: 0;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-terracota);
+  background: none;
+  border: 1px solid var(--color-terracota);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.boton-copiar:hover {
+  background-color: var(--color-terracota);
+  color: var(--color-cal);
+}
+
+.boton-copiar:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--tinta-10);
+}
+
+.modal-codigos__acciones {
+  display: flex;
+  gap: var(--espacio-xs);
+  margin-bottom: var(--espacio-md);
+}
+
+.modal-codigos__acciones .boton {
+  flex: 1;
+}
+
+.modal-codigos__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espacio-xs);
+  margin-bottom: var(--espacio-md);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-tinta);
+  cursor: pointer;
+}
+
+.modal-codigos__checkbox input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 420px) {
+  .modal-codigos {
+    padding: var(--espacio-md);
+  }
+
+  .modal-codigos__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-codigos__acciones {
+    flex-direction: column;
+  }
+}

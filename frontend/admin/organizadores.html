@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organizadores — Panel Admin · Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<style>
+  .tabla__vacio, .tabla__cargando, .tabla__error {
+    text-align: center; padding: 1.5rem; color: var(--tinta-70, #555);
+  }
+  .tabla__error { color: #b03030; }
+  .celda-subtitulo {
+    display: block; font-size: 0.75rem; font-weight: 400;
+    color: var(--tinta-70, #666); margin-top: 0.15rem;
+  }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-caja {
+    background: #fff; border-radius: 12px; max-width: 560px; width: 100%;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-caja__header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.25rem; border-bottom: 1px solid #eee;
+  }
+  .modal-caja__header h2 { margin: 0; font-size: 1.15rem; }
+  .modal-caja__header button {
+    background: none; border: none; font-size: 1.25rem; cursor: pointer;
+    color: #666; padding: 0.25rem 0.5rem;
+  }
+  .modal-caja__cuerpo { padding: 1.25rem; }
+  .modal-caja__pie {
+    display: flex; justify-content: flex-end; gap: 0.5rem;
+    padding: 1rem 1.25rem; border-top: 1px solid #eee;
+  }
+  .modal-detalle__cabecera { display: flex; justify-content: center; margin-bottom: 1rem; }
+  .modal-detalle__avatar {
+    width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+    background: var(--color-terracota, #b85c3a); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 700;
+  }
+  .modal-detalle__lista {
+    display: grid; grid-template-columns: 130px 1fr; gap: 0.5rem 1rem;
+    margin: 0 0 1rem;
+  }
+  .modal-detalle__lista dt { font-weight: 600; color: #555; font-size: 0.85rem; }
+  .modal-detalle__lista dd { margin: 0; font-size: 0.9rem; word-break: break-word; }
+  .modal-detalle__subtitulo {
+    margin: 1rem 0 0.5rem; font-size: 1rem; border-top: 1px solid #eee; padding-top: 1rem;
+  }
+  .modal-detalle__redes { list-style: none; padding: 0; margin: 0; }
+  .modal-detalle__redes li { padding: 0.25rem 0; font-size: 0.85rem; }
+  .modal-detalle__vacio { color: #888; font-size: 0.85rem; font-style: italic; }
+  .modal-motivo {
+    border-top: 1px solid #eee; padding: 1rem 1.25rem;
+  }
+  .modal-motivo label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+  .modal-motivo select, .modal-motivo textarea {
+    width: 100%; font: inherit; padding: 0.6rem; border: 1px solid #ccc; border-radius: 6px;
+  }
+  .modal-motivo__detalle { margin-top: 0.75rem; }
+  .modal-motivo__detalle[hidden] { display: none; }
+  .modal-motivo__notificar { display: flex !important; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+  .modal-motivo__notificar input { width: auto; }
+</style>
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Popayán · Colombia</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="resumen.html">Resumen</a>
+      <a href="eventos.html">Eventos</a>
+      <a href="organizadores.html" aria-current="page">Organizadores</a>
+      <a href="#">Categorías y ciudades</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial">AD</span>
+      <div><strong>Admin</strong><span class="rol">Administrador</span></div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Organizadores</h1>
+      </div>
+      <div class="panel-header__acciones">
+        <button class="boton-icono" aria-label="Notificaciones"><span class="punto-notificacion"></span>🔔</button>
+        <div class="panel-header__usuario"><span>Admin</span> <span class="avatar-inicial">AD</span></div>
+      </div>
+    </header>
+
+    <div class="panel-cuerpo">
+      <div class="bloque">
+        <div class="bloque__header">
+          <input type="search" data-buscar-organizador placeholder="Buscar por entidad, email o contacto…" style="min-width:18rem;" aria-label="Buscar organizador">
+        </div>
+        <div class="tabla-wrap">
+          <table class="tabla" data-tabla-organizadores>
+            <thead>
+              <tr>
+                <th>Entidad</th>
+                <th>Email de contacto</th>
+                <th>Fecha de registro</th>
+                <th>Estado</th>
+                <th class="columna-acciones">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" class="tabla__cargando">Cargando organizadores…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de detalle -->
+<div class="modal-overlay" data-modal-detalle hidden>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <header class="modal-caja__header">
+      <h2 id="modalTitulo" data-modal-titulo>Detalle del organizador</h2>
+      <button type="button" data-modal-cerrar aria-label="Cerrar">✕</button>
+    </header>
+    <div class="modal-caja__cuerpo" data-modal-cuerpo></div>
+    <section class="modal-motivo" data-modal-motivo hidden>
+      <label for="modalMotivo">Motivo</label>
+      <select id="modalMotivo" data-modal-motivo-select required>
+        <option value="">Selecciona un motivo</option>
+      </select>
+      <div class="modal-motivo__detalle" data-modal-motivo-detalle hidden>
+        <label for="modalDetalle">Nota adicional</label>
+        <textarea id="modalDetalle" data-modal-detalle-input rows="3" maxlength="500"></textarea>
+      </div>
+      <label class="modal-motivo__notificar" data-modal-notificar-wrap hidden>
+        <input type="checkbox" data-modal-notificar checked>
+        Notificar al organizador
+      </label>
+      <footer class="modal-caja__pie">
+        <button type="button" class="boton boton-secundario" data-modal-motivo-cancelar>Cancelar</button>
+        <button type="button" class="boton boton-rechazo" data-modal-motivo-confirmar>Confirmar</button>
+      </footer>
+    </section>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

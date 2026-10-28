@@ -1,0 +1,72 @@
+ALTER TYPE "EstadoOrganizador" ADD VALUE 'RECHAZADO';
+ALTER TYPE "EstadoOrganizador" ADD VALUE 'EN_REVISION';
+
+CREATE TYPE "MotivoEstado" AS ENUM (
+  'INFORMACION_INCOMPLETA',
+  'DOCUMENTO_NO_VERIFICABLE',
+  'ENTIDAD_DUPLICADA',
+  'CONTACTO_DUPLICADO',
+  'DATOS_SOSPECHOSOS',
+  'TYC_INCUMPLIDOS',
+  'EVENTO_FALSO',
+  'CONTENIDO_INAPROPIADO',
+  'QUEJAS_USUARIOS',
+  'INACTIVIDAD',
+  'SOLICITUD_ORGANIZADOR',
+  'OTRO',
+  'SUPLANTACION',
+  'FRAUDE',
+  'MULTIPLES_SUSPENSIONES',
+  'ACTIVIDAD_ILEGAL',
+  'DOCUMENTO_FALSIFICADO'
+);
+
+CREATE TYPE "TipoNotificacion" AS ENUM (
+  'VERIFICACION_APROBADA',
+  'VERIFICACION_RECHAZADA',
+  'EVENTO_APROBADO',
+  'EVENTO_RECHAZADO',
+  'SUSPENSION',
+  'REACTIVACION'
+);
+
+CREATE TYPE "MotivoReactivacion" AS ENUM (
+  'ERROR_ADMINISTRATIVO',
+  'APELACION_ACEPTADA',
+  'SANCION_CUMPLIDA',
+  'CONDICIONES_CAMBIADAS',
+  'ORDEN_LEGAL',
+  'OTRO'
+);
+
+ALTER TABLE "Organizador"
+  ADD COLUMN "motivoEstado" "MotivoEstado",
+  ADD COLUMN "detalleMotivoEstado" TEXT,
+  ADD COLUMN "motivoReactivacion" "MotivoReactivacion",
+  ADD COLUMN "detalleReactivacion" TEXT,
+  ADD COLUMN "reactivadoEn" TIMESTAMP(3),
+  ADD COLUMN "reactivadoPorId" INTEGER;
+
+CREATE TABLE "Notificacion" (
+  "id" SERIAL NOT NULL,
+  "usuarioId" INTEGER NOT NULL,
+  "tipo" "TipoNotificacion" NOT NULL,
+  "mensaje" TEXT NOT NULL,
+  "leida" BOOLEAN NOT NULL DEFAULT false,
+  "creadoEn" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "Notificacion_pkey" PRIMARY KEY ("id")
+);
+
+CREATE INDEX "Notificacion_usuarioId_leida_creadoEn_idx"
+  ON "Notificacion"("usuarioId", "leida", "creadoEn");
+
+ALTER TABLE "Notificacion"
+  ADD CONSTRAINT "Notificacion_usuarioId_fkey"
+  FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("id")
+  ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "Organizador"
+  ADD CONSTRAINT "Organizador_reactivadoPorId_fkey"
+  FOREIGN KEY ("reactivadoPorId") REFERENCES "Usuario"("id")
+  ON DELETE SET NULL ON UPDATE CASCADE;

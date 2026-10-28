@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<style>
+  .perfil-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .perfil-grid { grid-template-columns: 1fr; }
+  }
+  .perfil-avatar-col {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 1.5rem 1rem;
+    background: var(--color-marfil, #faf6ef);
+    border-radius: 12px;
+  }
+  .perfil-avatar-img {
+    width: 140px; height: 140px; border-radius: 50%;
+    object-fit: cover; background: var(--color-terracota, #b85c3a);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; font-weight: 700; font-family: var(--fuente-titulos, serif);
+    margin-bottom: 0.75rem;
+  }
+  .perfil-avatar-img img {
+    width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  }
+  .perfil-avatar-btn {
+    margin-top: 0.5rem; font-size: 0.8rem;
+    background: none; border: 1px solid var(--color-terracota, #b85c3a);
+    color: var(--color-terracota, #b85c3a); padding: 0.35rem 0.85rem;
+    border-radius: 20px; cursor: pointer;
+  }
+  .perfil-avatar-btn:hover { background: var(--color-terracota, #b85c3a); color: #fff; }
+  .perfil-redes-lista { list-style: none; padding: 0; margin: 1rem 0 0; font-size: 0.85rem; }
+  .perfil-redes-lista li { padding: 0.25rem 0; word-break: break-word; }
+  .aviso--rojo { background: #fdecea; border-left: 4px solid #c0392b; }
+  .aviso--verde { background: #eafaf1; border-left: 4px solid #27ae60; }
+  .redes-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+  }
+  @media (max-width: 620px) { .redes-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Plataforma de creadores</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="mis-eventos.html">🗓️ Mis eventos</a>
+      <a href="publicar.html">➕ Publicar</a>
+      <a href="perfil.html" aria-current="page">👤 Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">🚪 Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial" data-sidebar-inicial>··</span>
+      <div>
+        <strong data-sidebar-nombre>Cargando…</strong>
+        <span class="rol">Organizador</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Mi Perfil</h1>
+      </div>
+      <a href="publicar.html" class="boton boton-primario boton-sm">➕ Publicar nuevo evento</a>
+    </header>
+
+    <div class="panel-cuerpo">
+
+      <!-- Banner dinámico según estado -->
+      <div class="aviso" data-banner-estado hidden>
+        <span data-banner-icono>⚠️</span>
+        <div>
+          <strong data-banner-titulo></strong>
+          <span data-banner-texto></span>
+        </div>
+      </div>
+
+      <form data-form-perfil>
+        <div class="perfil-grid">
+
+          <!-- Columna izquierda: avatar + resumen -->
+          <div class="perfil-avatar-col">
+            <div class="perfil-avatar-img" data-avatar-preview>
+              <span data-avatar-inicial>?</span>
+            </div>
+            <button type="button" class="perfil-avatar-btn" data-avatar-btn>
+              Cambiar foto
+            </button>
+            <input type="file" accept="image/png,image/jpeg" data-avatar-input hidden>
+
+            <strong style="margin-top:0.75rem; font-size:0.95rem;" data-resumen-nombre>—</strong>
+            <span style="font-size:0.75rem; color:var(--tinta-55);" data-resumen-ciudad>—</span>
+
+            <ul class="perfil-redes-lista" data-resumen-redes></ul>
+          </div>
+
+          <!-- Columna derecha: formulario -->
+          <div>
+            <div class="bloque" style="padding:1.5rem;">
+              <h2 style="font-size:1.1rem; margin-bottom:1rem;">Datos de la organización</h2>
+
+              <div class="form-grupo">
+                <label for="nombreEntidad">Nombre de la organización *</label>
+                <input id="nombreEntidad" name="nombreEntidad" type="text" required maxlength="150">
+              </div>
+
+              <div class="form-grupo">
+                <label for="tipoEntidad">Tipo de entidad</label>
+                <select id="tipoEntidad" name="tipoEntidad">
+                  <option value="">— Selecciona —</option>
+                  <option value="PERSONA_NATURAL">Persona natural</option>
+                  <option value="FUNDACION">Fundación</option>
+                  <option value="EMPRESA">Empresa</option>
+                  <option value="COLECTIVO">Colectivo</option>
+                  <option value="ASOCIACION">Asociación</option>
+                  <option value="JUNTA_ACCION_COMUNAL">Junta de Acción Comunal</option>
+                  <option value="INSTITUCION_PUBLICA">Institución pública</option>
+                  <option value="OTRO">Otro</option>
+                </select>
+              </div>
+
+              <div class="form-grupo">
+                <label for="nit">NIT (opcional)</label>
+                <input id="nit" name="nit" type="text" maxlength="30" placeholder="Personas naturales no lo requieren">
+              </div>
+
+              <div class="form-grupo">
+                <label for="documentoIdentidad">Documento de identidad del representante *</label>
+                <input id="documentoIdentidad" name="documentoIdentidad" type="text" inputmode="numeric" pattern="\d{7,10}" maxlength="10" placeholder="Solo dígitos (7 a 10)">
+                <span class="campo__ayuda" data-doc-ayuda>
+                  Se guarda cifrado. Solo el admin ve los últimos 4 dígitos.
+                </span>
+              </div>
+
+              <div class="form-grupo">
+                <label for="anioFundacion">Año de fundación</label>
+                <input id="anioFundacion" name="anioFundacion" type="number" min="1800" max="2100" step="1">
+              </div>
+
+              <div class="form-grupo">
+                <label for="descripcion">Descripción institucional</label>
+                <textarea id="descripcion" name="descripcion" rows="4" maxlength="500" placeholder="Cuéntale al público y al admin quién eres, qué haces y desde cuándo."></textarea>
+              </div>
+
+              <h3 style="font-size:1rem; margin:1.5rem 0 0.75rem;">Contacto</h3>
+
+              <div class="form-grupo">
+                <label for="telefono">Teléfono de contacto</label>
+                <input id="telefono" name="telefono" type="tel" maxlength="20">
+              </div>
+
+              <div class="form-grupo">
+                <label for="direccion">Dirección física</label>
+                <input id="direccion" name="direccion" type="text" maxlength="200" placeholder="Ej: Calle 5 # 10-25, Popayán">
+              </div>
+
+              <div class="form-grupo">
+                <label for="ciudadBaseId">Ciudad base (Cauca)</label>
+                <select id="ciudadBaseId" name="ciudadBaseId">
+                  <option value="">— Selecciona —</option>
+                </select>
+              </div>
+
+              <h3 style="font-size:1rem; margin:1.5rem 0 0.75rem;">Redes sociales</h3>
+              <p style="font-size:0.8rem; color:var(--tinta-55); margin-bottom:0.75rem;">
+                Solo se guardan las que llenes. El público las verá en el detalle de tus eventos.
+              </p>
+
+              <div class="redes-grid">
+                <div class="form-grupo">
+                  <label for="rs-instagram">Instagram</label>
+                  <input id="rs-instagram" type="url" data-red="instagram" placeholder="https://instagram.com/…">
+                </div>
+                <div class="form-grupo">
+                  <label for="rs-facebook">Facebook</label>
+                  <input id="rs-facebook" type="url" data-red="facebook" placeholder="https://facebook.com/…">
+                </div>
+                <div class="form-grupo">
+                  <label for="rs-x">X (Twitter)</label>
+                  <input id="rs-x" type="url" data-red="x" placeholder="https://x.com/…">
+                </div>
+                <div class="form-grupo">
+                  <label for="rs-tiktok">TikTok</label>
+                  <input id="rs-tiktok" type="url" data-red="tiktok" placeholder="https://tiktok.com/@…">
+                </div>
+                <div class="form-grupo">
+                  <label for="rs-youtube">YouTube</label>
+                  <input id="rs-youtube" type="url" data-red="youtube" placeholder="https://youtube.com/@…">
+                </div>
+                <div class="form-grupo">
+                  <label for="rs-whatsapp">WhatsApp</label>
+                  <input id="rs-whatsapp" type="url" data-red="whatsapp" placeholder="https://wa.me/57…">
+                </div>
+                <div class="form-grupo" style="grid-column: 1 / -1;">
+                  <label for="rs-web">Sitio web</label>
+                  <input id="rs-web" type="url" data-red="web" placeholder="https://…">
+                </div>
+              </div>
+
+              <div style="margin-top:1.5rem; display:flex; align-items:center; gap:1rem;">
+                <button type="submit" class="boton boton-primario" data-boton-guardar>
+                  Guardar cambios
+                </button>
+                <p class="auth-card__mensaje" data-perfil-mensaje role="status" aria-live="polite" style="margin:0;"></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/organizador-perfil.js"></script>
+</body>
+</html>

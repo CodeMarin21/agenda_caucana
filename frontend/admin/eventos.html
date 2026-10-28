@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventos — Panel Admin · Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<style>
+  .tabla__vacio, .tabla__cargando, .tabla__error {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--tinta-70, #555);
+  }
+  .tabla__error { color: #b03030; }
+  .celda-subtitulo {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--tinta-70, #666);
+    margin-top: 0.15rem;
+  }
+  .tabs-eventos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .tab-eventos {
+    border: 1px solid var(--tinta-15);
+    background: var(--color-cal);
+    color: var(--tinta-70);
+    padding: 0.6rem 0.85rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .tab-eventos[aria-pressed="true"] {
+    border-color: var(--color-tinta);
+    background: var(--color-tinta);
+    color: var(--color-papel);
+  }
+  .modal-overlay-eventos {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(20, 18, 16, 0.65);
+    overflow-y: auto;
+  }
+  .modal-overlay-eventos[hidden] { display: none; }
+  .modal-eventos {
+    width: min(58rem, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    background: var(--color-cal);
+    border: 1px solid var(--tinta-15);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+  }
+  .modal-eventos__header, .modal-eventos__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--tinta-10);
+  }
+  .modal-eventos__footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--tinta-10);
+    border-bottom: 0;
+  }
+  .modal-eventos__header h2 { margin: 0; font-size: 1.25rem; }
+  .modal-eventos__contenido { padding: 1.25rem; }
+  .modal-eventos__detalle {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1.5rem;
+  }
+  .modal-eventos__imagen {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--color-papel);
+    margin-bottom: 1rem;
+  }
+  .modal-eventos__imagen[hidden] { display: none; }
+  .modal-eventos__categoria {
+    margin: 0 0 0.5rem;
+    color: var(--color-terracota);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .modal-eventos__titulo { margin: 0; font-size: 1.5rem; }
+  .modal-eventos__datos {
+    display: grid;
+    grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
+    gap: 0.65rem 0.8rem;
+    margin: 0;
+    font-size: 0.88rem;
+  }
+  .modal-eventos__datos dt { font-weight: 700; }
+  .modal-eventos__datos dd { margin: 0; overflow-wrap: anywhere; }
+  .modal-eventos__descripcion {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .modal-eventos__campo { margin-bottom: 1rem; }
+  .modal-eventos__campo label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .modal-eventos__campo select, .modal-eventos__campo textarea {
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px solid var(--tinta-15);
+    background: #fff;
+    font: inherit;
+  }
+  .modal-eventos__aviso { color: var(--tinta-70); font-size: 0.9rem; }
+  .modal-eventos__confirmacion { font-weight: 600; }
+  @media (max-width: 700px) {
+    .modal-eventos__detalle { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Popayán · Colombia</p>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="resumen.html">Resumen</a>
+      <a href="eventos.html" aria-current="page">Eventos</a>
+      <a href="negocios.html">Negocios</a>
+      <a href="organizadores.html">Organizadores</a>
+      <a href="#">Categorías y ciudades</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial">AD</span>
+      <div><strong>Admin</strong><span class="rol">Administrador</span></div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Eventos</h1>
+      </div>
+      <div class="panel-header__acciones">
+        <button class="boton-icono" aria-label="Notificaciones"><span class="punto-notificacion"></span>🔔</button>
+        <div class="panel-header__usuario"><span>Admin</span> <span class="avatar-inicial">AD</span></div>
+      </div>
+    </header>
+
+    <main class="panel-cuerpo">
+      <section class="bloque">
+        <div class="bloque__header">
+          <h2>Gestión de eventos</h2>
+          <input
+            type="search"
+            id="busquedaEventos"
+            placeholder="Buscar eventos por nombre…"
+            aria-label="Buscar eventos por nombre"
+            style="min-width: 16rem; padding: 0.5rem; border: 1px solid var(--tinta-15); font: inherit;"
+          />
+        </div>
+        <div class="tabs-eventos" role="group" aria-label="Filtrar eventos por estado">
+          <button type="button" class="tab-eventos" data-tab-eventos="PENDIENTE" aria-pressed="true">Pendientes (<span data-conteo-estado="PENDIENTE">0</span>)</button>
+          <button type="button" class="tab-eventos" data-tab-eventos="TODOS" aria-pressed="false">Todos (<span data-conteo-estado="TODOS">0</span>)</button>
+          <button type="button" class="tab-eventos" data-tab-eventos="APROBADO" aria-pressed="false">Aprobados (<span data-conteo-estado="APROBADO">0</span>)</button>
+          <button type="button" class="tab-eventos" data-tab-eventos="RECHAZADO" aria-pressed="false">Rechazados (<span data-conteo-estado="RECHAZADO">0</span>)</button>
+        </div>
+        <div class="tabla-wrap">
+          <table class="tabla" data-tabla-eventos>
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Organizador</th>
+                <th>Categoría</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th class="columna-acciones">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" class="tabla__cargando">Cargando eventos…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay-eventos" data-modal-detalle-evento hidden>
+  <section class="modal-eventos" role="dialog" aria-modal="true" aria-labelledby="tituloDetalleEvento">
+    <header class="modal-eventos__header">
+      <h2 id="tituloDetalleEvento">Detalle del evento</h2>
+      <button type="button" class="boton boton-secundario" data-cerrar-detalle-evento aria-label="Cerrar">Cerrar</button>
+    </header>
+    <div class="modal-eventos__contenido" data-contenido-detalle-evento></div>
+  </section>
+</div>
+
+<div class="modal-overlay-eventos" data-modal-motivo-evento hidden>
+  <section class="modal-eventos" role="dialog" aria-modal="true" aria-labelledby="tituloMotivoEvento">
+    <header class="modal-eventos__header">
+      <h2 id="tituloMotivoEvento">Motivo</h2>
+      <button type="button" class="boton boton-secundario" data-cerrar-motivo-evento aria-label="Cerrar">Cerrar</button>
+    </header>
+    <div class="modal-eventos__contenido">
+      <div class="modal-eventos__campo">
+        <label for="motivoEventoSelect">Motivo</label>
+        <select id="motivoEventoSelect" data-modal-motivo-evento-select>
+          <option value="">Selecciona un motivo</option>
+          <option value="INFORMACION_INCOMPLETA">Información del evento incompleta</option>
+          <option value="INFORMACION_FALSA">Información falsa o engañosa</option>
+          <option value="IMAGEN_INAPROPIADA">Imagen inapropiada</option>
+          <option value="CONTENIDO_INAPROPIADO">Contenido inapropiado</option>
+          <option value="DUPLICADO">Evento duplicado</option>
+          <option value="FUERA_DE_POLITICAS">Fuera de políticas de la plataforma</option>
+          <option value="OTRO">Otro (especificar)</option>
+        </select>
+      </div>
+      <div class="modal-eventos__campo" data-modal-motivo-evento-detalle hidden>
+        <label for="motivoEventoDetalle">Especifica el motivo (mínimo 5 caracteres)</label>
+        <textarea id="motivoEventoDetalle" data-modal-motivo-evento-textarea rows="3" maxlength="500"></textarea>
+      </div>
+      <p class="modal-eventos__aviso">El organizador será notificado con el motivo indicado.</p>
+    </div>
+    <footer class="modal-eventos__footer">
+      <button type="button" class="boton boton-secundario" data-cerrar-motivo-evento>Cancelar</button>
+      <button type="button" class="boton boton-rechazo" data-modal-motivo-evento-confirmar>Confirmar</button>
+    </footer>
+  </section>
+</div>
+
+<div class="modal-overlay-eventos" data-modal-eliminar-evento hidden>
+  <section class="modal-eventos" role="dialog" aria-modal="true" aria-labelledby="tituloEliminarEvento">
+    <header class="modal-eventos__header">
+      <h2 id="tituloEliminarEvento">Eliminar evento</h2>
+      <button type="button" class="boton boton-secundario" data-cerrar-eliminar-evento aria-label="Cerrar">Cerrar</button>
+    </header>
+    <div class="modal-eventos__contenido">
+      <p class="modal-eventos__confirmacion" data-confirmacion-eliminar-evento></p>
+      <div class="modal-eventos__campo">
+        <label for="motivoEliminarEventoSelect">Motivo</label>
+        <select id="motivoEliminarEventoSelect" data-modal-eliminar-evento-select>
+          <option value="">Selecciona un motivo</option>
+          <option value="INFORMACION_INCOMPLETA">Información del evento incompleta</option>
+          <option value="INFORMACION_FALSA">Información falsa o engañosa</option>
+          <option value="IMAGEN_INAPROPIADA">Imagen inapropiada</option>
+          <option value="CONTENIDO_INAPROPIADO">Contenido inapropiado</option>
+          <option value="DUPLICADO">Evento duplicado</option>
+          <option value="FUERA_DE_POLITICAS">Fuera de políticas de la plataforma</option>
+          <option value="OTRO">Otro (especificar)</option>
+        </select>
+      </div>
+      <div class="modal-eventos__campo" data-modal-eliminar-evento-detalle hidden>
+        <label for="motivoEliminarEventoDetalle">Especifica el motivo (mínimo 5 caracteres)</label>
+        <textarea id="motivoEliminarEventoDetalle" data-modal-eliminar-evento-textarea rows="3" maxlength="500"></textarea>
+      </div>
+      <p class="modal-eventos__aviso">El organizador será notificado con el motivo indicado.</p>
+    </div>
+    <footer class="modal-eventos__footer">
+      <button type="button" class="boton boton-secundario" data-cerrar-eliminar-evento>Cancelar</button>
+      <button type="button" class="boton boton-rechazo" data-modal-eliminar-evento-confirmar>Eliminar</button>
+    </footer>
+  </section>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

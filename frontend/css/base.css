@@ -1,0 +1,365 @@
+/* ==========================================================================
+   Agenda Caucana — Base compartida
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente-cuerpo);
+  background-color: var(--color-papel);
+  color: var(--color-tinta);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .fuente-titulos {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.15;
+}
+
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
+
+.contenedor {
+  max-width: var(--ancho-maximo);
+  margin-inline: auto;
+  padding-inline: var(--espacio-lg);
+}
+
+@media (max-width: 640px) {
+  .contenedor { padding-inline: var(--espacio-md); }
+}
+
+/* -------------------- Botones -------------------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radio);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.boton-primario {
+  background: var(--color-terracota);
+  color: var(--color-cal);
+}
+.boton-primario:hover { background: var(--color-tinta); }
+
+.boton-secundario {
+  background: transparent;
+  border-color: var(--tinta-15);
+  color: var(--color-tinta);
+}
+.boton-secundario:hover { border-color: var(--color-terracota); color: var(--color-terracota); }
+
+.boton-rechazo {
+  background: var(--color-rechazo);
+  color: var(--color-cal);
+}
+.boton-rechazo:hover { background: #6E2C21; }
+
+.boton-oscuro {
+  background: var(--color-tinta);
+  color: var(--color-papel);
+  border-color: rgba(241, 230, 211, 0.2);
+}
+.boton-oscuro:hover { background: var(--color-terracota); color: var(--color-cal); }
+
+.boton-sm { padding: 0.4rem 0.9rem; font-size: 0.75rem; }
+.boton:disabled { opacity: .5; cursor: not-allowed; }
+
+/* -------------------- Estado (badges tipo "docket", no pill generico) -------------------- */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.6rem 0.3rem 0.4rem;
+  border: 1px solid currentColor;
+}
+.estado::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.estado-pendiente { color: var(--color-oro); background: rgba(200, 155, 60, 0.1); }
+.estado-aprobado, .estado-verificado, .estado-publicado { color: var(--color-patina); background: rgba(95, 122, 106, 0.1); }
+.estado-rechazado, .estado-suspendido { color: var(--color-rechazo); background: rgba(140, 59, 46, 0.08); }
+.estado-actualizado { color: var(--color-terracota); background: rgba(181, 80, 43, 0.08); }
+
+/* -------------------- Tarjeta genérica -------------------- */
+.tarjeta {
+  background: var(--color-cal);
+  border: 1px solid var(--tinta-08);
+}
+
+/* -------------------- Utilidades -------------------- */
+.visualmente-oculto {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+/* -------------------- Auth (login / registro) -------------------- */
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacio-lg);
+  background: var(--color-papel);
+}
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  background: var(--color-cal);
+  border: 1px solid var(--tinta-08);
+  padding: var(--espacio-lg);
+}
+.auth-card__marca { text-align: center; margin-bottom: var(--espacio-lg); }
+.auth-card__marca .fuente-titulos { font-size: 1.5rem; color: var(--color-terracota); }
+.auth-card__marca p { font-size: 0.78rem; color: var(--tinta-55); margin-top: 0.3rem; }
+.auth-card h1 { font-size: 1.3rem; margin-bottom: 0.4rem; text-align: center; }
+.auth-card__subtitulo { text-align: center; font-size: 0.85rem; color: var(--tinta-55); margin-bottom: var(--espacio-md); }
+.auth-card .boton { width: 100%; margin-top: 0.5rem; }
+.auth-card__pie { text-align: center; font-size: 0.82rem; color: var(--tinta-55); margin-top: var(--espacio-md); }
+.auth-card__pie a { color: var(--color-terracota); font-weight: 600; }
+.auth-card__mensaje { font-size: 0.85rem; margin-top: 0.75rem; text-align: center; }
+.auth-card__mensaje--error { color: var(--color-rechazo); }
+.auth-card__mensaje--ok { color: var(--color-patina); }
+
+/* ==========================================================================
+   Accesibilidad — alto contraste, colores invertidos, modo lectura.
+   Se activan agregando una clase a <html> (ver js/accesibilidad.js) y
+   persisten entre páginas vía localStorage.
+   ========================================================================== */
+
+/* -------- Alto contraste (oscuro) -------- */
+html.a11y-alto-contraste body {
+  background: #000 !important;
+  color: #FFF !important;
+}
+html.a11y-alto-contraste .nav-publico,
+html.a11y-alto-contraste .footer,
+html.a11y-alto-contraste .tarjeta,
+html.a11y-alto-contraste .tarjeta-evento,
+html.a11y-alto-contraste .bloque,
+html.a11y-alto-contraste .panel-lateral,
+html.a11y-alto-contraste .evento-detalle__ficha,
+html.a11y-alto-contraste .auth-card,
+html.a11y-alto-contraste .menu-movil {
+  background: #000 !important;
+  color: #FFF !important;
+  border-color: #FFF !important;
+}
+html.a11y-alto-contraste a,
+html.a11y-alto-contraste h1, html.a11y-alto-contraste h2, html.a11y-alto-contraste h3,
+html.a11y-alto-contraste p, html.a11y-alto-contraste span, html.a11y-alto-contraste dd, html.a11y-alto-contraste dt {
+  color: #FFF !important;
+}
+html.a11y-alto-contraste .boton-primario,
+html.a11y-alto-contraste .pildora[aria-pressed="true"] {
+  background: #FFD400 !important; color: #000 !important; border-color: #FFD400 !important;
+}
+html.a11y-alto-contraste .boton-secundario, html.a11y-alto-contraste .pildora {
+  background: #000 !important; color: #FFD400 !important; border: 2px solid #FFD400 !important;
+}
+html.a11y-alto-contraste .hero__scrim { background: rgba(0,0,0,0.75) !important; }
+html.a11y-alto-contraste img:not(.hero__fondo-imagen):not(.hero__fondo-video) { filter: grayscale(1) contrast(1.2); }
+
+/* -------- Colores invertidos -------- */
+html.a11y-invertido {
+  filter: invert(1) hue-rotate(180deg);
+}
+/* Las fotos/video se re-invierten para que no se vean como negativos de cámara */
+html.a11y-invertido img,
+html.a11y-invertido video {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* -------- Modo lectura -------- */
+html.a11y-lectura body {
+  max-width: 42rem;
+  margin: 0 auto;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  background: #FDFBF7;
+  color: #1A1A1A;
+}
+html.a11y-lectura .hero,
+html.a11y-lectura .chat-flotante-boton,
+html.a11y-lectura .chat-panel,
+html.a11y-lectura .cta-organizador,
+html.a11y-lectura .grid-eventos .tarjeta-evento__imagen,
+html.a11y-lectura .evento-detalle__imagen,
+html.a11y-lectura .filtros,
+html.a11y-lectura .barra-resultados {
+  display: none !important;
+}
+html.a11y-lectura .evento-detalle { display: block; }
+html.a11y-lectura .panel-lateral { position: static; margin-top: 1.5rem; }
+html.a11y-lectura .contenedor { padding-inline: 1rem; }
+
+/* -------- Botón + panel de accesibilidad -------- */
+.a11y-boton {
+  background: transparent; border: 1px solid var(--tinta-15);
+  width: 2.25rem; height: 2.25rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 700;
+  color: var(--tinta-70);
+}
+.a11y-boton:hover { border-color: var(--color-terracota); color: var(--color-terracota); }
+.a11y-panel {
+  position: absolute; top: calc(100% + 0.5rem); right: 0;
+  background: var(--color-cal); border: 1px solid var(--tinta-15);
+  box-shadow: 0 10px 25px rgba(36,27,20,0.15);
+  padding: 0.75rem; width: 15rem;
+  display: none; z-index: 90;
+}
+.a11y-panel.abierto { display: block; }
+.a11y-panel button {
+  width: 100%; text-align: left; background: transparent; border: none;
+  padding: 0.6rem 0.5rem; font-size: 0.85rem; color: var(--color-tinta);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.a11y-panel button:hover { background: var(--tinta-05); }
+.a11y-panel button[aria-pressed="true"]::after { content: '✓'; color: var(--color-terracota); font-weight: 700; }
+.a11y-panel-wrap { position: relative; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Campo de formulario — compartido por auth, recuperación y perfil
+   ═══════════════════════════════════════════════════════════ */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-xs);
+  margin-bottom: var(--espacio-md);
+}
+
+.campo__etiqueta {
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-tinta);
+}
+
+.campo__input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font-family: var(--fuente-cuerpo);
+  font-size: 1rem;
+  color: var(--color-tinta);
+  background-color: var(--color-cal);
+  border: 1px solid var(--tinta-15);
+  border-radius: var(--radio);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.campo__input::placeholder {
+  color: var(--tinta-40);
+}
+
+.campo__input:hover {
+  border-color: var(--tinta-40);
+}
+
+.campo__input:focus-visible {
+  outline: none;
+  border-color: var(--color-terracota);
+  box-shadow: 0 0 0 3px var(--tinta-10);
+}
+
+.campo__input[aria-invalid="true"] {
+  border-color: var(--color-rechazo);
+}
+
+.campo__error {
+  display: block;
+  min-height: 1.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.15rem;
+  color: var(--color-rechazo);
+}
+
+.campo__ayuda {
+  font-size: 0.8125rem;
+  color: var(--tinta-55);
+}
+
+/* ── Botón de ancho completo + spinner ─────────────────────── */
+
+.boton-bloque {
+  width: 100%;
+  justify-content: center;
+}
+
+.boton__spinner {
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ac-giro 0.6s linear infinite;
+}
+
+@keyframes ac-giro {
+  to { transform: rotate(360deg); }
+}
+
+.boton[aria-busy="true"] .boton__texto {
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton__spinner {
+    animation-duration: 2s;
+  }
+}
+
+/* ── Medidor de fortaleza de contraseña ────────────────────── */
+
+.fortaleza {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fortaleza__barra {
+  display: flex;
+  gap: 2px;
+  height: 3px;
+}
+
+.fortaleza__segmento {
+  flex: 1;
+  background-color: var(--tinta-10);
+  transition: background-color 0.2s ease;
+}
+
+.fortaleza__segmento--nivel-1 { background-color: var(--color-rechazo); }
+.fortaleza__segmento--nivel-2 { background-color: var(--color-oro); }
+.fortaleza__segmento--nivel-3 { background-color: var(--color-terracota); }
+.fortaleza__segmento--nivel-4 { background-color: var(--color-patina); }

@@ -1,0 +1,10 @@
+﻿# Root del monorepo — Agenda Caucana
+node_modules/
+.env
+.env.local
+.env.*.local
+logs/
+*.log
+.DS_Store
+Thumbs.db
+.git-snapshot.txt

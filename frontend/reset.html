@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Nueva contraseña — Agenda Caucana</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+<div class="auth-layout">
+  <div class="auth-card">
+    <div class="auth-card__marca">
+      <a href="index.html"><span class="fuente-titulos">Agenda Caucana</span></a>
+      <p>Define tu nueva contraseña</p>
+    </div>
+
+    <h1>Nueva contraseña</h1>
+    <p class="auth-card__subtitulo">
+      Ingresa y confirma tu nueva contraseña. Al guardarla, todas tus sesiones activas se cerrarán por seguridad.
+    </p>
+
+    <form id="formReset" novalidate>
+      <div class="form-grupo">
+        <label for="password">Nueva contraseña</label>
+        <input id="password" name="password" type="password" required autocomplete="new-password" minlength="8">
+      </div>
+      <div class="form-grupo">
+        <label for="confirmar">Confirma la contraseña</label>
+        <input id="confirmar" name="confirmar" type="password" required autocomplete="new-password" minlength="8">
+      </div>
+      <button type="submit" class="boton boton-primario boton-bloque">Guardar contraseña</button>
+      <p class="auth-card__mensaje" data-reset-mensaje role="status" aria-live="polite"></p>
+    </form>
+
+    <p class="auth-card__pie">
+      <a href="login.html">Volver a iniciar sesión</a>
+    </p>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+(function () {
+  const form = document.getElementById('formReset');
+  const mensaje = document.querySelector('[data-reset-mensaje]');
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    mensaje.textContent = 'Falta el token de recuperación en la URL. Vuelve a solicitar el enlace desde la página de recuperación.';
+    mensaje.className = 'auth-card__mensaje auth-card__mensaje--error';
+    form.querySelectorAll('input, button').forEach((el) => { el.disabled = true; });
+    return;
+  }
+
+  form.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    const boton = form.querySelector('button[type="submit"]');
+    const password = form.password.value;
+    const confirmar = form.confirmar.value;
+
+    if (password !== confirmar) {
+      mensaje.textContent = 'Las contraseñas no coinciden.';
+      mensaje.className = 'auth-card__mensaje auth-card__mensaje--error';
+      return;
+    }
+    if (password.length < 8) {
+      mensaje.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+      mensaje.className = 'auth-card__mensaje auth-card__mensaje--error';
+      return;
+    }
+
+    boton.disabled = true;
+    mensaje.className = 'auth-card__mensaje';
+    mensaje.textContent = 'Guardando...';
+    try {
+      await AC_API.confirmarReset(token, password);
+      mensaje.textContent = '✓ Contraseña actualizada. Redirigiendo al login…';
+      mensaje.classList.add('auth-card__mensaje--ok');
+      form.reset();
+      setTimeout(() => { window.location.href = 'login.html'; }, 1800);
+    } catch (error) {
+      mensaje.textContent = `No se pudo actualizar: ${error.message}`;
+      mensaje.classList.add('auth-card__mensaje--error');
+      boton.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publicar negocio — Agenda Caucana</title>
+<meta name="description" content="Publica tu restaurante o negocio de comida en Sabores de Popayán.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;600;700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <a href="index.html" class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </a>
+    <nav class="nav-publico__links" aria-label="Navegación principal">
+      <a href="index.html">Explorar</a>
+      <a href="index.html#categorias">Categorías</a>
+      <a href="rutas.html">Rutas</a>
+      <a href="sabores.html">Sabores</a>
+    </nav>
+    <div class="nav-publico__acciones">
+      <div class="a11y-panel-wrap">
+        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <div class="a11y-panel" data-a11y-panel role="menu">
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+        </div>
+      </div>
+      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
+        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
+      </select>
+      <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
+      <a href="publicar-negocio.html" class="boton boton-primario">Publicar negocio</a>
+    </div>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
+  </div>
+  <div class="menu-movil" data-menu-movil>
+    <a href="index.html">Explorar</a>
+    <a href="index.html#categorias">Categorías</a>
+    <a href="rutas.html">Rutas</a>
+    <a href="sabores.html">Sabores</a>
+    <a href="login.html">Mi perfil</a>
+    <a href="publicar-negocio.html" class="boton boton-primario">Publicar negocio</a>
+  </div>
+</header>
+
+<main class="contenedor publicar-negocio">
+  <nav class="publicar-negocio__migas" aria-label="Ruta de navegación">
+    <a href="sabores.html">Sabores</a> &gt; <span aria-current="page">Publicar negocio</span>
+  </nav>
+  <header class="publicar-negocio__encabezado">
+    <h1>Publica tu negocio</h1>
+    <p>Comparte tu cocina con quienes quieren descubrir los sabores del Cauca.</p>
+  </header>
+
+  <section id="estado-cargando" class="publicar-negocio__estado" aria-live="polite">
+    <p>Verificando tu cuenta...</p>
+  </section>
+
+  <section id="estado-no-auth" class="publicar-negocio__estado" aria-labelledby="titulo-no-auth" hidden>
+    <h2 id="titulo-no-auth">Inicia sesión para continuar</h2>
+    <p>Para publicar tu negocio necesitás iniciar sesión como organizador.</p>
+    <a class="boton boton-primario" href="login.html?next=publicar-negocio.html">Iniciar sesión</a>
+    <a class="boton boton-secundario" href="organizador/registro.html?next=publicar-negocio.html">Registrarme como organizador</a>
+  </section>
+
+  <section id="estado-no-org" class="publicar-negocio__estado" aria-labelledby="titulo-no-org" hidden>
+    <h2 id="titulo-no-org">Publicación para organizadores</h2>
+    <p>Solo organizadores pueden publicar negocios. Si ya tienes una cuenta de organizador, inicia sesión con ella. Si aún no, regístrate aquí.</p>
+    <a class="boton boton-secundario" href="organizador/registro.html?next=publicar-negocio.html">Registrarme como organizador</a>
+  </section>
+
+  <section id="estado-form" hidden>
+    <form class="publicar-negocio__formulario" data-form-negocio novalidate>
+      <section>
+        <h2>Información del negocio</h2>
+        <div class="publicar-negocio__fila">
+          <div class="campo">
+            <label class="campo__etiqueta" for="nombre">Nombre del negocio</label>
+            <input class="campo__input" id="nombre" name="nombre" type="text" required minlength="3" maxlength="150">
+            <span class="campo__error" data-error="nombre"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="categoria">Categoría</label>
+            <select class="campo__input" id="categoria" name="categoria" required>
+              <option value="">Selecciona una categoría</option>
+              <option value="TRADICIONAL_CAUCANA">Tradicional Caucana</option>
+              <option value="COMIDA_RAPIDA">Comida Rápida</option>
+              <option value="PARRILLA">Parrilla</option>
+              <option value="PIZZA">Pizza</option>
+              <option value="SUSHI">Sushi</option>
+              <option value="POSTRES">Postres</option>
+              <option value="CAFETERIA">Cafetería</option>
+              <option value="BEBIDAS">Bebidas</option>
+              <option value="VEGETARIANA">Vegetariana</option>
+              <option value="OTRO">Otro</option>
+            </select>
+            <span class="campo__error" data-error="categoria"></span>
+          </div>
+        </div>
+        <div class="campo">
+          <label class="campo__etiqueta" for="descripcion">Descripción</label>
+          <textarea class="campo__input" id="descripcion" name="descripcion" required minlength="10" maxlength="2000"></textarea>
+          <span class="campo__error" data-error="descripcion"></span>
+        </div>
+        <div class="publicar-negocio__fila">
+          <div class="campo">
+            <label class="campo__etiqueta" for="ciudadId">Ciudad</label>
+            <select class="campo__input" id="ciudadId" name="ciudadId" required disabled>
+              <option value="">Cargando ciudades...</option>
+            </select>
+            <span class="campo__error" data-error="ciudadId"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="direccion">Dirección</label>
+            <input class="campo__input" id="direccion" name="direccion" type="text" required minlength="5" maxlength="300">
+            <span class="campo__error" data-error="direccion"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="precioPromedio">Precio promedio (COP)</label>
+            <input class="campo__input" id="precioPromedio" name="precioPromedio" type="number" min="0" step="1">
+            <span class="campo__error" data-error="precioPromedio"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="horarioAtencion">Horario de atención</label>
+            <textarea class="campo__input" id="horarioAtencion" name="horarioAtencion" maxlength="200"></textarea>
+            <span class="campo__error" data-error="horarioAtencion"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="telefono">Teléfono</label>
+            <input class="campo__input" id="telefono" name="telefono" type="tel" maxlength="20">
+            <span class="campo__error" data-error="telefono"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="whatsapp">WhatsApp</label>
+            <input class="campo__input" id="whatsapp" name="whatsapp" type="tel" maxlength="20">
+            <span class="campo__error" data-error="whatsapp"></span>
+          </div>
+          <div class="campo">
+            <label class="campo__etiqueta" for="instagram">Instagram</label>
+            <input class="campo__input" id="instagram" name="instagram" type="text" maxlength="100">
+            <span class="campo__error" data-error="instagram"></span>
+          </div>
+        </div>
+        <div class="campo">
+          <label class="campo__etiqueta" for="imagenPrincipal">Foto principal del negocio</label>
+          <input class="campo__input" id="imagenPrincipal" name="imagenPrincipal" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="campo__ayuda">JPG, PNG o WebP, hasta 5 MB.</span>
+          <span class="campo__error" data-error="imagenPrincipal"></span>
+          <img class="publicar-negocio__preview" data-imagen-principal-preview alt="Vista previa de la imagen del negocio" hidden>
+        </div>
+      </section>
+
+      <section>
+        <h2>Platos (opcional, hasta 5)</h2>
+        <p class="campo__ayuda">Puedes agregar hasta 5 platos con su foto y precio. Solo se mostrarán los platos completos.</p>
+        <fieldset class="slot-plato" data-slot="1">
+          <legend>Plato 1</legend>
+          <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
+          <div class="campo"><label for="plato-1-nombre">Nombre</label><input class="campo__input" id="plato-1-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
+          <div class="campo"><label for="plato-1-precio">Precio (COP)</label><input class="campo__input" id="plato-1-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-1-imagen">Foto</label><input class="campo__input" id="plato-1-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 1" hidden></div>
+        </fieldset>
+        <fieldset class="slot-plato" data-slot="2">
+          <legend>Plato 2</legend>
+          <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
+          <div class="campo"><label for="plato-2-nombre">Nombre</label><input class="campo__input" id="plato-2-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
+          <div class="campo"><label for="plato-2-precio">Precio (COP)</label><input class="campo__input" id="plato-2-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-2-imagen">Foto</label><input class="campo__input" id="plato-2-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 2" hidden></div>
+        </fieldset>
+        <fieldset class="slot-plato" data-slot="3">
+          <legend>Plato 3</legend>
+          <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
+          <div class="campo"><label for="plato-3-nombre">Nombre</label><input class="campo__input" id="plato-3-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
+          <div class="campo"><label for="plato-3-precio">Precio (COP)</label><input class="campo__input" id="plato-3-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-3-imagen">Foto</label><input class="campo__input" id="plato-3-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 3" hidden></div>
+        </fieldset>
+        <fieldset class="slot-plato" data-slot="4">
+          <legend>Plato 4</legend>
+          <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
+          <div class="campo"><label for="plato-4-nombre">Nombre</label><input class="campo__input" id="plato-4-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
+          <div class="campo"><label for="plato-4-precio">Precio (COP)</label><input class="campo__input" id="plato-4-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-4-imagen">Foto</label><input class="campo__input" id="plato-4-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 4" hidden></div>
+        </fieldset>
+        <fieldset class="slot-plato" data-slot="5">
+          <legend>Plato 5</legend>
+          <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
+          <div class="campo"><label for="plato-5-nombre">Nombre</label><input class="campo__input" id="plato-5-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
+          <div class="campo"><label for="plato-5-precio">Precio (COP)</label><input class="campo__input" id="plato-5-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-5-imagen">Foto</label><input class="campo__input" id="plato-5-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 5" hidden></div>
+        </fieldset>
+      </section>
+
+      <p class="publicar-negocio__mensaje" data-mensaje role="alert" aria-live="polite"></p>
+      <div class="publicar-negocio__acciones">
+        <button class="boton boton-primario" type="submit">Publicar negocio</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/accesibilidad.js"></script>
+<script src="js/publicar-negocio.js"></script>
+<script>
+  document.querySelector('[data-menu-movil-boton]').addEventListener('click', function () {
+    const abierto = document.querySelector('[data-menu-movil]').classList.toggle('abierto');
+    this.setAttribute('aria-expanded', String(abierto));
+  });
+</script>
+</body>
+</html>

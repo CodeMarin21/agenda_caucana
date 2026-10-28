@@ -1,0 +1,595 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMIN
+  ORGANIZADOR
+  USUARIO
+  JUGADOR
+}
+
+enum EstadoOrganizador {
+  PENDIENTE
+  VERIFICADO
+  SUSPENDIDO
+  RECHAZADO
+  EN_REVISION
+}
+
+enum MotivoEstado {
+  INFORMACION_INCOMPLETA
+  DOCUMENTO_NO_VERIFICABLE
+  ENTIDAD_DUPLICADA
+  CONTACTO_DUPLICADO
+  DATOS_SOSPECHOSOS
+  TYC_INCUMPLIDOS
+  EVENTO_FALSO
+  CONTENIDO_INAPROPIADO
+  QUEJAS_USUARIOS
+  INACTIVIDAD
+  SOLICITUD_ORGANIZADOR
+  OTRO
+  SUPLANTACION
+  FRAUDE
+  MULTIPLES_SUSPENSIONES
+  ACTIVIDAD_ILEGAL
+  DOCUMENTO_FALSIFICADO
+}
+
+enum TipoNotificacion {
+  VERIFICACION_APROBADA
+  VERIFICACION_RECHAZADA
+  EVENTO_APROBADO
+  EVENTO_RECHAZADO
+  EVENTO_ELIMINADO
+  NEGOCIO_APROBADO
+  NEGOCIO_RECHAZADO
+  NEGOCIO_ELIMINADO
+  SUSPENSION
+  REACTIVACION
+}
+
+enum CategoriaNegocio {
+  TRADICIONAL_CAUCANA
+  COMIDA_RAPIDA
+  PARRILLA
+  PIZZA
+  SUSHI
+  POSTRES
+  CAFETERIA
+  BEBIDAS
+  VEGETARIANA
+  OTRO
+}
+
+enum EstadoNegocio {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+enum MotivoReactivacion {
+  ERROR_ADMINISTRATIVO
+  APELACION_ACEPTADA
+  SANCION_CUMPLIDA
+  CONDICIONES_CAMBIADAS
+  ORDEN_LEGAL
+  OTRO
+}
+
+enum EstadoPublicacion {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+enum TipoBoleta {
+  GENERAL
+  VIP
+  PALCO
+}
+
+enum EstadoBoleta {
+  DISPONIBLE
+  VENDIDA
+  CANCELADA
+}
+
+// ── Tipo de entidad del organizador ────────────────────
+// Afecta reglas de verificación y documentos requeridos.
+enum TipoEntidad {
+  PERSONA_NATURAL
+  FUNDACION
+  EMPRESA
+  COLECTIVO
+  ASOCIACION
+  JUNTA_ACCION_COMUNAL
+  INSTITUCION_PUBLICA
+  OTRO
+}
+
+model Ciudad {
+  id           Int      @id @default(autoincrement())
+  nombre       String   @unique
+  departamento String
+  activa       Boolean  @default(true)
+  creadoEn     DateTime @default(now())
+  eventos      Evento[]
+  lugares      Lugar[]
+  negocios     Negocio[]
+
+  // Organizadores que declaran este municipio como sede base
+  organizadoresBase Organizador[]
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nombre        String?
+  username      String?  @unique
+  email         String?  @unique
+  passwordHash  String
+  rol           Rol      @default(USUARIO)
+  activo        Boolean  @default(true)
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  organizador         Organizador?
+  jugador             Jugador?
+  suscripciones       Suscripcion[]
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  notificaciones      Notificacion[]
+
+  // Organizadores que este admin/ usuario vetó (auditoría de vetos)
+  organizadorVetados     Organizador[] @relation("VetoOrganizador")
+  organizadorReactivados Organizador[] @relation("ReactivacionOrganizador")
+
+  // ── Sistema de seguimiento (Follow) ──────────────────
+  siguiendo  Follow[] @relation("Seguidor") // Usuarios que ESTE usuario sigue
+  seguidores Follow[] @relation("Seguido") // Usuarios que SIGUEN a este usuario
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  usuarioId Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  creadoEn  DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+// ── Sistema de seguimiento entre jugadores ──────────────
+// Modelo explícito (no implicit) para poder agregar campos
+// como `creadoEn` y para poder ordenar/paginar por fecha.
+//
+// Índices compuestos con creadoEn: los listados paginados
+// ordenan por creadoEn DESC. Con el índice compuesto, Postgres
+// devuelve las filas ya ordenadas sin sort adicional.
+model Follow {
+  id         Int      @id @default(autoincrement())
+  seguidorId Int
+  seguidor   Usuario  @relation("Seguidor", fields: [seguidorId], references: [id], onDelete: Cascade)
+  seguidoId  Int
+  seguido    Usuario  @relation("Seguido", fields: [seguidoId], references: [id], onDelete: Cascade)
+  creadoEn   DateTime @default(now())
+
+  @@unique([seguidorId, seguidoId]) // No puedes seguir 2 veces a la misma persona
+  @@index([seguidorId, creadoEn]) // "A quién sigo", ordenado por fecha
+  @@index([seguidoId, creadoEn]) // "Quién me sigue", ordenado por fecha
+}
+
+model Organizador {
+  id                  Int               @id @default(autoincrement())
+  usuarioId           Int               @unique
+  usuario             Usuario           @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombreEntidad       String
+  descripcion         String?
+  telefono            String?
+  redesSociales       Json?
+  nit                 String?
+  avatarUrl           String?
+  estado              EstadoOrganizador @default(PENDIENTE)
+  motivoEstado        MotivoEstado?
+  detalleMotivoEstado String?
+  creadoEn            DateTime          @default(now())
+  actualizadoEn       DateTime          @updatedAt
+  eventos             Evento[]
+  negocios            Negocio[]
+
+  // ── Perfil ampliado (parámetros de seguridad) ────────
+  direccion                 String? // Dirección física de la entidad
+  ciudadBaseId              Int? // FK a Ciudad (sede principal)
+  ciudadBase                Ciudad?      @relation(fields: [ciudadBaseId], references: [id])
+  anioFundacion             Int?
+  tipoEntidad               TipoEntidad?
+  documentoIdentidadCifrado String? // AES-256-GCM: "<iv-hex>:<authTag-hex>:<data-hex>"
+  documentoIdentidadHash    String?      @unique // HMAC-SHA256(normalizado) para unicidad + veto
+
+  // ── Veto (soft-delete + bloqueo de re-registro) ──────
+  vetado              Boolean             @default(false)
+  motivoVeto          String?
+  vetadoEn            DateTime?
+  vetadoPorId         Int?
+  vetadoPor           Usuario?            @relation("VetoOrganizador", fields: [vetadoPorId], references: [id], onDelete: SetNull)
+  motivoReactivacion  MotivoReactivacion?
+  detalleReactivacion String?
+  reactivadoEn        DateTime?
+  reactivadoPorId     Int?
+  reactivadoPor       Usuario?            @relation("ReactivacionOrganizador", fields: [reactivadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([vetado, estado])
+  @@index([ciudadBaseId])
+}
+
+model Notificacion {
+  id        Int              @id @default(autoincrement())
+  usuarioId Int
+  usuario   Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      TipoNotificacion
+  mensaje   String
+  leida     Boolean          @default(false)
+  creadoEn  DateTime         @default(now())
+
+  @@index([usuarioId, leida, creadoEn])
+}
+
+model Jugador {
+  id               Int      @id @default(autoincrement())
+  usuarioId        Int      @unique
+  usuario          Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  avatarUrl        String?
+  descripcion      String?
+  nivel            Int      @default(1)
+  puntajeTotal     Int      @default(0)
+  puntajeSemanal   Int      @default(0)
+  puntajeTemporada Int      @default(0)
+  progresoGlobal   Float    @default(0.0)
+  creadoEn         DateTime @default(now())
+  actualizadoEn    DateTime @updatedAt
+
+  // ── Privacidad y visibilidad ─────────────────────────
+  cuentaPrivada    Boolean @default(false) // Solo seguidores aprobados ven el perfil
+  recomendarAOtros Boolean @default(true) // Aparecer en recomendaciones
+  mostrarEnRanking Boolean @default(true) // Aparecer en leaderboards
+  permitirMensajes Boolean @default(true) // Recibir mensajes de otros jugadores
+
+  visitas        VisitaJugador[]
+  logros         LogroJugador[]
+  progresosRutas ProgresoRuta[]
+  hallOfFame     HallOfFame[]
+  recoveryCodes  RecoveryCode[]
+
+  @@index([puntajeSemanal(sort: Desc), puntajeTotal(sort: Desc)])
+  @@index([puntajeTemporada(sort: Desc), puntajeTotal(sort: Desc)])
+  @@index([cuentaPrivada, recomendarAOtros]) // Para listados de recomendaciones
+}
+
+model Ruta {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String?
+  colorTema   String?
+  categoria   String?
+  activa      Boolean  @default(true)
+  creadoEn    DateTime @default(now())
+
+  puntos    RutaPunto[]
+  progresos ProgresoRuta[]
+
+  @@index([categoria, activa])
+}
+
+model RutaPunto {
+  id      Int   @id @default(autoincrement())
+  rutaId  Int
+  ruta    Ruta  @relation(fields: [rutaId], references: [id], onDelete: Cascade)
+  lugarId Int
+  lugar   Lugar @relation(fields: [lugarId], references: [id], onDelete: Cascade)
+  orden   Int?
+
+  @@unique([rutaId, lugarId])
+  @@index([lugarId])
+}
+
+model VisitaJugador {
+  id        Int     @id @default(autoincrement())
+  jugadorId Int
+  jugador   Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  lugarId   Int
+  lugar     Lugar   @relation(fields: [lugarId], references: [id], onDelete: Cascade)
+
+  semanaIso       String
+  puntosOtorgados Int
+
+  accuracyGps       Float?
+  distanciaValidada Float?
+
+  creadoEn DateTime @default(now())
+
+  @@unique([jugadorId, lugarId, semanaIso])
+  @@index([jugadorId, creadoEn])
+  @@index([jugadorId, semanaIso])
+}
+
+model Logro {
+  id          Int     @id @default(autoincrement())
+  nombre      String  @unique
+  descripcion String
+  icono       String?
+  categoria   String
+  meta        Int
+  activo      Boolean @default(true)
+  esTemporal  Boolean @default(false)
+
+  jugadores LogroJugador[]
+
+  @@index([activo, categoria])
+  @@index([esTemporal, activo])
+}
+
+model LogroJugador {
+  id        Int     @id @default(autoincrement())
+  jugadorId Int
+  jugador   Jugador @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  logroId   Int
+  logro     Logro   @relation(fields: [logroId], references: [id], onDelete: Cascade)
+
+  temporadaId      Int?
+  temporada        Temporada? @relation(fields: [temporadaId], references: [id], onDelete: SetNull)
+  descripcionExtra String?
+
+  desbloqueadoEn DateTime @default(now())
+
+  @@unique([jugadorId, logroId])
+  @@index([jugadorId, desbloqueadoEn(sort: Desc)])
+  @@index([temporadaId])
+}
+
+model ProgresoRuta {
+  id          Int      @id @default(autoincrement())
+  jugadorId   Int
+  jugador     Jugador  @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  rutaId      Int
+  ruta        Ruta     @relation(fields: [rutaId], references: [id], onDelete: Cascade)
+  porcentaje  Float    @default(0.0)
+  completada  Boolean  @default(false)
+  actualizado DateTime @updatedAt
+
+  @@unique([jugadorId, rutaId])
+  @@index([rutaId, completada])
+}
+
+model Temporada {
+  id          Int      @id @default(autoincrement())
+  numero      Int      @unique
+  nombre      String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  cerrada     Boolean  @default(false)
+  creadaEn    DateTime @default(now())
+
+  hallOfFame HallOfFame[]
+  logros     LogroJugador[]
+
+  @@index([cerrada, fechaFin])
+}
+
+model HallOfFame {
+  id               Int       @id @default(autoincrement())
+  temporadaId      Int
+  temporada        Temporada @relation(fields: [temporadaId], references: [id], onDelete: Cascade)
+  jugadorId        Int
+  jugador          Jugador   @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  posicion         Int
+  puntajeTemporada Int
+  visitasTemporada Int       @default(0)
+  archivadoEn      DateTime  @default(now())
+
+  @@unique([temporadaId, jugadorId])
+  @@unique([temporadaId, posicion])
+  @@index([temporadaId, posicion])
+  @@index([jugadorId, archivadoEn(sort: Desc)])
+}
+
+model Categoria {
+  id            Int           @id @default(autoincrement())
+  nombre        String        @unique
+  slug          String        @unique
+  descripcion   String?
+  icono         String?
+  activa        Boolean       @default(true)
+  eventos       Evento[]
+  suscripciones Suscripcion[]
+}
+
+model Lugar {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  direccion   String
+  descripcion String?
+  capacidad   Int?
+  ciudadId    Int
+  ciudad      Ciudad  @relation(fields: [ciudadId], references: [id])
+  activo      Boolean @default(true)
+
+  latitud     Float?
+  longitud    Float?
+  radioMetros Int    @default(100)
+
+  eventos Evento[]
+  rutas   RutaPunto[]
+  visitas VisitaJugador[]
+
+  @@index([ciudadId, activo])
+}
+
+model Evento {
+  id                      Int               @id @default(autoincrement())
+  titulo                  String
+  descripcion             String
+  imagenUrl               String?
+  publicIdImagen          String?
+  fechaInicio             DateTime
+  fechaFin                DateTime?
+  horaApertura            String?
+  horaCierre              String?
+  direccion               String?
+  precioReferencial       Float?
+  esMayorDeEdad           Boolean           @default(false)
+  urlExternaBoletas       String?
+  gestionaTaquillaInterna Boolean           @default(false)
+  estadoPublicacion       EstadoPublicacion @default(PENDIENTE)
+  motivoRechazo           String?
+  slug                    String            @unique
+  destacado               Boolean           @default(false)
+
+  ciudadId      Int
+  ciudad        Ciudad       @relation(fields: [ciudadId], references: [id])
+  categoriaId   Int
+  categoria     Categoria    @relation(fields: [categoriaId], references: [id])
+  lugarId       Int
+  lugar         Lugar        @relation(fields: [lugarId], references: [id])
+  organizadorId Int?
+  organizador   Organizador? @relation(fields: [organizadorId], references: [id])
+
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+  boletas       Boleta[]
+
+  @@index([estadoPublicacion, fechaInicio])
+  @@index([categoriaId, estadoPublicacion, fechaInicio])
+  @@index([ciudadId, estadoPublicacion, fechaInicio])
+  @@index([organizadorId, estadoPublicacion])
+  @@index([destacado, estadoPublicacion, fechaInicio])
+}
+
+model Negocio {
+  id                  Int              @id @default(autoincrement())
+  slug                String           @unique
+  nombre              String
+  descripcion         String
+  direccion           String
+  ciudadId            Int
+  ciudad              Ciudad           @relation(fields: [ciudadId], references: [id])
+  telefono            String?
+  whatsapp            String?
+  instagram           String?
+  horarioAtencion     String?
+  categoria           CategoriaNegocio
+  precioPromedio      Int?
+  imagenPrincipalUrl  String?
+  imagenesAdicionales Json?
+  platos              Json?
+  destacado           Boolean          @default(false)
+  activo              Boolean          @default(true)
+  estadoPublicacion   EstadoNegocio    @default(PENDIENTE)
+  motivoRechazo       String?
+
+  organizadorId       Int?
+  organizador         Organizador?     @relation(fields: [organizadorId], references: [id])
+
+  creadoEn            DateTime         @default(now())
+  actualizadoEn       DateTime         @updatedAt
+
+  calificaciones      CalificacionNegocio[]
+
+  @@index([estadoPublicacion, activo])
+  @@index([categoria, estadoPublicacion])
+  @@index([ciudadId, estadoPublicacion])
+  @@index([organizadorId, estadoPublicacion])
+}
+
+model CalificacionNegocio {
+  id         Int      @id @default(autoincrement())
+  negocioId  Int
+  negocio    Negocio  @relation(fields: [negocioId], references: [id], onDelete: Cascade)
+  estrellas  Int
+  comentario String?
+  ipHash     String
+  creadoEn   DateTime @default(now())
+
+  @@index([negocioId, creadoEn])
+  @@index([negocioId, ipHash, creadoEn])
+}
+
+model Boleta {
+  id       Int          @id @default(autoincrement())
+  eventoId Int
+  evento   Evento       @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  tipo     TipoBoleta
+  precio   Float
+  cantidad Int
+  vendidas Int          @default(0)
+  estado   EstadoBoleta @default(DISPONIBLE)
+  codigoQR String?      @unique
+  creadoEn DateTime     @default(now())
+
+  @@index([eventoId, estado])
+}
+
+model Suscripcion {
+  id          Int       @id @default(autoincrement())
+  usuarioId   Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  categoriaId Int
+  categoria   Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+  email       String
+  activa      Boolean   @default(true)
+  creadoEn    DateTime  @default(now())
+
+  @@unique([usuarioId, categoriaId])
+  @@index([categoriaId, activa])
+}
+
+model ChatLog {
+  id        Int      @id @default(autoincrement())
+  pregunta  String
+  respuesta String
+  idioma    String   @default("es")
+  ipOrigen  String?
+  creadoEn  DateTime @default(now())
+
+  @@index([creadoEn(sort: Desc)])
+}
+
+// ── Recuperación de contraseña por email ────────────────
+// Token de un solo uso enviado por email. Se guarda HASHED (SHA-256).
+// TTL 30 minutos. Al usarse, se invalidan TODOS los refresh tokens
+// del usuario (cierra sesiones activas en otros dispositivos).
+model PasswordResetToken {
+  id            Int      @id @default(autoincrement())
+  tokenHash     String   @unique
+  usuarioId     Int
+  usuario       Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiresAt     DateTime
+  usado         Boolean  @default(false)
+  ipSolicitante String?
+  creadoEn      DateTime @default(now())
+
+  @@index([usuarioId, expiresAt])
+  @@index([expiresAt])
+}
+
+// ── Códigos de respaldo para JUGADOR (sin email) ────────
+// Al registrarse se generan 8 códigos y se muestran UNA SOLA VEZ.
+// Se guardan HASHED (SHA-256). Cada uno sirve solo una vez.
+// Patrón GitHub/Discord — estándar de la industria.
+model RecoveryCode {
+  id        Int       @id @default(autoincrement())
+  codeHash  String    @unique
+  jugadorId Int
+  jugador   Jugador   @relation(fields: [jugadorId], references: [id], onDelete: Cascade)
+  usado     Boolean   @default(false)
+  usadoEn   DateTime?
+  creadoEn  DateTime  @default(now())
+
+  @@index([jugadorId, usado])
+}
