@@ -3,6 +3,7 @@ node_modules/
 .env
 .env.local
 .env.*.local
+backend/backup_gamificacion.json
 logs/
 *.log
 .DS_Store
