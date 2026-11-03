@@ -7,18 +7,16 @@ import { logger } from '../../config/logger';
 const authService = new AuthService();
 const passwordResetService = new PasswordResetService();
 
-const ROLES_PUBLICOS: ReadonlyArray<Rol> = [Rol.USUARIO, Rol.ORGANIZADOR, Rol.JUGADOR];
+const ROLES_PUBLICOS: ReadonlyArray<Rol> = [Rol.USUARIO, Rol.ORGANIZADOR];
 
 // ─────────────────────────────────────────────
 // POST /api/auth/registro
 // ─────────────────────────────────────────────
 export async function registro(req: Request, res: Response): Promise<void> {
   try {
-    const { nombre, email, username, descripcion, password, rol } = req.body as {
-      nombre?: string;
-      email?: string;
-      username?: string;
-      descripcion?: string;
+    const { nombre, email, password, rol } = req.body as {
+      nombre: string;
+      email: string;
       password: string;
       rol?: Rol;
     };
@@ -27,8 +25,8 @@ export async function registro(req: Request, res: Response): Promise<void> {
       res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
       return;
     }
-    if (!email && !username) {
-      res.status(400).json({ error: 'Debes enviar email o username' });
+    if (!email) {
+      res.status(400).json({ error: 'El email es obligatorio' });
       return;
     }
 
@@ -38,24 +36,14 @@ export async function registro(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const resultado = await authService.registrar({
-      nombre, email, username, descripcion, password, rol: rolSolicitado,
+    const usuario = await authService.registrar({
+      nombre, email, password, rol: rolSolicitado,
     });
 
-    // Si es JUGADOR, resultado incluye recoveryCodes (SOLO esta vez)
-    const respuesta: Record<string, unknown> = {
+    res.status(201).json({
       mensaje: 'Cuenta creada exitosamente',
-      usuario: resultado.usuario,
-    };
-
-    if (resultado.recoveryCodes) {
-      respuesta.recoveryCodes = resultado.recoveryCodes;
-      respuesta.advertencia =
-        'Guarda estos códigos en un lugar seguro. NO se volverán a mostrar. ' +
-        'Son la ÚNICA forma de recuperar tu cuenta si olvidas tu contraseña.';
-    }
-
-    res.status(201).json(respuesta);
+      usuario,
+    });
   } catch (error) {
     const mensaje = error instanceof Error ? error.message : 'Error al registrar';
     res.status(400).json({ error: mensaje });
@@ -67,19 +55,17 @@ export async function registro(req: Request, res: Response): Promise<void> {
 // ─────────────────────────────────────────────
 export async function login(req: Request, res: Response): Promise<void> {
   try {
-    const { email, username, password } = req.body as {
-      email?: string;
-      username?: string;
+    const { email, password } = req.body as {
+      email: string;
       password: string;
     };
 
-    const identificador = email ?? username;
-    if (!identificador || !password) {
+    if (!email || !password) {
       res.status(400).json({ error: 'Credenciales incompletas' });
       return;
     }
 
-    const resultado = await authService.login(identificador, password);
+    const resultado = await authService.login(email, password);
     res.json({ mensaje: 'Sesión iniciada', ...resultado });
   } catch {
     res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -159,26 +145,8 @@ export async function solicitarReset(req: Request, res: Response): Promise<void>
 }
 
 // ─────────────────────────────────────────────
-// POST /api/auth/jugador/solicitar-reset
-// Valida código de recuperación → devuelve resetToken
-// ─────────────────────────────────────────────
-export async function solicitarResetJugador(req: Request, res: Response): Promise<void> {
-  try {
-    const { username, codigo } = req.body as { username: string; codigo: string };
-    const resetToken = await passwordResetService.solicitarResetPorCodigo(username, codigo);
-    res.json({
-      mensaje: 'Código válido. Ingresa tu nueva contraseña.',
-      resetToken,
-    });
-  } catch (error) {
-    const mensaje = error instanceof Error ? error.message : 'Código inválido';
-    res.status(400).json({ error: mensaje });
-  }
-}
-
 // ─────────────────────────────────────────────
 // POST /api/auth/confirmar-reset
-// Común a ambos flujos (email y jugador)
 // ─────────────────────────────────────────────
 export async function confirmarReset(req: Request, res: Response): Promise<void> {
   try {

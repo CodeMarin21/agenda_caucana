@@ -5,7 +5,6 @@ import { prisma } from '../../config/database';
  *
  * Encapsula TODO el acceso a datos de:
  *   - PasswordResetToken (recuperación vía email)
- *   - RecoveryCode       (recuperación de jugadores sin email)
  *   - Usuario            (solo lecturas/escrituras relevantes al flujo)
  *   - RefreshToken       (invalidación masiva al cambiar contraseña)
  *
@@ -16,13 +15,6 @@ export class PasswordResetRepository {
   // ── Usuario ────────────────────────────────────────────
   async buscarUsuarioPorEmail(email: string) {
     return prisma.usuario.findUnique({ where: { email } });
-  }
-
-  async buscarUsuarioPorUsernameConJugador(username: string) {
-    return prisma.usuario.findUnique({
-      where: { username },
-      include: { jugador: true },
-    });
   }
 
   async buscarUsuarioPorId(id: number) {
@@ -84,32 +76,6 @@ export class PasswordResetRepository {
     return prisma.passwordResetToken.deleteMany({
       where: { expiresAt: { lt: new Date() } },
     });
-  }
-
-  // ── RecoveryCode ───────────────────────────────────────
-  async crearRecoveryCodes(codes: Array<{ codeHash: string; jugadorId: number }>) {
-    return prisma.recoveryCode.createMany({ data: codes });
-  }
-
-  async buscarRecoveryCodePorHash(codeHash: string) {
-    return prisma.recoveryCode.findUnique({ where: { codeHash } });
-  }
-
-  async marcarRecoveryCodeUsado(id: number) {
-    return prisma.recoveryCode.update({
-      where: { id },
-      data:  { usado: true, usadoEn: new Date() },
-    });
-  }
-
-  async contarRecoveryCodesDisponibles(jugadorId: number) {
-    return prisma.recoveryCode.count({
-      where: { jugadorId, usado: false },
-    });
-  }
-
-  async eliminarRecoveryCodesDeJugador(jugadorId: number) {
-    return prisma.recoveryCode.deleteMany({ where: { jugadorId } });
   }
 
   // ── RefreshToken (invalidación masiva) ─────────────────

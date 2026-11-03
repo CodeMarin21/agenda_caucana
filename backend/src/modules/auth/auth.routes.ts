@@ -7,14 +7,12 @@ import {
   logout,
   perfil,
   solicitarReset,
-  solicitarResetJugador,
   confirmarReset,
 } from './auth.controller';
 import {
   registroValidacion,
   loginValidacion,
   solicitarResetValidacion,
-  solicitarResetJugadorValidacion,
   confirmarResetValidacion,
 } from './auth.dto';
 import { validateRequest } from '../../middlewares/validate.middleware';
@@ -59,14 +57,6 @@ router.post(
   solicitarResetValidacion,
   validateRequest,
   solicitarReset
-);
-
-router.post(
-  '/jugador/solicitar-reset',
-  solicitarResetLimiter,
-  solicitarResetJugadorValidacion,
-  validateRequest,
-  solicitarResetJugador
 );
 
 router.post(

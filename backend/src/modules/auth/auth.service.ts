@@ -2,7 +2,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Rol } from '@prisma/client';
 import { prisma } from '../../config/database';
-import { generarRecoveryCodes, hashToken } from './password-reset.util';
 
 interface TokenPair {
   accessToken: string;
@@ -10,17 +9,10 @@ interface TokenPair {
 }
 
 interface RegistroDTO {
-  nombre?: string;
-  email?: string;
-  username?: string;
-  descripcion?: string;
+  nombre: string;
+  email: string;
   password: string;
   rol?: Rol;
-}
-
-interface ResultadoRegistro {
-  usuario: object;
-  recoveryCodes?: string[];
 }
 
 // Select reutilizable: respuesta consistente en todos los flujos
@@ -28,133 +20,48 @@ const USUARIO_PUBLICO_SELECT = {
   id: true,
   nombre: true,
   email: true,
-  username: true,
   rol: true,
   creadoEn: true,
-  jugador: {
-    select: {
-      id: true,
-      avatarUrl: true,
-      descripcion: true,
-      nivel: true,
-      puntajeTotal: true,
-    },
-  },
 } as const;
-
-const CODIGOS_POR_JUGADOR = 8;
 
 export class AuthService {
   // ── Registro de nuevo usuario ──────────────────────────
   async registrar({
     nombre,
     email,
-    username,
-    descripcion,
     password,
     rol,
-  }: RegistroDTO): Promise<ResultadoRegistro> {
+  }: RegistroDTO): Promise<object> {
     const rolFinal: Rol = rol ?? Rol.USUARIO;
 
-    // ── Validaciones por tipo de cuenta ──
-    if (rolFinal === Rol.JUGADOR) {
-      if (!username || username.trim().length < 3) {
-        throw new Error('El nombre de usuario es obligatorio (mínimo 3 caracteres)');
-      }
-      if (email) {
-        throw new Error('Los jugadores de Popayán Go no requieren correo electrónico');
-      }
-    } else {
-      if (!email) {
-        throw new Error('El correo electrónico es obligatorio para este tipo de cuenta');
-      }
+    if (rolFinal !== Rol.USUARIO && rolFinal !== Rol.ORGANIZADOR) {
+      throw new Error('No se permite registrar este tipo de cuenta');
     }
 
     // ── Unicidad ──
-    if (email) {
-      const existeEmail = await prisma.usuario.findUnique({ where: { email } });
-      if (existeEmail) throw new Error('Ya existe una cuenta con ese email');
-    }
-    if (username) {
-      const existeUsername = await prisma.usuario.findUnique({ where: { username } });
-      if (existeUsername) throw new Error('Ese nombre de usuario ya está en uso');
-    }
+    const existeEmail = await prisma.usuario.findUnique({ where: { email } });
+    if (existeEmail) throw new Error('Ya existe una cuenta con ese email');
 
     // ── Hash de contraseña ──
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // ── JUGADOR: transacción atómica Usuario + Jugador + RecoveryCodes ──
-    if (rolFinal === Rol.JUGADOR) {
-      return prisma.$transaction(async (tx) => {
-        // 1) Crear el Usuario (sin include del jugador, todavía no existe)
-        const usuarioCreado = await tx.usuario.create({
-          data: {
-            nombre: nombre ?? username!,
-            email: null,
-            username: username!,
-            passwordHash,
-            rol: Rol.JUGADOR,
-          },
-          select: { id: true },
-        });
-
-        // 2) Crear el perfil de Jugador asociado
-        const jugador = await tx.jugador.create({
-          data: {
-            usuarioId: usuarioCreado.id,
-            descripcion: descripcion?.trim() || null,
-          },
-          select: { id: true },
-        });
-
-        // 3) Generar 8 códigos de recuperación (hasheados en BD).
-        //    Se devuelven en claro SOLO en esta respuesta, UNA VEZ.
-        const codigosPlano = generarRecoveryCodes(CODIGOS_POR_JUGADOR);
-        await tx.recoveryCode.createMany({
-          data: codigosPlano.map((codigo) => ({
-            codeHash: hashToken(codigo.toUpperCase()),
-            jugadorId: jugador.id,
-          })),
-        });
-
-        // 4) Re-consultar para traer el usuario CON su perfil de Jugador.
-        //    Sin este re-fetch, `usuario.jugador` aparecería null porque
-        //    Prisma evalúa las relaciones anidadas en el momento del create,
-        //    y el Jugador se creó después.
-        const usuarioCompleto = await tx.usuario.findUnique({
-          where: { id: usuarioCreado.id },
-          select: USUARIO_PUBLICO_SELECT,
-        });
-
-        return { usuario: usuarioCompleto!, recoveryCodes: codigosPlano };
-      });
-    }
-
-    // ── ORGANIZADOR / USUARIO: sin perfil de Jugador ──
-    const usuario = await prisma.usuario.create({
+    return prisma.usuario.create({
       data: {
-        nombre: nombre!,
-        email: email!,
-        username: null,
+        nombre,
+        email,
         passwordHash,
         rol: rolFinal,
       },
       select: USUARIO_PUBLICO_SELECT,
     });
-
-    return { usuario };
   }
 
-  // ── Login (email o username) ───────────────────────────
+  // ── Login por email ────────────────────────────────────
   async login(
-    identificador: string,
+    email: string,
     password: string
   ): Promise<{ usuario: object; tokens: TokenPair }> {
-    const esEmail = identificador.includes('@');
-
-    const usuario = await prisma.usuario.findFirst({
-      where: esEmail ? { email: identificador } : { username: identificador },
-    });
+    const usuario = await prisma.usuario.findUnique({ where: { email } });
 
     if (!usuario || !usuario.activo) {
       throw new Error('Credenciales incorrectas');
@@ -172,7 +79,6 @@ export class AuthService {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
-        username: usuario.username,
         rol: usuario.rol,
       },
       tokens,

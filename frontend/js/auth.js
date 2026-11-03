@@ -13,14 +13,12 @@
 
 /**
  * Detecta la ruta relativa al login según dónde esté montada la página.
- *  - /popayan-go/... → login.html (el login propio de Popayán GO)
- *  - /admin|organizador|jugador/... → ../login.html
+ *  - /admin|organizador/... → ../login.html
  *  - raíz → login.html
  */
 function acRutaLogin() {
   const path = window.location.pathname;
-  if (/\/popayan-go\//.test(path)) return 'login.html';
-  if (/\/(admin|organizador|jugador)\//.test(path)) return '../login.html';
+  if (/\/(admin|organizador)\//.test(path)) return '../login.html';
   return 'login.html';
 }
 
@@ -100,13 +98,12 @@ document.addEventListener('click', (evento) => {
           localStorage.setItem('agendaCaucanaRefreshToken', respuesta.tokens.refreshToken);
         }
 
-        // Redirección por rol. Antes ignoraba JUGADOR.
+        // Redirección por rol.
         const rol = respuesta.usuario?.rol;
         let destino;
         switch (rol) {
           case 'ADMIN':        destino = 'admin/resumen.html';            break;
           case 'ORGANIZADOR':  destino = 'organizador/mis-eventos.html';  break;
-          case 'JUGADOR':      destino = 'popayan-go/perfil.html';        break;
           default:             destino = 'index.html';
         }
         destino = acDestinoSiguiente() || destino;

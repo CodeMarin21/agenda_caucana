@@ -17,7 +17,6 @@ import organizadoresRoutes                   from './modules/organizadores/organ
 import suscripcionesRoutes                   from './modules/usuarios/usuarios.routes';
 import { eventoAprobadoSubject }             from './patterns/observer/EventoAprobadoSubject';
 import { NotificacionSuscriptoresObserver }  from './modules/notificaciones/notificaciones.service';
-import gamificacionRoutes                    from './modules/gamificacion/gamificacion.routes';
 setupUncaughtHandlers();
 import uploadRoutes from './modules/upload/upload.routes';
 import negociosRoutes from './modules/negocios/negocios.routes';
@@ -136,7 +135,6 @@ app.use('/api/categorias',    categoriasRoutes);
 app.use('/api/ciudades',      ciudadesRoutes);
 app.use('/api/organizadores', organizadoresRoutes);
 app.use('/api/suscripciones', suscripcionesRoutes);
-app.use('/api/gamificacion',  gamificacionRoutes);
 app.use('/api/upload',        uploadRoutes);
 app.use('/api/negocios',      negociosRoutes);
 

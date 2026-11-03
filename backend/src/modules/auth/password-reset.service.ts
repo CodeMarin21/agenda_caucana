@@ -2,19 +2,13 @@ import bcrypt from 'bcryptjs';
 import { PasswordResetRepository } from './password-reset.repository';
 import { enviarMail } from '../../config/mailer';
 import { plantillaResetPassword } from './password-reset.mailer';
-import {
-  generarTokenReset,
-  hashToken,
-  generarRecoveryCodes,
-} from './password-reset.util';
+import { generarTokenReset, hashToken } from './password-reset.util';
 import { logger } from '../../config/logger';
 
 // ── Configuración ────────────────────────────────────────
 const TTL_TOKEN_MINUTOS = 30;
 const TTL_TOKEN_MS = TTL_TOKEN_MINUTOS * 60 * 1000;
 const RATE_LIMIT_EMAIL_MS = 60 * 1000; // 1 min entre solicitudes al mismo email
-const CODIGOS_POR_JUGADOR = 8;
-
 export class PasswordResetService {
   private repo: PasswordResetRepository;
 
@@ -63,7 +57,7 @@ export class PasswordResetService {
     const url = `${frontendUrl}/reset.html?token=${tokenPlano}`;
 
     const { html, text } = plantillaResetPassword({
-      nombreUsuario: usuario.nombre ?? usuario.username ?? 'usuario',
+      nombreUsuario: usuario.nombre ?? 'usuario',
       url,
       minutosValidez: TTL_TOKEN_MINUTOS,
     });
@@ -82,56 +76,7 @@ export class PasswordResetService {
   }
 
   // ───────────────────────────────────────────────────────
-  // FLUJO 2: Solicitud con username + código (jugadores)
-  // ───────────────────────────────────────────────────────
-  /**
-   * Valida el código de recuperación y devuelve un `resetToken` en claro.
-   * El cliente lo manda luego a `confirmarReset()`.
-   *
-   * Si algo falla, lanza error con mensaje GENÉRICO
-   * ("Usuario o código inválido") para no revelar si el username existe.
-   */
-  async solicitarResetPorCodigo(username: string, codigo: string): Promise<string> {
-    const usuario = await this.repo.buscarUsuarioPorUsernameConJugador(username);
-
-    if (!usuario || !usuario.jugador) {
-      throw new Error('Usuario o código inválido');
-    }
-
-    const codeHash = hashToken(codigo.trim().toUpperCase());
-    const recoveryCode = await this.repo.buscarRecoveryCodePorHash(codeHash);
-
-    // Mismo mensaje para: código no existe / código de otro jugador.
-    if (!recoveryCode || recoveryCode.jugadorId !== usuario.jugador.id) {
-      throw new Error('Usuario o código inválido');
-    }
-
-    if (recoveryCode.usado) {
-      throw new Error('Este código ya fue utilizado');
-    }
-
-    // Marcar el código como consumido (un solo uso).
-    await this.repo.marcarRecoveryCodeUsado(recoveryCode.id);
-
-    // Invalidar tokens de reset anteriores.
-    await this.repo.eliminarTokensResetDeUsuario(usuario.id);
-
-    // Generar token temporal (mismo mecanismo que flujo email).
-    const tokenPlano = generarTokenReset();
-    const tokenHash = hashToken(tokenPlano);
-    const expiresAt = new Date(Date.now() + TTL_TOKEN_MS);
-
-    await this.repo.crearTokenReset({
-      tokenHash,
-      usuarioId: usuario.id,
-      expiresAt,
-    });
-
-    return tokenPlano;
-  }
-
-  // ───────────────────────────────────────────────────────
-  // FLUJO 3: Confirmar reset (común a ambos flujos)
+  // Confirmar reset por email
   // ───────────────────────────────────────────────────────
   /**
    * Cambia la contraseña, invalida el token y cierra TODAS las sesiones
@@ -157,25 +102,4 @@ export class PasswordResetService {
     await this.repo.invalidarTodosLosRefreshTokens(tokenGuardado.usuarioId);
   }
 
-  // ───────────────────────────────────────────────────────
-  // UTILIDAD: generación de códigos al registrar jugador
-  // ───────────────────────────────────────────────────────
-  /**
-   * Se invoca desde auth.service.ts al registrar un JUGADOR.
-   * Devuelve los códigos EN CLARO (para mostrarlos UNA SOLA VEZ).
-   * En BD quedan hasheados.
-   */
-  async generarCodigosParaJugador(jugadorId: number): Promise<string[]> {
-    await this.repo.eliminarRecoveryCodesDeJugador(jugadorId);
-
-    const codigosPlano = generarRecoveryCodes(CODIGOS_POR_JUGADOR);
-    const codesData = codigosPlano.map((codigo) => ({
-      codeHash: hashToken(codigo.toUpperCase()),
-      jugadorId,
-    }));
-
-    await this.repo.crearRecoveryCodes(codesData);
-
-    return codigosPlano;
-  }
 }

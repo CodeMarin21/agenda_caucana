@@ -9,7 +9,7 @@
  */
 
 export interface PlantillaResetOpts {
-  nombreUsuario: string;   // "Mateo" o "jugador123"
+  nombreUsuario: string;
   url: string;             // URL completa con token
   minutosValidez: number;  // ej. 30
 }

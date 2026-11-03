@@ -148,37 +148,10 @@ const AC_API = (() => {
     login: (email, password) => solicitar('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     perfil: () => solicitar('/auth/perfil'),
 
-    registrarJugador: (payload) => solicitar('/auth/registro', { method: 'POST', body: JSON.stringify(payload) }),
-    loginJugador: (username, password) => solicitar('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
-
     solicitarReset: (email) =>
       solicitar('/auth/solicitar-reset', { method: 'POST', body: JSON.stringify({ email }) }),
     confirmarReset: (token, nuevaPassword) =>
       solicitar('/auth/confirmar-reset', { method: 'POST', body: JSON.stringify({ token, nuevaPassword }) }),
-
-    solicitarResetJugador: (username, codigo) =>
-      solicitar('/auth/jugador/solicitar-reset', { method: 'POST', body: JSON.stringify({ username, codigo }) }),
-    confirmarResetJugador: (resetToken, nuevaPassword) =>
-      solicitar('/auth/jugador/confirmar-reset', { method: 'POST', body: JSON.stringify({ resetToken, nuevaPassword }) }),
-
-    // ── Popayán GO ───────────────────────────────────────
-    perfilJugador: () => solicitar('/gamificacion/perfil'),
-    actualizarPerfilJugador: (payload) => solicitar('/gamificacion/perfil', { method: 'PATCH', body: JSON.stringify(payload) }),
-    listarRutasJugador: () => solicitar('/gamificacion/rutas'),
-    obtenerRutaJugador: (id) => solicitar(`/gamificacion/rutas/${id}`),
-    registrarVisita: (payload) => solicitar('/gamificacion/visitas', { method: 'POST', body: JSON.stringify(payload) }),
-    listarLogrosJugador: () => solicitar('/gamificacion/logros'),
-    leaderboard: (ciclo) => solicitar(`/gamificacion/leaderboard/${ciclo}`),
-    hallOfFame: () => solicitar('/gamificacion/hall-of-fame'),
-
-    obtenerPrivacidad: () => solicitar('/gamificacion/perfil/privacidad'),
-    actualizarPrivacidad: (payload) =>
-      solicitar('/gamificacion/perfil/privacidad', { method: 'PATCH', body: JSON.stringify(payload) }),
-
-    listarSeguidores: (tipo = 'seguidores', page = 1) =>
-      solicitar(`/gamificacion/seguidores?tipo=${tipo}&page=${page}`),
-    seguir: (usuarioId) => solicitar(`/gamificacion/seguir/${usuarioId}`, { method: 'POST' }),
-    dejarDeSeguir: (usuarioId) => solicitar(`/gamificacion/seguir/${usuarioId}`, { method: 'DELETE' }),
 
     // ── Upload ───────────────────────────────────────────
     subirImagen: async (file, carpeta = 'eventos') => {

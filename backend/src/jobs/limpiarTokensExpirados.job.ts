@@ -3,7 +3,6 @@ import { logger } from '../config/logger';
 
 /**
  * Elimina tokens de reset de contraseña expirados.
- * Los RecoveryCode NO se eliminan (no expiran, solo se consumen).
  *
  * Se ejecuta cada hora (ver scheduler.ts).
  */
