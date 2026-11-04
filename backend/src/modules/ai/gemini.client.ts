@@ -24,7 +24,15 @@ export class GeminiClient {
   private readonly temperature: number;
 
   constructor(config: GeminiClientConfig) {
-    this.ai = config.apiKey?.trim() ? new GoogleGenAI({ apiKey: config.apiKey }) : null;
+    this.ai = config.apiKey?.trim()
+      ? new GoogleGenAI({
+        apiKey: config.apiKey,
+        httpOptions: {
+          timeout: 1400,
+          retryOptions: { attempts: 1 },
+        },
+      })
+      : null;
     this.modelos = config.modelos;
     this.maxOutputTokens = config.maxOutputTokens;
     this.temperature = config.temperature;

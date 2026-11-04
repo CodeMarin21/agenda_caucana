@@ -10,6 +10,11 @@ import { buildSystemPrompt } from './prompt.builder';
 import { generarFallback } from './fallback.local';
 import { detectIntent } from './ai.intent';
 import {
+  responderEvento,
+  responderEventoNoEncontrado,
+  responderNegocios,
+} from './catalogo.responses';
+import {
   ChatRequest,
   ChatResponse,
   EventoContexto,
@@ -34,10 +39,8 @@ export class AiService {
       apiKey: process.env.GEMINI_API_KEY ?? '',
       modelos: [
         process.env.GEMINI_MODEL_PRIMARY   ?? 'gemini-flash-latest',
-        process.env.GEMINI_MODEL_FALLBACK1 ?? 'gemini-2.5-flash-lite',
-        process.env.GEMINI_MODEL_FALLBACK2 ?? 'gemini-flash-lite-latest',
       ],
-      maxOutputTokens: 500,
+      maxOutputTokens: 220,
       temperature: 0.3,
     });
     this.cache = cache;
@@ -56,6 +59,28 @@ export class AiService {
 
     // 2. Pre-filtrado en PostgreSQL según intención
     const intent = detectIntent(pregunta, eventoId);
+
+    if (intent.type === 'EVENTO_BUSQUEDA') {
+      const eventos = await this.repository.findEventosPorTerminos(intent.terminos);
+      const evento = eventos[0];
+      const respuesta = evento
+        ? responderEvento(evento, idioma)
+        : responderEventoNoEncontrado(intent.terminos, idioma);
+      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+    }
+
+    if (intent.type === 'NEGOCIO_BUSQUEDA') {
+      const negocios = await this.repository.findNegociosPublicados();
+      const respuesta = responderNegocios(
+        negocios,
+        intent.terminos,
+        idioma,
+        intent.presupuesto,
+        intent.personas,
+      );
+      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+    }
+
     const { eventos, eventoEspecifico, eventoNoEncontrado } =
       await this.cargarContexto(intent);
 
@@ -73,9 +98,7 @@ export class AiService {
         idioma,
         ...(eventoId && { eventoId }),
       };
-      this.cache.set(cacheKey, response, TTL_EVENTO_MS);
-      this.guardarLog(pregunta, respuesta, idioma, ip);
-      return response;
+      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'fallback', TTL_EVENTO_MS, eventoId);
     }
 
     // 3. Construir prompt con eventos reales
@@ -103,11 +126,39 @@ export class AiService {
     };
 
     // 6. Guardar en caché con TTL según contexto
-    this.cache.set(cacheKey, response, eventoId ? TTL_EVENTO_MS : TTL_GENERAL_MS);
+    return this.guardarRespuesta(
+      cacheKey,
+      pregunta,
+      respuesta,
+      idioma,
+      ip,
+      fuente,
+      eventoId ? TTL_EVENTO_MS : TTL_GENERAL_MS,
+      eventoId,
+      geminiResult?.modelo,
+    );
+  }
 
-    // 7. Log fire-and-forget
+  private guardarRespuesta(
+    cacheKey: string,
+    pregunta: string,
+    respuesta: string,
+    idioma: ChatRequest['idioma'],
+    ip: string | undefined,
+    fuente: Fuente,
+    ttl = TTL_EVENTO_MS,
+    eventoId?: number,
+    modelo?: string,
+  ): ChatResponse {
+    const response: ChatResponse = {
+      respuesta,
+      fuente,
+      idioma,
+      ...(eventoId && { eventoId }),
+      ...(modelo && { modelo }),
+    };
+    this.cache.set(cacheKey, response, ttl);
     this.guardarLog(pregunta, respuesta, idioma, ip);
-
     return response;
   }
 
@@ -129,7 +180,7 @@ export class AiService {
   }
 
   private async cargarContexto(
-    intent: ReturnType<typeof detectIntent>
+    intent: Exclude<ReturnType<typeof detectIntent>, { type: 'EVENTO_BUSQUEDA' | 'NEGOCIO_BUSQUEDA' }>
   ): Promise<{
     eventos: EventoContexto[];
     eventoEspecifico?: EventoContexto;

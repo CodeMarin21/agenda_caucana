@@ -64,6 +64,7 @@ export class EventosService {
     precioMax?: number;
     pagina?: number;
     limite?: number;
+    orden?: 'fecha' | 'recientes';
   }) {
     const estrategias: IEstrategiaFiltro[] = [];
 
@@ -87,7 +88,8 @@ export class EventosService {
     return repo.findAprobados(
       whereCombinado,
       filtros.pagina || 1,
-      filtros.limite || 12
+      filtros.limite || 12,
+      filtros.orden || 'fecha',
     );
   }
 

@@ -5,7 +5,12 @@ import { Prisma, TipoNotificacion } from '@prisma/client';
 // El servicio nunca toca prisma directamente
 export class EventosRepository {
 
-  async findAprobados(where: Prisma.EventoWhereInput = {}, pagina = 1, limite = 12) {
+  async findAprobados(
+    where: Prisma.EventoWhereInput = {},
+    pagina = 1,
+    limite = 12,
+    orden: 'fecha' | 'recientes' = 'fecha',
+  ) {
     const skip = (pagina - 1) * limite;
     const filtroPublico: Prisma.EventoWhereInput = {
       AND: [
@@ -29,7 +34,9 @@ export class EventosRepository {
           ciudad:    { select: { id: true, nombre: true } },
           organizador: { select: { id: true, nombreEntidad: true } },
         },
-        orderBy: { fechaInicio: 'asc' },
+        orderBy: orden === 'recientes'
+          ? [{ creadoEn: 'desc' }, { id: 'desc' }]
+          : { fechaInicio: 'asc' },
         skip,
         take: limite,
       }),

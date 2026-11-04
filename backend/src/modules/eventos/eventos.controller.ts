@@ -20,13 +20,14 @@ async function resolverOrganizadorDeJWT(
 // ─── Listado público ────────────────────────────────────
 export const listarEventos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { categoriaSlug, desde, hasta, precioMax, pagina, limite } = req.query as {
+    const { categoriaSlug, desde, hasta, precioMax, pagina, limite, orden } = req.query as {
       categoriaSlug?: string;
       desde?: string;
       hasta?: string;
       precioMax?: string;
       pagina?: string;
       limite?: string;
+      orden?: 'fecha' | 'recientes';
     };
 
     const resultado = await service.listarAprobados({
@@ -36,6 +37,7 @@ export const listarEventos = async (req: Request, res: Response): Promise<void> 
       precioMax: precioMax ? parseFloat(precioMax) : undefined,
       pagina:    pagina    ? parseInt(pagina)       : 1,
       limite:    limite    ? parseInt(limite)        : 12,
+      orden,
     });
 
     res.json(resultado);

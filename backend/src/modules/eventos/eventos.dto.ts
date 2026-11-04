@@ -101,4 +101,5 @@ export const filtrosEventoValidacion = [
   query('precioMax').optional().isFloat({ min: 0 }).withMessage('Precio máximo inválido'),
   query('pagina').optional().isInt({ min: 1 }).withMessage('Página inválida'),
   query('limite').optional().isInt({ min: 1, max: 50 }).withMessage('Límite entre 1 y 50'),
+  query('orden').optional().isIn(['fecha', 'recientes']).withMessage('Orden inválido'),
 ];
