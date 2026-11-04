@@ -14,6 +14,7 @@ export interface PlatoDTO {
   nombre: string;
   precio: number;
   imagenUrl: string;
+  descripcion?: string;
 }
 
 export interface CrearNegocioDTO {
@@ -77,6 +78,12 @@ export class NegociosService {
     );
   }
 
+  private invalidarCacheAsistente(): void {
+    getCacheService().delByPrefix(
+      CacheKeyBuilder.create().ns('ia').entity('chat').prefix(),
+    );
+  }
+
   async listarAprobados(filtros: FiltrosNegocios) {
     // Bypass de cache cuando la petición no es cacheable:
     //  - paginación > 1 (muchas variantes)
@@ -92,6 +99,12 @@ export class NegociosService {
     const negocio = await repo.findBySlug(slug);
     if (!negocio) throw new Error('Negocio no encontrado');
     return negocio;
+  }
+
+  async listarCalificaciones(slug: string, pagina: number, limite: number) {
+    const resultado = await repo.findCalificacionesPublicas(slug, pagina, limite);
+    if (!resultado) throw new Error('Negocio no encontrado');
+    return resultado;
   }
 
   async listarDelOrganizador(organizadorId: number) {
@@ -123,6 +136,7 @@ export class NegociosService {
           nombre: plato.nombre,
           precio: plato.precio,
           imagenUrl: plato.imagenUrl,
+          ...(plato.descripcion ? { descripcion: plato.descripcion } : {}),
         })) }
         : {}),
       slug: generarSlug(data.nombre),
@@ -132,6 +146,7 @@ export class NegociosService {
     };
     const negocio = await repo.create(datos);
     this.invalidarCacheListado();
+    this.invalidarCacheAsistente();
     return negocio;
   }
 
@@ -153,6 +168,7 @@ export class NegociosService {
     }
     const resultado = await repo.delete(id, esAdmin ? motivo : undefined);
     this.invalidarCacheListado();
+    this.invalidarCacheAsistente();
     return resultado;
   }
 
@@ -198,6 +214,7 @@ export class NegociosService {
     }
     const resultado = await repo.aprobar(id);
     this.invalidarCacheListado();
+    this.invalidarCacheAsistente();
     return resultado;
   }
 
@@ -209,6 +226,7 @@ export class NegociosService {
     }
     const resultado = await repo.rechazar(id, motivo.trim());
     this.invalidarCacheListado();
+    this.invalidarCacheAsistente();
     return resultado;
   }
 

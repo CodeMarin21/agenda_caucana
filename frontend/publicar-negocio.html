@@ -153,7 +153,7 @@
         <div class="campo">
           <label class="campo__etiqueta" for="imagenPrincipal">Foto principal del negocio</label>
           <input class="campo__input" id="imagenPrincipal" name="imagenPrincipal" type="file" accept="image/jpeg,image/png,image/webp">
-          <span class="campo__ayuda">JPG, PNG o WebP, hasta 5 MB.</span>
+          <span class="campo__ayuda">JPG, PNG o WebP, hasta 5 MB. Los flyers se muestran completos, sin recortar.</span>
           <span class="campo__error" data-error="imagenPrincipal"></span>
           <img class="publicar-negocio__preview" data-imagen-principal-preview alt="Vista previa de la imagen del negocio" hidden>
         </div>
@@ -167,6 +167,7 @@
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-1-nombre">Nombre</label><input class="campo__input" id="plato-1-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
           <div class="campo"><label for="plato-1-precio">Precio (COP)</label><input class="campo__input" id="plato-1-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-1-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-1-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-1-imagen">Foto</label><input class="campo__input" id="plato-1-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 1" hidden></div>
         </fieldset>
         <fieldset class="slot-plato" data-slot="2">
@@ -174,6 +175,7 @@
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-2-nombre">Nombre</label><input class="campo__input" id="plato-2-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
           <div class="campo"><label for="plato-2-precio">Precio (COP)</label><input class="campo__input" id="plato-2-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-2-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-2-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-2-imagen">Foto</label><input class="campo__input" id="plato-2-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 2" hidden></div>
         </fieldset>
         <fieldset class="slot-plato" data-slot="3">
@@ -181,6 +183,7 @@
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-3-nombre">Nombre</label><input class="campo__input" id="plato-3-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
           <div class="campo"><label for="plato-3-precio">Precio (COP)</label><input class="campo__input" id="plato-3-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-3-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-3-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-3-imagen">Foto</label><input class="campo__input" id="plato-3-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 3" hidden></div>
         </fieldset>
         <fieldset class="slot-plato" data-slot="4">
@@ -188,6 +191,7 @@
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-4-nombre">Nombre</label><input class="campo__input" id="plato-4-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
           <div class="campo"><label for="plato-4-precio">Precio (COP)</label><input class="campo__input" id="plato-4-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-4-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-4-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-4-imagen">Foto</label><input class="campo__input" id="plato-4-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 4" hidden></div>
         </fieldset>
         <fieldset class="slot-plato" data-slot="5">
@@ -195,6 +199,7 @@
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-5-nombre">Nombre</label><input class="campo__input" id="plato-5-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
           <div class="campo"><label for="plato-5-precio">Precio (COP)</label><input class="campo__input" id="plato-5-precio" data-plato-precio type="number" min="0" step="1000" placeholder="6000"><span class="campo__error" data-plato-error="precio"></span></div>
+          <div class="campo"><label for="plato-5-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-5-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-5-imagen">Foto</label><input class="campo__input" id="plato-5-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 5" hidden></div>
         </fieldset>
       </section>
@@ -214,7 +219,7 @@
       <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
     </div>
   </div>
-  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</p>
+  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.<br><a href="terminos.html">Términos y condiciones</a> · <a href="terminos.html#creditos">Créditos y licencias</a></p>
 </footer>
 
 <script src="js/config.js"></script>

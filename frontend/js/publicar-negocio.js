@@ -99,6 +99,7 @@
   function limpiarSlot(slot) {
     slot.querySelector('[data-plato-nombre]').value = '';
     slot.querySelector('[data-plato-precio]').value = '';
+    slot.querySelector('[data-plato-descripcion]').value = '';
     const imagen = slot.querySelector('[data-plato-imagen]');
     imagen.value = '';
     imagen.disabled = false;
@@ -197,9 +198,11 @@
     form.querySelectorAll('[data-slot]').forEach((slot) => {
       const nombre = slot.querySelector('[data-plato-nombre]');
       const precio = slot.querySelector('[data-plato-precio]');
+      const descripcion = slot.querySelector('[data-plato-descripcion]');
       const imagenUrl = slot.dataset.imagenUrl || '';
       const hayDatos = nombre.value.trim() !== '' ||
         precio.value !== '' ||
+        descripcion.value.trim() !== '' ||
         imagenUrl !== '' ||
         slot.querySelector('[data-plato-imagen]').files.length > 0;
       if (!hayDatos) return;
@@ -222,6 +225,7 @@
           nombre: nombre.value.trim(),
           precio: Number(precio.value),
           imagenUrl,
+          ...(descripcion.value.trim() ? { descripcion: descripcion.value.trim() } : {}),
         });
       } else {
         slot.setAttribute('aria-invalid', 'true');

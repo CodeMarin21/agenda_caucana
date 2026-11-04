@@ -109,6 +109,13 @@ export const crearNegocioValidacion = [
   body('platos.*.imagenUrl')
     .custom(esUrlHttp)
     .withMessage('La imagen de cada plato debe ser una URL HTTP o HTTPS válida'),
+
+  body('platos.*.descripcion')
+    .optional({ values: 'falsy' })
+    .isString().withMessage('La descripción de cada plato debe ser texto')
+    .bail()
+    .trim()
+    .isLength({ max: 500 }).withMessage('La descripción de cada plato no puede superar 500 caracteres'),
 ];
 
 export const calificarValidacion = [
@@ -145,5 +152,12 @@ export const filtrosNegociosValidacion = [
   query('limite')
     .optional({ values: 'falsy' })
     .isInt({ min: 1, max: 50 }).withMessage('El límite debe estar entre 1 y 50')
+    .toInt(),
+];
+
+export const filtrosCalificacionesValidacion = [
+  query('pagina')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 1 }).withMessage('La página debe ser mayor que cero')
     .toInt(),
 ];

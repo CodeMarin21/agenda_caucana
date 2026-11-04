@@ -82,7 +82,7 @@
   async function cargarNegociosDestacados() {
     if (!gridNegociosDestacados) return;
     try {
-      const respuesta = await AC_API.listarNegocios({ orden: 'destacados', limite: 4 });
+      const respuesta = await AC_API.listarNegocios({ orden: 'mejor-calificados', limite: 4 });
       const negocios = respuesta.negocios || respuesta.data || [];
       if (!Array.isArray(negocios) || negocios.length === 0) {
         gridNegociosDestacados.textContent = 'Pronto encontrarás aquí lugares para disfrutar la cocina caucana.';
@@ -136,6 +136,7 @@
   async function cargarEventos() {
     try {
       const params = {};
+      params.orden = 'recientes';
       if (categoriaActiva) params.categoriaSlug = categoriaActiva;
       if (terminoBusqueda) params.q = terminoBusqueda;
       const respuesta = await AC_API.listarEventos(params);

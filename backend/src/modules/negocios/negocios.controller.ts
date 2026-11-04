@@ -57,6 +57,18 @@ export const obtenerNegocio = async (req: Request, res: Response): Promise<void>
   }
 };
 
+export const listarCalificacionesNegocio = async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json(await service.listarCalificaciones(
+      req.params.slug,
+      Number(req.query.pagina) || 1,
+      5,
+    ));
+  } catch (error) {
+    responderError(res, error);
+  }
+};
+
 export const crearNegocio = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.usuarioId) {

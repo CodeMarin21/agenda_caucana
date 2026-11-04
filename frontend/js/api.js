@@ -91,6 +91,8 @@ const AC_API = (() => {
       return solicitar(`/negocios${query ? `?${query}` : ''}`);
     },
     obtenerNegocio: (slug) => solicitar(`/negocios/${encodeURIComponent(slug)}`),
+    listarCalificacionesNegocio: (slug, pagina = 1) =>
+      solicitar(`/negocios/${encodeURIComponent(slug)}/calificaciones?pagina=${encodeURIComponent(pagina)}`),
     misNegocios: () => solicitar('/negocios/mis-negocios'),
     listarNegociosAdminTodos: () => solicitar('/negocios/admin/todos'),
     listarNegociosPendientes: () => solicitar('/negocios/admin/pendientes'),

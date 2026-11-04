@@ -175,7 +175,7 @@ export class NegociosRepository {
         calificaciones: {
           select: { estrellas: true, comentario: true, creadoEn: true },
           orderBy: { creadoEn: 'desc' },
-          take: 10,
+          take: 5,
         },
       },
     });
@@ -192,6 +192,44 @@ export class NegociosRepository {
       ...negocio,
       promedioEstrellas: promedio._avg.estrellas ?? 0,
       totalCalificaciones: total,
+    };
+  }
+
+  async findCalificacionesPublicas(slug: string, pagina: number, limite: number) {
+    const negocio = await prisma.negocio.findFirst({
+      where: {
+        slug,
+        estadoPublicacion: EstadoNegocio.APROBADO,
+        activo: true,
+        OR: [
+          { organizadorId: null },
+          { organizador: { is: { estado: 'VERIFICADO', vetado: false } } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!negocio) return null;
+
+    const where = { negocioId: negocio.id };
+    const [calificaciones, total] = await Promise.all([
+      prisma.calificacionNegocio.findMany({
+        where,
+        select: { estrellas: true, comentario: true, creadoEn: true },
+        orderBy: { creadoEn: 'desc' },
+        skip: (pagina - 1) * limite,
+        take: limite,
+      }),
+      prisma.calificacionNegocio.count({ where }),
+    ]);
+
+    return {
+      calificaciones,
+      paginacion: {
+        pagina,
+        limite,
+        total,
+        totalPaginas: Math.ceil(total / limite),
+      },
     };
   }
 

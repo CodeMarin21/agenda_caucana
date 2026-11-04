@@ -20,6 +20,7 @@
     </div>
     <h1>Crea tu cuenta de organizador</h1>
     <p class="auth-card__subtitulo">Después de registrarte, un administrador revisa y verifica tu cuenta antes de que puedas publicar eventos.</p>
+    <p class="auth-card__subtitulo"><a href="como-funciona.html">Consulta los pasos, requisitos y condiciones para organizadores</a></p>
 
     <form data-form-registro-organizador>
       <div class="form-grupo">
@@ -42,7 +43,8 @@
       </div>
       <div class="form-grupo">
         <label for="password">Contraseña</label>
-        <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
+        <input id="password" name="password" type="password" required minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}" title="Usa al menos 8 caracteres, una mayúscula, una minúscula y un número." aria-describedby="ayuda-password" autocomplete="new-password">
+        <small id="ayuda-password" class="auth-card__subtitulo">Mínimo 8 caracteres, con al menos una mayúscula, una minúscula y un número.</small>
       </div>
       <button type="submit" class="boton boton-primario">Crear cuenta de organizador</button>
       <p class="auth-card__mensaje" data-registro-mensaje></p>

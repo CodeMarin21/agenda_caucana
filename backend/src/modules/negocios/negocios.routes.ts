@@ -7,6 +7,7 @@ import {
   destacarNegocio,
   eliminarNegocio,
   listarNegocios,
+  listarCalificacionesNegocio,
   listarPendientes,
   listarTodos,
   misNegocios,
@@ -16,6 +17,7 @@ import {
 import {
   calificarValidacion,
   crearNegocioValidacion,
+  filtrosCalificacionesValidacion,
   filtrosNegociosValidacion,
 } from './negocios.dto';
 import { authMiddleware } from '../../middlewares/auth.middleware';
@@ -82,6 +84,13 @@ router.post(
   calificarValidacion,
   validateRequest,
   calificarNegocio
+);
+
+router.get(
+  '/:slug/calificaciones',
+  filtrosCalificacionesValidacion,
+  validateRequest,
+  listarCalificacionesNegocio,
 );
 
 router.get('/:slug', obtenerNegocio);

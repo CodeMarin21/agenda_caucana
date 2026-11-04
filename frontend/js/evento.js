@@ -12,6 +12,7 @@
   };
 
   const contenedorRelacionados = select('[data-relacionados]');
+  const seccionRelacionados = select('[data-relacionados-seccion]');
   if (contenedorRelacionados) contenedorRelacionados.replaceChildren();
 
   if (!slug) {
@@ -83,6 +84,7 @@
     });
 
     contenedorRelacionados.replaceChildren(...tarjetas);
+    if (seccionRelacionados) seccionRelacionados.hidden = tarjetas.length === 0;
   }
 
   async function cargarRelacionados(evento) {
@@ -127,9 +129,7 @@
       setText('[data-evento-fecha-lateral]', fecha);
       setText('[data-evento-descripcion]', evento.descripcion);
       setText('[data-evento-lugar]', nombreLugar);
-      setText('[data-evento-lugar-nombre]', nombreLugar);
       setText('[data-evento-lugar-corto]', nombreLugar);
-      setText('[data-evento-direccion]', evento.direccion || lugar.direccion);
       setText('[data-evento-organiza]', evento.organizador?.nombreEntidad);
       setText('[data-evento-categoria-ficha]', categoria);
       setText('[data-evento-publico]', publico);
@@ -140,28 +140,6 @@
         .replace(/\s+/g, ' ')
         .trim();
       const ciudad = evento.ciudad?.nombre || 'Popayán';
-      const mapaContenedor = select('[data-evento-mapa]');
-      if (mapaContenedor) {
-        if (direccion) {
-          const query = `${direccion}, ${ciudad}, Cauca, Colombia`;
-          const url = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
-          const iframe = document.createElement('iframe');
-          iframe.src = url;
-          iframe.width = '100%';
-          iframe.height = '300';
-          iframe.style.border = '0';
-          iframe.style.borderRadius = '8px';
-          iframe.style.display = 'block';
-          iframe.loading = 'lazy';
-          iframe.referrerPolicy = 'no-referrer-when-downgrade';
-          iframe.title = 'Mapa de ubicación del evento';
-          mapaContenedor.replaceChildren(iframe);
-          mapaContenedor.hidden = false;
-        } else {
-          mapaContenedor.replaceChildren();
-          mapaContenedor.hidden = true;
-        }
-      }
 
       const duracionEl = select('[data-evento-duracion]');
       if (duracionEl) {
@@ -198,15 +176,10 @@
       const enlaceExterno = select('[data-evento-enlace-externo]');
       if (enlaceExterno) {
         const tieneCoords = lugar.latitud != null && lugar.longitud != null;
-        let query;
-        if (direccion) {
-          query = `${direccion}, ${ciudad}, Cauca, Colombia`;
-        } else if (tieneCoords) {
-          query = `${lugar.latitud},${lugar.longitud}`;
-        } else {
-          query = `${lugar.nombre || 'Popayán'}, ${ciudad}, Cauca, Colombia`;
-        }
-        enlaceExterno.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+        const destino = tieneCoords
+          ? `${lugar.latitud},${lugar.longitud}`
+          : [direccion, lugar.nombre, ciudad, 'Cauca', 'Colombia'].filter(Boolean).join(', ');
+        enlaceExterno.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}`;
         enlaceExterno.target = '_blank';
         enlaceExterno.rel = 'noopener noreferrer';
       }
