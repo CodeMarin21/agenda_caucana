@@ -7,7 +7,8 @@
     "start": "node dist/app.js",
     "test": "jest --detectOpenHandles --runInBand",
     "test:coverage": "jest --coverage --detectOpenHandles --runInBand",
-    "seed": "ts-node src/scripts/seed.ts"
+    "seed": "ts-node src/scripts/seed.ts",
+    "seed:demo": "node prisma/seed-demo.js"
   },
   "prisma": {
     "seed": "ts-node src/scripts/seed.ts"

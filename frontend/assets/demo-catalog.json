@@ -1,0 +1,162 @@
+{
+  "generadoEn": "2026-11-04T19:42:33.642Z",
+  "aviso": "Copia local de demostraci?n de contenido p?blico aprobado; no contiene cuentas ni credenciales.",
+  "eventos": [
+    {
+      "titulo": "SalchiFest 2026 Popayán",
+      "descripcion": "Se viene el @salchimaniafest el primer festival de salchipapas de la ciudad de Popayán ahora convertido en competencia",
+      "imagenUrl": "https://res.cloudinary.com/obovynxs/image/upload/v1792464136/agenda-caucana/eventos/vhmy3tjv5higaavxednp.jpg",
+      "fechaInicio": "2026-11-01T14:34:00.000Z",
+      "fechaFin": "2026-12-16T02:34:00.000Z",
+      "horaApertura": null,
+      "horaCierre": null,
+      "direccion": "Lugares participantes",
+      "precioReferencial": 0,
+      "esMayorDeEdad": false,
+      "urlExternaBoletas": null,
+      "gestionaTaquillaInterna": false,
+      "slug": "salchifest-2026-popayan-1792464138106",
+      "destacado": false,
+      "categoria": {
+        "nombre": "Gastronomía",
+        "slug": "gastronomia",
+        "icono": "🍽️"
+      },
+      "ciudad": {
+        "nombre": "Popayán",
+        "departamento": "Cauca"
+      },
+      "lugar": {
+        "nombre": "Lugares participantes",
+        "direccion": "Lugares participantes",
+        "latitud": null,
+        "longitud": null
+      },
+      "organizador": {
+        "nombreEntidad": "Tunel del tiempo"
+      }
+    },
+    {
+      "titulo": "Feria Del Libro",
+      "descripcion": "Popayán Ciudad Libro se estará celebrando del 6 al 13 de noviembre de 2025, en el edificio nuevo de la Facultad de Ciencias Sociales de la Universidad del Cauca; este evento, que a lo largo de los años se ha encargado de crear espacios que incluyan a toda la comunidad, permitiéndoles acceder a talleres, actividades y conversatorios que les permitan ampliar su conocimiento y amor por la literatura.",
+      "imagenUrl": "https://res.cloudinary.com/obovynxs/image/upload/v1792002227/agenda-caucana/eventos/hslpl8icuuzpzgbfczrs.jpg",
+      "fechaInicio": "2026-10-14T18:24:00.000Z",
+      "fechaFin": "2026-10-28T06:22:00.000Z",
+      "horaApertura": null,
+      "horaCierre": null,
+      "direccion": "Cra. 11 #3-45",
+      "precioReferencial": 0,
+      "esMayorDeEdad": false,
+      "urlExternaBoletas": "http://ciudadlibro.com/",
+      "gestionaTaquillaInterna": false,
+      "slug": "feria-del-libro-1792002228232",
+      "destacado": true,
+      "categoria": {
+        "nombre": "Cultural",
+        "slug": "cultural",
+        "icono": "🎨"
+      },
+      "ciudad": {
+        "nombre": "Popayán",
+        "departamento": "Cauca"
+      },
+      "lugar": {
+        "nombre": "Centro de Convenciones Casa de la Moneda",
+        "direccion": "Cra. 11 #3-45",
+        "latitud": null,
+        "longitud": null
+      },
+      "organizador": {
+        "nombreEntidad": "Tunel del tiempo"
+      }
+    },
+    {
+      "titulo": "Velada del barrio vol 2",
+      "descripcion": "Velada del barrio vol 2",
+      "imagenUrl": "https://res.cloudinary.com/obovynxs/image/upload/v1791996708/agenda-caucana/eventos/shj8ckmjf6r1n7a1uots.jpg",
+      "fechaInicio": "2026-10-31T04:50:00.000Z",
+      "fechaFin": "2026-10-31T16:52:00.000Z",
+      "horaApertura": null,
+      "horaCierre": null,
+      "direccion": "Carrera 9 # 11N-17, barrio Santa Clara",
+      "precioReferencial": 15000,
+      "esMayorDeEdad": false,
+      "urlExternaBoletas": "https://latiquetera.com/site/kany-garcia-tour-2026",
+      "gestionaTaquillaInterna": false,
+      "slug": "velada-del-barrio-vol-2-1791996708878",
+      "destacado": false,
+      "categoria": {
+        "nombre": "Cultural",
+        "slug": "cultural",
+        "icono": "🎨"
+      },
+      "ciudad": {
+        "nombre": "Popayán",
+        "departamento": "Cauca"
+      },
+      "lugar": {
+        "nombre": "Iglesia de San Francisco",
+        "direccion": "Calle 4 # 9-40, Centro",
+        "latitud": 2.44076,
+        "longitud": -76.60831
+      },
+      "organizador": {
+        "nombreEntidad": "Tunel del tiempo"
+      }
+    }
+  ],
+  "negocios": [
+    {
+      "nombre": "Suculentas de Juanita",
+      "slug": "suculentas-de-juanita-1793748874423",
+      "descripcion": "El sabor y la abundancia que te mereces. Disfruta de papas crocantes, embutidos de alta calidad, salsas artesanales y combinaciones irresistibles preparadas con el toque único y amoroso de la casa. ¡Ven por las tuyas o pídelas a domicilio y date el gusto que te mereces!",
+      "direccion": "Cl. 25 #15-05",
+      "telefono": "3229737004",
+      "whatsapp": "555555444",
+      "instagram": "https://www.instagram.com/nickyburgerpopayan/",
+      "horarioAtencion": "8:00 a.m a 10:00 p.m",
+      "categoria": "COMIDA_RAPIDA",
+      "precioPromedio": 15000,
+      "imagenPrincipalUrl": "https://res.cloudinary.com/obovynxs/image/upload/v1793748867/agenda-caucana/negocios/o7hhdcm8aexmnrswrozw.jpg",
+      "imagenesAdicionales": null,
+      "platos": [
+        {
+          "nombre": "Salchipapa sencilla",
+          "precio": 12000,
+          "imagenUrl": "https://res.cloudinary.com/obovynxs/image/upload/v1793748833/agenda-caucana/negocios/siwkqi7yzcfcsonkofmv.jpg"
+        }
+      ],
+      "destacado": false,
+      "ciudad": {
+        "nombre": "Popayán",
+        "departamento": "Cauca"
+      },
+      "organizador": {
+        "nombreEntidad": "Tunel del tiempo"
+      }
+    },
+    {
+      "nombre": "Café Popayán",
+      "slug": "caf-popayn-1792011843754",
+      "descripcion": "Café tradicional del centro histórico con granos del Cauca",
+      "direccion": "Calle 5 # 4-30, Centro, Popayán",
+      "telefono": "3001234567",
+      "whatsapp": null,
+      "instagram": null,
+      "horarioAtencion": "Lun-Sab 8:00-21:00",
+      "categoria": "CAFETERIA",
+      "precioPromedio": 8000,
+      "imagenPrincipalUrl": null,
+      "imagenesAdicionales": null,
+      "platos": null,
+      "destacado": false,
+      "ciudad": {
+        "nombre": "Popayán",
+        "departamento": "Cauca"
+      },
+      "organizador": {
+        "nombreEntidad": "Tunel del tiempo"
+      }
+    }
+  ]
+}
