@@ -1,9 +1,8 @@
 /**
  * Agenda Caucana — Home.
  * Carga categorías (para las píldoras de filtro) y eventos desde la API real.
- * Si el backend no responde (por ejemplo, corriendo esta página sola sin
- * `npm run dev` en backend/), se muestran los eventos de ejemplo del HTML
- * para que el boceto siga siendo revisable sin backend levantado.
+ * Las publicaciones se obtienen del backend; no se muestran datos de ejemplo
+ * cuando la API no está disponible.
  */
 (function () {
   const grid = document.querySelector('[data-grid-eventos]');
@@ -149,7 +148,9 @@
       grid.innerHTML = eventos.map(tarjetaHtml).join('');
       if (contadorResultados) contadorResultados.textContent = `${eventos.length} eventos destacados encontrados`;
     } catch (error) {
-      console.warn('No se pudieron cargar eventos desde la API, se muestran los de ejemplo:', error.message);
+      console.error('No se pudieron cargar las publicaciones desde la API:', error);
+      grid.innerHTML = '<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">No se pudieron cargar las publicaciones. Verifica que el backend esté iniciado e intenta recargar la página.</p>';
+      if (contadorResultados) contadorResultados.textContent = 'Error al cargar publicaciones';
     }
   }
 
