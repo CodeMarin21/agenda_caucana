@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/dashboard.css">
 </head>
-<body>
+<body data-especialidad-pagina="EVENTOS">
 <div class="layout-panel">
   <aside class="sidebar" data-sidebar>
     <div class="sidebar__marca">
@@ -19,10 +19,11 @@
       <p>Plataforma de creadores</p>
     </div>
     <nav class="sidebar__nav">
-      <a href="mis-eventos.html" aria-current="page">🗓️ Mis eventos</a>
-      <a href="publicar.html">➕ Publicar</a>
-      <a href="perfil.html">👤 Perfil</a>
-      <a href="#" data-logout style="margin-top:auto;">🚪 Cerrar sesión</a>
+      <a href="mis-eventos.html" aria-current="page">Mis eventos</a>
+      <a href="publicar.html" data-publicar-evento hidden>Publicar evento</a>
+      <a href="notificaciones.html">Notificaciones <span class="notificaciones-nav__contador" data-notificaciones-no-leidas hidden></span></a>
+      <a href="perfil.html">Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
     </nav>
     <div class="sidebar__pie">
       <span class="avatar-inicial" data-sidebar-inicial>AC</span>
@@ -37,9 +38,9 @@
     <header class="panel-header">
       <div style="display:flex; align-items:center; gap:0.75rem;">
         <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
-        <h1>Mis Eventos</h1>
+        <h1>Mis eventos</h1>
       </div>
-      <a href="publicar.html" class="boton boton-primario boton-sm">➕ Publicar nuevo evento</a>
+      <a href="publicar.html" class="boton boton-primario boton-sm" data-publicar-evento hidden>Publicar nuevo evento</a>
     </header>
 
     <div class="panel-cuerpo">
@@ -69,13 +70,13 @@
         <p id="cargando" style="padding:1rem 0; color:var(--tinta-55);">Cargando eventos…</p>
 
         <!-- Estado vacío -->
-        <div id="estadoVacio" hidden style="text-align:center; padding:3rem 1rem;">
-          <p style="font-size:3rem; margin:0 0 0.5rem;">📭</p>
+        <div id="estadoVacio" class="estado-vacio-panel" hidden>
+          <p class="estado-vacio-panel__indice" aria-hidden="true">01</p>
           <h3 style="margin:0 0 0.5rem;">Aún no has publicado eventos</h3>
           <p style="color:var(--tinta-55); margin-bottom:1.5rem;">
             Cuando publiques tu primer evento aparecerá aquí con su estado de revisión.
           </p>
-          <a href="publicar.html" class="boton boton-primario">Publicar mi primer evento</a>
+          <a href="publicar.html" class="boton boton-primario" data-publicar-evento hidden>Publicar mi primer evento</a>
         </div>
 
         <!-- Sin resultados de filtro -->
@@ -106,6 +107,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/notificaciones.js"></script>
 <script src="../js/mis-eventos.js"></script>
 </body>
 </html>

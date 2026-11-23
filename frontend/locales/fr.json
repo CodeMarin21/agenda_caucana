@@ -4,7 +4,238 @@
     "categorias": "Catégories",
     "rutas": "Itinéraires",
     "publicarEvento": "Publier un événement",
-    "soyOrganizador": "Je suis organisateur"
+    "soyOrganizador": "Je suis organisateur",
+    "miPerfil": "Mon profil",
+    "abrirMenu": "Ouvrir le menu",
+    "menu": "Menu",
+    "sabores": "Saveurs",
+    "tagline": "Le guide culturel de Popayán"
+  },
+  "a11y": {
+    "herramientas": "Outils d’accessibilité",
+    "accesibilidad": "Accessibilité",
+    "contraste": "Contraste élevé",
+    "invertidos": "Couleurs inversées",
+    "lectura": "Mode lecture"
+  },
+  "i18n": {
+    "idioma": "Langue"
+  },
+  "page": {
+    "homeTitle": "Agenda Caucana — Le guide culturel de Popayán",
+    "homeDescription": "Concerts, art, gastronomie et plus encore — tout l’agenda culturel de Popayán au même endroit.",
+    "routesDescription": "Parcourez Popayán pour découvrir son histoire, son architecture, ses cafés et sa cuisine traditionnelle.",
+    "foodDescription": "Découvrez les restaurants, cafés et cuisines traditionnelles de Popayán et du Cauca."
+  },
+  "home": {
+    "heroAlt": "Coucher de soleil sur le centre colonial de Popayán avec des colombes en vol",
+    "gastronomiaLocal": "Gastronomie locale",
+    "mejorResenados": "Les mieux notés par la communauté",
+    "verNegocios": "Voir tous les établissements",
+    "cargandoEventos": "Chargement des publications...",
+    "cargandoNegocios": "À la découverte des saveurs de Popayán...",
+    "destacado": "À la une",
+    "precioNoDisponible": "Prix indisponible",
+    "promedio": "en moyenne",
+    "gratis": "Gratuit",
+    "proximamenteNegocios": "Vous trouverez bientôt ici des lieux pour découvrir la cuisine du Cauca.",
+    "errorNegocios": "Impossible de charger les établissements pour le moment.",
+    "sinEventos": "Aucun événement ne correspond à ces filtres. Essayez une autre catégorie ou recherche.",
+    "ceroEventos": "Aucun événement trouvé",
+    "unEvento": "{n} événement à la une trouvé",
+    "variosEventos": "{n} événements à la une trouvés",
+    "errorCarga": "Impossible de charger les publications. Vérifiez que le serveur fonctionne et rechargez la page.",
+    "errorContador": "Erreur lors du chargement des publications"
+  },
+  "rutas": {
+    "tituloPagina": "Itinéraires culturels — Agenda Caucana",
+    "titulo": "Itinéraires culturels à Popayán",
+    "intro": "Parcourez le centre historique et ses environs pour découvrir l’architecture, l’histoire et les saveurs de Popayán à votre rythme.",
+    "explorar": "Explorer l’itinéraire",
+    "gastronomica": "Gastronomie",
+    "historica": {
+      "categoria": "Idéal pour le premier jour",
+      "titulo": "Itinéraire historique et architectural",
+      "ubicacion": "Centre historique et environs · Popayán, Cauca",
+      "descripcion": "Découvrez les façades coloniales de la Ville Blanche, ses places, ses églises et ses monuments. Commencez au parc Caldas et poursuivez à votre rythme vers les lieux qui vous intéressent."
+    },
+    "cafe": {
+      "categoria": "Itinéraire gastronomique",
+      "titulo": "Itinéraire des cafés de Popayán",
+      "ubicacion": "Centre historique, Campanario et Pueblito Patojo · Popayán, Cauca",
+      "descripcion": "Découvrez la culture du café du Cauca : goûtez les profils régionaux, explorez les méthodes filtre et accompagnez votre café de pâtisseries et de produits locaux. Choisissez vos étapes et parcourez-les à votre rythme."
+    },
+    "abrirMaps": "Ouvrir l’itinéraire dans Google Maps",
+    "buscarMaps": "Rechercher sur Google Maps",
+    "fotoPendiente": "Photo en attente d’autorisation",
+    "comoLlegar": "Itinéraire",
+    "tipo": {
+      "parque": "Parc local",
+      "historico": "Lieu historique",
+      "puente": "Pont historique",
+      "mirador": "Site historique et belvédère",
+      "atraccion": "Attraction touristique",
+      "bistro": "Café-bistrot",
+      "especialidad": "Café de spécialité",
+      "cafeReposteria": "Café et pâtisseries",
+      "cafeRegion": "Café régional",
+      "cafeArtesanias": "Café et artisanat",
+      "tiendaCafe": "Boutique de café"
+    },
+    "puntoPartida": "Point de départ · Centre de Popayán",
+    "centroPopayan": "Centre historique · Popayán",
+    "carreraCentro": "Carrera 5 · Centre historique",
+    "nortePopayan": "Nord de Popayán · Cauca",
+    "paradas": "Étapes culturelles",
+    "parque": {
+      "historia": "Le cœur de la ville, entouré de bâtiments historiques et marqué par la statue du savant Francisco José de Caldas."
+    },
+    "torre": {
+      "historia": "Construite entre 1673 et 1682, elle est affectueusement surnommée le « nez de Popayán » et reste l’un des monuments les plus reconnaissables du centre."
+    },
+    "puente": {
+      "historia": "Pont emblématique de douze arches au-dessus de la rivière Molino, achevé en 1873. Sa structure en brique et en pierre relie le centre aux quartiers du nord."
+    },
+    "morro": {
+      "historia": "Pyramide tronquée précolombienne offrant une vue panoramique sur la ville et un monument à Sebastián de Belalcázar."
+    },
+    "iglesias": {
+      "titulo": "Églises et musées",
+      "historia": "Comprend l’église baroque San Francisco, La Ermita et le musée national Guillermo Valencia. Chaque étape peut être visitée séparément."
+    },
+    "pueblito": {
+      "historia": "Petit parc regroupant des répliques de certains des monuments les plus représentatifs de la ville."
+    },
+    "identidad": {
+      "historia": "Un hommage à la culture du café du Cauca, avec des profils régionaux de petits producteurs et des méthodes de préparation alternatives."
+    },
+    "caffique": {
+      "historia": "Une étape pour déguster du slow coffee et découvrir des méthodes filtre comme V60, Chemex et Aeropress, ainsi que des variétés régionales comme Castillo, Caturra et Bourbon."
+    },
+    "ricoleta": {
+      "historia": "Cafés de spécialité et pâtisseries artisanales locales, à quelques pas du parc principal."
+    },
+    "fabrica": {
+      "historia": "Une étape traditionnelle pour découvrir le café régional et en acheter en grains ou moulu."
+    },
+    "nigua": {
+      "historia": "Dégustez un café du Cauca et découvrez l’artisanat avec vue sur l’un des lieux les plus connus de Popayán."
+    },
+    "cafeCauca": {
+      "historia": "Un lieu pour trouver du café du Cauca au centre commercial Campanario. L’adresse exacte reste à confirmer."
+    },
+    "notaValoraciones": "Les notes et le nombre d’avis sont donnés à titre indicatif et peuvent changer. Vérifiez les horaires avant votre visite.",
+    "notaCafe": "Les descriptions et emplacements reposent sur les informations communiquées. Vérifiez les horaires, la disponibilité et l’adresse auprès de chaque établissement avant votre visite.",
+    "organizador": {
+      "categoria": "Pour les organisateurs d’événements",
+      "titulo": "Vous organisez des événements à Popayán ?",
+      "texto": "Inscrivez-vous comme organisateur et, après approbation, publiez les dates, les lieux et les détails dans l’agenda.",
+      "boton": "M’inscrire comme organisateur d’événements"
+    },
+    "card": {
+      "historica": "Historique et architectural",
+      "centro": "Centre historique · premier jour",
+      "centroResumen": "Parc Caldas, Tour de l’Horloge, pont Humilladero et plus.",
+      "cafe": "Route du café",
+      "cafeResumen": "De la ferme à la tasse, avec les producteurs du Cauca.",
+      "cafes": "Itinéraire des cafés de Popayán",
+      "cafesResumen": "Cafés de spécialité, méthodes filtrées et saveurs du Cauca."
+    }
+  },
+  "sabores": {
+    "titulo": "Saveurs du Cauca",
+    "resumen": "Pipián, carantanta, champús et douceurs de Popayán.",
+    "descubrir": "Découvrir les saveurs",
+    "cocina": "Cuisine traditionnelle de Popayán",
+    "ubicacion": "Préparations traditionnelles de Popayán et du Cauca",
+    "descripcion": "Un aperçu des saveurs de Popayán : maïs, pipián, préparations à base de maïs et boissons traditionnelles. Les recettes varient selon les familles et les établissements ; renseignez-vous sur les ingrédients et la disponibilité du jour.",
+    "portadaNota": "Image illustrative générée par IA ; elle ne représente pas un restaurant ni des plats photographiés.",
+    "nota": "Cette sélection est un guide culturel, pas un menu ni une garantie de disponibilité. Renseignez-vous auprès de chaque établissement sur les ingrédients, la préparation et les options alimentaires.",
+    "empanadas": {
+      "categoria": "Salé · maïs et pipián",
+      "titulo": "Empanaditas au pipián",
+      "historia": "Petites empanadas à la pâte de maïs, traditionnellement farcies de pipián, un mélange de pommes de terre, d’arachides et d’assaisonnement de Popayán. Elles sont souvent servies avec une sauce pimentée aux arachides."
+    },
+    "tamal": {
+      "categoria": "Salé · enveloppé dans une feuille",
+      "titulo": "Tamal au pipián",
+      "historia": "Une version locale du tamal, composée de pâte et d’une farce au pipián, enveloppée dans une feuille et cuite. Cette préparation familiale varie selon les recettes."
+    },
+    "carantanta": {
+      "categoria": "Préparation au maïs",
+      "titulo": "Carantanta",
+      "historia": "De fines feuilles croustillantes de maïs récupérées lors de la préparation de la pâte. Elles se mangent seules ou avec des soupes et d’autres plats."
+    },
+    "champus": {
+      "categoria": "Boisson traditionnelle",
+      "titulo": "Champús",
+      "historia": "Boisson épaisse et rafraîchissante à base de maïs et de fruits comme le lulo et l’ananas, avec de la panela et des épices. Sa recette et sa texture changent d’une maison à l’autre."
+    },
+    "aplanchados": {
+      "categoria": "Sucré · pâtisserie",
+      "titulo": "Aplanchados",
+      "historia": "Fines feuilletés croustillants recouverts d’un glaçage sucré, considérés comme l’une des pâtisseries traditionnelles de Popayán."
+    }
+  },
+  "saboresPagina": {
+    "titulo": "Saveurs de Popayán",
+    "descripcion": "Restaurants, cafés et cuisines traditionnelles du Cauca.",
+    "busquedaLabel": "Rechercher des restaurants, cafés ou plats",
+    "busquedaPlaceholder": "Rechercher un lieu, un plat ou une adresse",
+    "ciudadLabel": "Choisir une ville",
+    "todasCiudades": "Toutes les villes",
+    "buscar": "Rechercher",
+    "destacadosEyebrow": "Popayán et ses environs",
+    "destacadosTitulo": "Lieux recommandés pour manger",
+    "destacadosTexto": "Sélectionnés parmi les établissements approuvés selon leur évaluation et leur présence publique.",
+    "filtroCategoria": "Filtrer par catégorie",
+    "orden": "Trier :",
+    "recientes": "Récents",
+    "destacados": "À la une",
+    "mejorCalificados": "Mieux notés",
+    "precio": "Prix :",
+    "todos": "Tous",
+    "hasta10": "Jusqu’à 10 000 $",
+    "de10a30": "10 000–30 000 $",
+    "mas30": "Plus de 30 000 $",
+    "ctaTitulo": "Vous tenez un restaurant ou un stand de cuisine ?",
+    "ctaTexto": "Présentez votre offre aux personnes qui souhaitent découvrir la cuisine du Cauca.",
+    "comoFunciona": "Comment inscrire un établissement",
+    "registrarNegocio": "Inscrire mon établissement",
+    "categorias": {
+      "tradicional": "Traditionnel",
+      "rapida": "Restauration rapide",
+      "parrilla": "Grillades",
+      "pizza": "Pizza",
+      "sushi": "Sushi",
+      "postres": "Desserts",
+      "cafe": "Café",
+      "bebidas": "Boissons",
+      "vegetariana": "Végétarien",
+      "otro": "Autre"
+    },
+    "sinDestacados": "Aucun établissement approuvé n’est encore à la une.",
+    "errorDestacados": "Impossible de charger les lieux recommandés.",
+    "cargandoDestacados": "Chargement des lieux recommandés...",
+    "filtros": "Filtres des établissements",
+    "cargarMas": "Afficher plus de lieux",
+    "etiquetaDestacado": "À la une",
+    "precioNoDisponible": "Prix indisponible",
+    "direccionNoDisponible": "Adresse indisponible",
+    "promedio": "en moyenne",
+    "verMenu": "Consultez la fiche de l’établissement pour le menu, les plats et les horaires.",
+    "verPrecios": "Voir les prix",
+    "verInformacion": "Voir les détails du lieu",
+    "ariaCalificacion": "{n} étoiles sur 5",
+    "contador": "{n} {unidad}",
+    "contadorConTotal": "{n} {unidad} sur {total}",
+    "errorCargaMensaje": "Impossible de charger les établissements. Veuillez réessayer.",
+    "sinFiltrosCargados": "Aucun lieu ne correspond à ces filtres dans les résultats chargés. Chargez-en davantage ou modifiez votre recherche.",
+    "sinNegocios": "Aucun établissement ne correspond à ces filtres. Essayez une autre recherche ou catégorie.",
+    "unLugar": "lieu affiché",
+    "variosLugares": "lieux affichés",
+    "cargando": "Chargement des établissements...",
+    "errorCarga": "Erreur lors du chargement des établissements"
   },
   "hero": {
     "eyebrow": "Agenda Caucana · Saison 2026",
@@ -13,6 +244,7 @@
     "subtexto": "Concerts, art et saveurs du Cauca — tout ce qui se passe cette semaine dans la Ville Blanche."
   },
   "busqueda": {
+    "label": "Rechercher des événements",
     "titulo": "Que faire aujourd'hui à Popayán ?",
     "subtitulo": "Concerts, art, gastronomie et plus — toute l'agenda culturelle en un seul endroit.",
     "placeholder": "Rechercher des événements, lieux ou artistes...",
@@ -26,6 +258,7 @@
     "fecha": "Date",
     "precio": "Prix",
     "categoria": "Catégorie",
+    "filtrarCategoria": "Filtrer par catégorie",
     "ciudad": "Ville",
     "aplicar": "Appliquer les filtres",
     "limpiar": "Effacer les filtres",
@@ -38,7 +271,36 @@
   },
   "rutasCulturales": {
     "titulo": "Itinéraires culturels",
-    "verTodas": "Voir tous →"
+    "verTodas": "Voir tous →",
+    "altColonial": "Rue du centre historique de Popayán au coucher du soleil",
+    "altCafe": "Illustration générée par IA d’un producteur récoltant du café dans le Cauca",
+    "altSabores": "Illustration générée par IA d’une table avec des plats traditionnels du Cauca",
+    "cards": {
+      "colonial": "Popayán colonial"
+    }
+  },
+  "categoriasEvento": {
+    "cultural": "Culture",
+    "deportes": "Sports",
+    "educacion": "Éducation",
+    "musica": "Musique",
+    "arte": "Art",
+    "gastronomia": "Gastronomie",
+    "teatro": "Théâtre",
+    "cine": "Cinéma",
+    "talleres": "Ateliers",
+    "fiestas": "Festivals",
+    "historia": "Histoire",
+    "naturaleza": "Nature"
+  },
+  "explorar": {
+    "filtros": {
+      "desde": "Du",
+      "hasta": "Au",
+      "gratis": "Gratuit",
+      "hasta10": "Jusqu’à 10 000 $",
+      "hasta30": "Jusqu’à 30 000 $"
+    }
   },
   "organizadorCta": {
     "eyebrow": "Pour les organisateurs",
@@ -50,10 +312,16 @@
   "footer": {
     "descripcion": "L'agenda culturelle de la Ville Blanche de Popayán.",
     "explorar": "Explorer",
+    "eventosHoy": "Événements aujourd’hui",
+    "rutasHistoricas": "Itinéraires historiques",
     "contacto": "Contact et réseaux",
+    "prensa": "Presse",
+    "soporte": "Assistance",
     "legal": "Mentions légales",
     "avisoPrivacidad": "Politique de confidentialité",
     "terminos": "Conditions générales",
+    "creditos": "Crédits et licences",
+    "derechosRuta": "© 2026 Agenda Caucana. Tous droits réservés. Popayán, Colombie.",
     "derechos": "© {year} Agenda Caucana. Tous droits réservés."
   },
   "chat": {
@@ -65,8 +333,11 @@
     "pensando": "Réflexion...",
     "bienvenida": "Bonjour ! Posez-moi des questions sur les événements, les lieux ou quoi faire à Popayán.",
     "error": "Je n'ai pas pu répondre. Réessayez dans un instant.",
+    "busquedaCargando": "Recherche dans les événements et établissements publiés…",
     "sabores": {
-      "aria": "Demandez à l'IA"
+      "aria": "Demandez à l'IA",
+      "bienvenida": "Que souhaitez-vous manger à Popayán ?",
+      "placeholder": "Ex. Où trouver des ailes pour quatre personnes à moins de 50 000 COP ?"
     }
   },
   "comun": {

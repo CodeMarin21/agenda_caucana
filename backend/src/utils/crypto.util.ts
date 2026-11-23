@@ -12,6 +12,12 @@ import crypto from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // 96 bits recomendado para GCM
+const CLAVE_IDENTIDAD_HEX = /^[0-9a-fA-F]{64}$/;
+
+export function tieneClaveIdentidadValida(): boolean {
+  const key = process.env.IDENTIDAD_ENCRYPTION_KEY;
+  return Boolean(key && CLAVE_IDENTIDAD_HEX.test(key));
+}
 
 function getKey(): Buffer {
   const key = process.env.IDENTIDAD_ENCRYPTION_KEY;
@@ -21,7 +27,7 @@ function getKey(): Buffer {
       'node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"'
     );
   }
-  if (!/^[0-9a-fA-F]{64}$/.test(key)) {
+  if (!CLAVE_IDENTIDAD_HEX.test(key)) {
     throw new Error('IDENTIDAD_ENCRYPTION_KEY debe tener 64 caracteres hex (32 bytes).');
   }
   return Buffer.from(key, 'hex');

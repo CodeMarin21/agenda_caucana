@@ -4,7 +4,238 @@
     "categorias": "Categorías",
     "rutas": "Rutas",
     "publicarEvento": "Publicar evento",
-    "soyOrganizador": "Soy organizador"
+    "soyOrganizador": "Soy organizador",
+    "miPerfil": "Mi perfil",
+    "abrirMenu": "Abrir menú",
+    "menu": "Menú",
+    "sabores": "Sabores",
+    "tagline": "La cartelera cultural de Popayán"
+  },
+  "a11y": {
+    "herramientas": "Herramientas de accesibilidad",
+    "accesibilidad": "Accesibilidad",
+    "contraste": "Alto contraste",
+    "invertidos": "Colores invertidos",
+    "lectura": "Modo lectura"
+  },
+  "i18n": {
+    "idioma": "Idioma"
+  },
+  "page": {
+    "homeTitle": "Agenda Caucana — La cartelera cultural de Popayán",
+    "homeDescription": "Conciertos, arte, gastronomía y más — toda la agenda cultural de Popayán en un solo lugar.",
+    "routesDescription": "Recorridos culturales por Popayán para descubrir su historia, arquitectura, cafés y cocina tradicional.",
+    "foodDescription": "Descubre restaurantes, cafés y cocinas tradicionales de Popayán y el Cauca."
+  },
+  "home": {
+    "heroAlt": "Atardecer sobre el skyline colonial de Popayán con torcazas en vuelo",
+    "gastronomiaLocal": "Gastronomía local",
+    "mejorResenados": "Los mejor reseñados por la comunidad",
+    "verNegocios": "Ver todos los negocios",
+    "cargandoEventos": "Cargando publicaciones...",
+    "cargandoNegocios": "Descubriendo sabores de Popayán...",
+    "destacado": "Destacado",
+    "precioNoDisponible": "Precio no disponible",
+    "promedio": "promedio",
+    "gratis": "Gratis",
+    "proximamenteNegocios": "Pronto encontrarás aquí lugares para disfrutar la cocina caucana.",
+    "errorNegocios": "No fue posible cargar los negocios en este momento.",
+    "sinEventos": "No encontramos eventos con ese filtro. Prueba con otra categoría o búsqueda.",
+    "ceroEventos": "0 eventos encontrados",
+    "unEvento": "{n} evento destacado encontrado",
+    "variosEventos": "{n} eventos destacados encontrados",
+    "errorCarga": "No se pudieron cargar las publicaciones. Verifica que el backend esté iniciado e intenta recargar la página.",
+    "errorContador": "Error al cargar publicaciones"
+  },
+  "rutas": {
+    "tituloPagina": "Rutas culturales — Agenda Caucana",
+    "titulo": "Rutas culturales de Popayán",
+    "intro": "Recorridos culturales por el centro histórico y sus alrededores para descubrir la arquitectura, la historia y los sabores de Popayán a tu propio ritmo.",
+    "explorar": "Explorar la ruta",
+    "gastronomica": "Gastronómica",
+    "historica": {
+      "categoria": "Ideal para el primer día",
+      "titulo": "Ruta Histórica y Arquitectónica",
+      "ubicacion": "Centro Histórico y alrededores · Popayán, Cauca",
+      "descripcion": "Un recorrido para descubrir las fachadas coloniales de la Ciudad Blanca, sus plazas, templos y monumentos. Empieza en el Parque Caldas y continúa por los sitios que quieras visitar a tu ritmo."
+    },
+    "cafe": {
+      "categoria": "Ruta gastronómica",
+      "titulo": "Ruta de cafés de Popayán",
+      "ubicacion": "Centro Histórico, Campanario y Pueblito Patojo · Popayán, Cauca",
+      "descripcion": "Una invitación a conocer la cultura cafetera caucana: prueba perfiles de taza regionales, explora métodos filtrados y acompaña el café con repostería y productos locales. Elige las paradas que más te interesen y recórrelas a tu ritmo."
+    },
+    "abrirMaps": "Abrir recorrido en Google Maps",
+    "buscarMaps": "Buscar en Google Maps",
+    "fotoPendiente": "Fotografía pendiente de autorización",
+    "comoLlegar": "Cómo llegar",
+    "tipo": {
+      "parque": "Parque local",
+      "historico": "Lugar de interés histórico",
+      "puente": "Puente histórico",
+      "mirador": "Sitio histórico y mirador",
+      "atraccion": "Atracción turística",
+      "bistro": "Café bistró",
+      "especialidad": "Café de especialidad",
+      "cafeReposteria": "Café y repostería",
+      "cafeRegion": "Café de la región",
+      "cafeArtesanias": "Café y artesanías",
+      "tiendaCafe": "Tienda de café"
+    },
+    "puntoPartida": "Punto de partida · Centro de Popayán",
+    "centroPopayan": "Centro Histórico · Popayán",
+    "carreraCentro": "Carrera 5 · Centro Histórico",
+    "nortePopayan": "Norte de Popayán · Cauca",
+    "paradas": "Paradas culturales",
+    "parque": {
+      "historia": "El corazón de la ciudad, rodeado de edificaciones históricas y con la estatua del sabio Francisco José de Caldas en el centro."
+    },
+    "torre": {
+      "historia": "Construida entre 1673 y 1682, es conocida afectuosamente como la “Nariz de Popayán” y forma parte de la imagen más reconocible del centro."
+    },
+    "puente": {
+      "historia": "Icónico puente de doce arcos sobre el río Molino, terminado en 1873. Su estructura de ladrillo y calicanto conecta el centro con los barrios del norte."
+    },
+    "morro": {
+      "historia": "Una pirámide truncada de origen precolombino con vista panorámica de la ciudad y el monumento a Sebastián de Belalcázar."
+    },
+    "iglesias": {
+      "titulo": "Iglesias y museos",
+      "historia": "Incluye la Iglesia de San Francisco, de estilo barroco, la Ermita y el Museo Nacional Guillermo Valencia. Puedes visitar cada parada por separado."
+    },
+    "pueblito": {
+      "historia": "Un pequeño parque que reúne réplicas de algunos de los monumentos más representativos de la ciudad."
+    },
+    "identidad": {
+      "historia": "Un homenaje a la cultura cafetera caucana, con perfiles de taza regionales de pequeños productores y métodos alternativos."
+    },
+    "caffique": {
+      "historia": "Una parada para disfrutar el slow coffee y explorar preparaciones filtradas como V60, Chemex y Aeropress, además de variedades regionales como Castillo, Caturra y Borbón."
+    },
+    "ricoleta": {
+      "historia": "Cafés de especialidad y repostería artesanal local, a pocos pasos del parque principal."
+    },
+    "fabrica": {
+      "historia": "Una parada tradicional para conocer el café regional y comprarlo en grano o molido para llevar."
+    },
+    "nigua": {
+      "historia": "Combina una pausa para degustar café caucano con artesanías y las vistas de uno de los lugares más reconocidos de Popayán."
+    },
+    "cafeCauca": {
+      "historia": "Una opción para encontrar café caucano en el Centro Comercial Campanario. La dirección exacta de esta parada está pendiente de confirmar."
+    },
+    "notaValoraciones": "Las valoraciones y el número de reseñas son referencias compartidas; pueden cambiar. Confirma los horarios antes de tu visita.",
+    "notaCafe": "Las descripciones y ubicaciones se basan en la información compartida. Confirma horarios, disponibilidad y dirección con cada establecimiento antes de visitarlo.",
+    "organizador": {
+      "categoria": "Para creadores de eventos",
+      "titulo": "¿Organizas eventos en Popayán?",
+      "texto": "Regístrate como organizador de eventos y, una vez aprobado, publica fechas, lugares y detalles en la agenda.",
+      "boton": "Registrarme como organizador de eventos"
+    },
+    "card": {
+      "historica": "Histórica y arquitectónica",
+      "centro": "Centro Histórico · primer día",
+      "centroResumen": "Parque Caldas, Torre del Reloj, Puente del Humilladero y más.",
+      "cafe": "Camino del Café",
+      "cafeResumen": "De la finca a la taza, con productores del Cauca.",
+      "cafes": "Ruta de cafés de Popayán",
+      "cafesResumen": "Cafés de especialidad, métodos filtrados y sabores del Cauca."
+    }
+  },
+  "sabores": {
+    "titulo": "Sabores del Cauca",
+    "resumen": "Pipián, carantanta, champús y dulces payaneses.",
+    "descubrir": "Descubrir los sabores",
+    "cocina": "Cocina tradicional payanesa",
+    "ubicacion": "Preparaciones tradicionales de Popayán y el Cauca",
+    "descripcion": "Una muestra de sabores que se encuentran en la mesa payanesa: maíz, pipián, preparaciones de amasijo y bebidas tradicionales. Las recetas cambian entre familias y establecimientos; pregunta por los ingredientes y la disponibilidad del día.",
+    "portadaNota": "Imagen ilustrativa generada con IA; no representa un restaurante ni platos fotografiados.",
+    "nota": "Esta selección es una guía cultural, no un menú ni una garantía de disponibilidad. Consulta directamente con cada establecimiento por ingredientes, preparación y opciones alimentarias.",
+    "empanadas": {
+      "categoria": "Salado · maíz y pipián",
+      "titulo": "Empanaditas de pipián",
+      "historia": "Pequeñas empanadas de masa de maíz, tradicionalmente rellenas de pipián, una preparación payanesa de papa, maní y guiso. Suelen servirse con ají de maní."
+    },
+    "tamal": {
+      "categoria": "Salado · envuelto en hoja",
+      "titulo": "Tamal de pipián",
+      "historia": "Una versión local del tamal que combina masa y relleno de pipián, cocidos envueltos en hoja. Es una preparación casera que puede variar según la receta."
+    },
+    "carantanta": {
+      "categoria": "Amasijo · maíz",
+      "titulo": "Carantanta",
+      "historia": "Láminas crujientes de maíz, tradicionalmente obtenidas durante la preparación de la masa. Se comen solas o acompañadas de sopas y otros platos."
+    },
+    "champus": {
+      "categoria": "Bebida tradicional",
+      "titulo": "Champús",
+      "historia": "Bebida espesa y refrescante a base de maíz y frutas, como lulo y piña, con panela y especias. La receta y su consistencia cambian de una casa a otra."
+    },
+    "aplanchados": {
+      "categoria": "Dulce · repostería",
+      "titulo": "Aplanchados",
+      "historia": "Hojaldres delgados y crujientes cubiertos con glaseado dulce, conocidos como uno de los amasijos tradicionales de Popayán."
+    }
+  },
+  "saboresPagina": {
+    "titulo": "Sabores de Popayán",
+    "descripcion": "Restaurantes, cafés y cocinas tradicionales del Cauca.",
+    "busquedaLabel": "Buscar restaurantes, cafés o platos",
+    "busquedaPlaceholder": "Busca un lugar, plato o dirección",
+    "ciudadLabel": "Seleccionar ciudad",
+    "todasCiudades": "Todas las ciudades",
+    "buscar": "Buscar",
+    "destacadosEyebrow": "Popayán y sus alrededores",
+    "destacadosTitulo": "Lugares destacados para comer",
+    "destacadosTexto": "Seleccionados entre los negocios aprobados según valoración y presencia pública.",
+    "filtroCategoria": "Filtrar por categoría",
+    "orden": "Orden:",
+    "recientes": "Recientes",
+    "destacados": "Destacados",
+    "mejorCalificados": "Mejor calificados",
+    "precio": "Precio:",
+    "todos": "Todos",
+    "hasta10": "Hasta $10.000",
+    "de10a30": "$10.000–$30.000",
+    "mas30": "Más de $30.000",
+    "ctaTitulo": "¿Tienes un restaurante o puesto de comida?",
+    "ctaTexto": "Comparte tu propuesta con quienes quieren descubrir la cocina caucana.",
+    "comoFunciona": "Ver cómo funciona para negocios",
+    "registrarNegocio": "Registrar mi negocio",
+    "categorias": {
+      "tradicional": "Tradicional",
+      "rapida": "Rápida",
+      "parrilla": "Parrilla",
+      "pizza": "Pizza",
+      "sushi": "Sushi",
+      "postres": "Postres",
+      "cafe": "Café",
+      "bebidas": "Bebidas",
+      "vegetariana": "Veggie",
+      "otro": "Otro"
+    },
+    "sinDestacados": "Aún no hay negocios aprobados destacados.",
+    "errorDestacados": "No fue posible cargar los lugares destacados.",
+    "cargandoDestacados": "Cargando lugares destacados...",
+    "filtros": "Filtros de negocios",
+    "cargarMas": "Cargar más lugares",
+    "etiquetaDestacado": "Destacado",
+    "precioNoDisponible": "Precio no disponible",
+    "direccionNoDisponible": "Dirección no disponible",
+    "promedio": "promedio",
+    "verMenu": "Consulta menú, platos y horarios en la ficha del negocio.",
+    "verPrecios": "Ver precios",
+    "verInformacion": "Ver información del lugar",
+    "ariaCalificacion": "{n} de 5 estrellas",
+    "contador": "{n} {unidad}",
+    "contadorConTotal": "{n} {unidad} de {total}",
+    "errorCargaMensaje": "No fue posible cargar los negocios. Intenta nuevamente.",
+    "sinFiltrosCargados": "No encontramos lugares con esos filtros en los resultados cargados. Puedes cargar más lugares o cambiar la búsqueda.",
+    "sinNegocios": "No encontramos negocios con esos filtros. Prueba con otra búsqueda o categoría.",
+    "unLugar": "lugar mostrado",
+    "variosLugares": "lugares mostrados",
+    "cargando": "Cargando negocios...",
+    "errorCarga": "Error al cargar los negocios"
   },
   "hero": {
     "eyebrow": "Agenda Caucana · Temporada 2026",
@@ -13,6 +244,7 @@
     "subtexto": "Conciertos, arte y sabores del Cauca — todo lo que pasa esta semana en la Ciudad Blanca."
   },
   "busqueda": {
+    "label": "Buscar eventos",
     "titulo": "¿Qué hacer hoy en Popayán?",
     "subtitulo": "Conciertos, arte, gastronomía y más — toda la agenda cultural en un solo lugar.",
     "placeholder": "Buscar eventos, lugares o artistas...",
@@ -26,6 +258,7 @@
     "fecha": "Fecha",
     "precio": "Precio",
     "categoria": "Categoría",
+    "filtrarCategoria": "Filtrar por categoría",
     "ciudad": "Ciudad",
     "aplicar": "Aplicar filtros",
     "limpiar": "Limpiar filtros",
@@ -38,7 +271,36 @@
   },
   "rutasCulturales": {
     "titulo": "Rutas culturales",
-    "verTodas": "Ver todas →"
+    "verTodas": "Ver todas →",
+    "altColonial": "Calle del centro histórico de Popayán al atardecer",
+    "altCafe": "Ilustración generada con IA de un caficultor recolectando café en el Cauca",
+    "altSabores": "Ilustración generada con IA de una mesa con preparaciones tradicionales del Cauca",
+    "cards": {
+      "colonial": "Popayán Colonial"
+    }
+  },
+  "categoriasEvento": {
+    "cultural": "Cultural",
+    "deportes": "Deportes",
+    "educacion": "Educación",
+    "musica": "Música",
+    "arte": "Arte",
+    "gastronomia": "Gastronomía",
+    "teatro": "Teatro",
+    "cine": "Cine",
+    "talleres": "Talleres",
+    "fiestas": "Fiestas",
+    "historia": "Historia",
+    "naturaleza": "Naturaleza"
+  },
+  "explorar": {
+    "filtros": {
+      "desde": "Desde",
+      "hasta": "Hasta",
+      "gratis": "Gratis",
+      "hasta10": "Hasta $10.000",
+      "hasta30": "Hasta $30.000"
+    }
   },
   "organizadorCta": {
     "eyebrow": "Para organizadores",
@@ -50,10 +312,16 @@
   "footer": {
     "descripcion": "La cartelera cultural de la Ciudad Blanca de Popayán.",
     "explorar": "Explorar",
+    "eventosHoy": "Eventos hoy",
+    "rutasHistoricas": "Rutas históricas",
     "contacto": "Contacto y redes",
+    "prensa": "Prensa",
+    "soporte": "Soporte",
     "legal": "Legal",
     "avisoPrivacidad": "Aviso de privacidad",
     "terminos": "Términos y condiciones",
+    "creditos": "Créditos y licencias",
+    "derechosRuta": "© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.",
     "derechos": "© {year} Agenda Caucana. Todos los derechos reservados."
   },
   "chat": {
@@ -65,8 +333,11 @@
     "pensando": "Pensando...",
     "bienvenida": "¡Hola! Pregúntame por eventos, lugares o qué hacer en Popayán.",
     "error": "No pude responder. Intenta de nuevo en un momento.",
+    "busquedaCargando": "Buscando en eventos y negocios publicados…",
     "sabores": {
-      "aria": "Pregúntale a la IA"
+      "aria": "Pregúntale a la IA",
+      "bienvenida": "¿Qué te gustaría encontrar para comer en Popayán?",
+      "placeholder": "Ej: ¿Dónde comer alitas para 4 por menos de 50 mil?"
     }
   },
   "comun": {

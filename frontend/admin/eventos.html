@@ -10,130 +10,9 @@
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/dashboard.css">
-<style>
-  .tabla__vacio, .tabla__cargando, .tabla__error {
-    text-align: center;
-    padding: 1.5rem;
-    color: var(--tinta-70, #555);
-  }
-  .tabla__error { color: #b03030; }
-  .celda-subtitulo {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: var(--tinta-70, #666);
-    margin-top: 0.15rem;
-  }
-  .tabs-eventos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  .tab-eventos {
-    border: 1px solid var(--tinta-15);
-    background: var(--color-cal);
-    color: var(--tinta-70);
-    padding: 0.6rem 0.85rem;
-    font: inherit;
-    font-size: 0.85rem;
-    cursor: pointer;
-  }
-  .tab-eventos[aria-pressed="true"] {
-    border-color: var(--color-tinta);
-    background: var(--color-tinta);
-    color: var(--color-papel);
-  }
-  .modal-overlay-eventos {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: grid;
-    place-items: center;
-    padding: 1rem;
-    background: rgba(20, 18, 16, 0.65);
-    overflow-y: auto;
-  }
-  .modal-overlay-eventos[hidden] { display: none; }
-  .modal-eventos {
-    width: min(58rem, 100%);
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
-    background: var(--color-cal);
-    border: 1px solid var(--tinta-15);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
-  }
-  .modal-eventos__header, .modal-eventos__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--tinta-10);
-  }
-  .modal-eventos__footer {
-    justify-content: flex-end;
-    border-top: 1px solid var(--tinta-10);
-    border-bottom: 0;
-  }
-  .modal-eventos__header h2 { margin: 0; font-size: 1.25rem; }
-  .modal-eventos__contenido { padding: 1.25rem; }
-  .modal-eventos__detalle {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 1.5rem;
-  }
-  .modal-eventos__imagen {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    background: var(--color-papel);
-    margin-bottom: 1rem;
-  }
-  .modal-eventos__imagen[hidden] { display: none; }
-  .modal-eventos__categoria {
-    margin: 0 0 0.5rem;
-    color: var(--color-terracota);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .modal-eventos__titulo { margin: 0; font-size: 1.5rem; }
-  .modal-eventos__datos {
-    display: grid;
-    grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
-    gap: 0.65rem 0.8rem;
-    margin: 0;
-    font-size: 0.88rem;
-  }
-  .modal-eventos__datos dt { font-weight: 700; }
-  .modal-eventos__datos dd { margin: 0; overflow-wrap: anywhere; }
-  .modal-eventos__descripcion {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .modal-eventos__campo { margin-bottom: 1rem; }
-  .modal-eventos__campo label {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
-  .modal-eventos__campo select, .modal-eventos__campo textarea {
-    width: 100%;
-    padding: 0.65rem;
-    border: 1px solid var(--tinta-15);
-    background: #fff;
-    font: inherit;
-  }
-  .modal-eventos__aviso { color: var(--tinta-70); font-size: 0.9rem; }
-  .modal-eventos__confirmacion { font-weight: 600; }
-  @media (max-width: 700px) {
-    .modal-eventos__detalle { grid-template-columns: 1fr; }
-  }
-</style>
+<link rel="stylesheet" href="../css/admin.css">
 </head>
-<body>
+<body class="admin-panel">
 <div class="layout-panel">
   <aside class="sidebar" data-sidebar>
     <div class="sidebar__marca">
@@ -146,7 +25,7 @@
       <a href="negocios.html">Negocios</a>
       <a href="organizadores.html">Organizadores</a>
       <a href="#">Categorías y ciudades</a>
-      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+      <a href="#" data-logout>Cerrar sesión</a>
     </nav>
     <div class="sidebar__pie">
       <span class="avatar-inicial">AD</span>
@@ -156,12 +35,14 @@
 
   <div class="panel-principal">
     <header class="panel-header">
-      <div style="display:flex; align-items:center; gap:0.75rem;">
+      <div class="panel-header__titulo">
         <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
         <h1>Eventos</h1>
       </div>
       <div class="panel-header__acciones">
-        <button class="boton-icono" aria-label="Notificaciones"><span class="punto-notificacion"></span>🔔</button>
+        <button type="button" class="boton-icono" data-admin-notificaciones aria-label="Notificaciones" aria-expanded="false" aria-controls="admin-notificaciones-panel">
+          <span class="punto-notificacion" hidden></span>🔔
+        </button>
         <div class="panel-header__usuario"><span>Admin</span> <span class="avatar-inicial">AD</span></div>
       </div>
     </header>
@@ -175,7 +56,7 @@
             id="busquedaEventos"
             placeholder="Buscar eventos por nombre…"
             aria-label="Buscar eventos por nombre"
-            style="min-width: 16rem; padding: 0.5rem; border: 1px solid var(--tinta-15); font: inherit;"
+            class="admin-busqueda"
           />
         </div>
         <div class="tabs-eventos" role="group" aria-label="Filtrar eventos por estado">
@@ -286,6 +167,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/admin-notificaciones.js"></script>
 <script src="../js/admin.js"></script>
 </body>
 </html>

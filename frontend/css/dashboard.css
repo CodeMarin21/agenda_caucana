@@ -28,12 +28,25 @@
   border-left: 3px solid transparent;
   transition: all .15s;
 }
+.sidebar__nav [hidden] { display: none !important; }
 .sidebar__nav a:hover { color: var(--color-papel); background: rgba(241,230,211,0.04); }
 .sidebar__nav a[aria-current="page"] {
   color: var(--color-cal);
   background: rgba(181,80,43,0.15);
   border-left-color: var(--color-terracota);
   font-weight: 600;
+}
+.notificaciones-nav__contador {
+  display: inline-grid;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  padding-inline: 0.25rem;
+  border-radius: 999px;
+  background: var(--color-terracota);
+  color: var(--color-cal);
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 .sidebar__pie {
   padding: var(--espacio-md);
@@ -152,6 +165,7 @@ td.celda-secundaria { color: var(--tinta-55); }
   background: rgba(200,155,60,0.12); border: 1px solid rgba(200,155,60,0.3);
   padding: var(--espacio-md); font-size: 0.85rem; margin-bottom: var(--espacio-md);
 }
+.aviso[hidden] { display: none; }
 .aviso strong { display: block; margin-bottom: 0.2rem; }
 
 .perfil-organizador { display: grid; grid-template-columns: auto 1fr; gap: var(--espacio-lg); }
@@ -175,13 +189,14 @@ td.celda-secundaria { color: var(--tinta-55); }
 .filtros-negocios { flex-wrap: wrap; }
 .filtros-negocios select { min-width: 10.5rem; }
 .estado-carga { padding: var(--espacio-md) 0; color: var(--tinta-55); }
-.estado-error, .estado-vacio-negocios, .sin-resultados-negocios {
+.estado-error, .estado-vacio-panel, .estado-vacio-negocios, .sin-resultados-negocios {
   padding: clamp(1.5rem, 5vw, 3rem) var(--espacio-md);
   text-align: center;
 }
-.estado-error h3, .estado-vacio-negocios h3 { margin-bottom: var(--espacio-xs); font-family: var(--fuente-titulos); }
-.estado-error p, .estado-vacio-negocios > p:not(.estado-vacio-negocios__indice), .sin-resultados-negocios { color: var(--tinta-55); }
-.estado-error .boton, .estado-vacio-negocios .boton { margin-top: var(--espacio-md); }
+.estado-error h3, .estado-vacio-panel h3, .estado-vacio-negocios h3 { margin-bottom: var(--espacio-xs); font-family: var(--fuente-titulos); }
+.estado-error p, .estado-vacio-panel > p:not(.estado-vacio-panel__indice), .estado-vacio-negocios > p:not(.estado-vacio-negocios__indice), .sin-resultados-negocios { color: var(--tinta-55); }
+.estado-error .boton, .estado-vacio-panel .boton, .estado-vacio-negocios .boton { margin-top: var(--espacio-md); }
+.estado-vacio-panel__indice,
 .estado-vacio-negocios__indice {
   margin: 0 0 var(--espacio-sm);
   color: var(--color-terracota);
@@ -194,6 +209,29 @@ td.celda-secundaria { color: var(--tinta-55); }
   grid-template-columns: minmax(0, 1fr);
   gap: var(--espacio-md);
 }
+.notificaciones__contenido { padding: var(--espacio-md); }
+.notificaciones__resumen { margin-top: 0.3rem; color: var(--tinta-55); font-size: 0.8rem; }
+.notificaciones__estado { padding: var(--espacio-md) 0; color: var(--tinta-55); }
+.notificaciones__lista { display: grid; gap: var(--espacio-sm); }
+.notificacion-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espacio-md);
+  padding: var(--espacio-md);
+  border: 1px solid var(--tinta-10);
+  border-left: 4px solid var(--color-terracota);
+  background: var(--color-cal);
+}
+.notificacion-item--leida { border-left-color: var(--tinta-15); background: var(--color-papel); }
+.notificacion-item__contenido { min-width: 0; }
+.notificacion-item__cabecera { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.notificacion-item__cabecera h3 { margin: 0; font-size: 0.95rem; }
+.notificacion-item__contenido > p { margin: 0.55rem 0; color: var(--tinta-70); line-height: 1.6; overflow-wrap: anywhere; }
+.notificacion-item__fecha { color: var(--tinta-55); font-size: 0.75rem; }
+.notificacion-item__nueva { padding: 0.18rem 0.45rem; border-radius: 999px; background: rgba(181,80,43,0.12); color: var(--color-terracota); font-size: 0.65rem; font-weight: 800; }
+.notificacion-item__accion { flex-shrink: 0; }
+.notificaciones__cargar-mas { display: block; margin: var(--espacio-md) auto 0; }
 .tarjeta-negocio-panel {
   display: flex;
   min-width: 0;
@@ -258,6 +296,8 @@ td.celda-secundaria { color: var(--tinta-55); }
   .mis-negocios__encabezado h1 { font-size: 1.15rem; }
   .mis-negocios__sobretitulo { font-size: 0.58rem; }
   .bloque__acciones.filtros-negocios { width: 100%; }
+  .notificacion-item { flex-direction: column; }
+  .notificacion-item__accion { align-self: flex-start; }
   .filtros-negocios select { min-width: 0; flex: 1 1 100%; }
   .mis-negocios__contenido { padding: var(--espacio-sm); }
 }

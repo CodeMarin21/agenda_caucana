@@ -5,11 +5,40 @@
  * cuando la API no está disponible.
  */
 (function () {
+  const traducir = (_clave, respaldo) => respaldo;
+  const formatoPrecio = (valor) => new Intl.NumberFormat(
+    { es: 'es-CO', en: 'en-US', fr: 'fr-FR' }[AC_API.getLocale()] || 'es-CO',
+    { style: 'currency', currency: 'COP', maximumFractionDigits: 0 },
+  ).format(Number(valor));
+  const categoriasNegocio = {
+    TRADICIONAL_CAUCANA: 'tradicional',
+    COMIDA_RAPIDA: 'rapida',
+    PARRILLA: 'parrilla',
+    PIZZA: 'pizza',
+    SUSHI: 'sushi',
+    POSTRES: 'postres',
+    CAFETERIA: 'cafe',
+    BEBIDAS: 'bebidas',
+    VEGETARIANA: 'vegetariana',
+    OTRO: 'otro',
+  };
+  const etiquetaCategoriaNegocio = (categoria) => {
+    const valor = String(categoria || '');
+    const clave = categoriasNegocio[valor.toUpperCase()];
+    return clave
+      ? traducir(`saboresPagina.categorias.${clave}`, valor.replaceAll('_', ' '))
+      : valor.replaceAll('_', ' ');
+  };
   const grid = document.querySelector('[data-grid-eventos]');
   const contenedorPildoras = document.querySelector('[data-pildoras]');
   const contadorResultados = document.querySelector('[data-contador-resultados]');
   const formBusqueda = document.querySelector('[data-form-busqueda]');
   const inputBusqueda = document.querySelector('[data-input-busqueda]');
+  const filtroDesde = document.querySelector('[data-evento-desde]');
+  const filtroHasta = document.querySelector('[data-evento-hasta]');
+  const filtroPrecio = document.querySelector('[data-evento-precio]');
+  const filtroOrden = document.querySelector('[data-evento-orden]');
+  const limpiarFiltros = document.querySelector('[data-limpiar-filtros-eventos]');
 
   function crearTarjetaNegocio(negocio) {
     const tarjeta = document.createElement('a');
@@ -36,12 +65,12 @@
 
     const categoria = document.createElement('span');
     categoria.className = 'tarjeta-negocio__categoria';
-    categoria.textContent = String(negocio.categoria || '').replaceAll('_', ' ');
+    categoria.textContent = etiquetaCategoriaNegocio(negocio.categoria);
     imagen.appendChild(categoria);
     if (negocio.destacado) {
       const destacado = document.createElement('span');
       destacado.className = 'tarjeta-negocio__destacado';
-      destacado.textContent = 'Destacado';
+      destacado.textContent = traducir('home.destacado', 'Destacado');
       imagen.appendChild(destacado);
     }
 
@@ -71,8 +100,8 @@
     const precio = document.createElement('p');
     precio.className = 'tarjeta-negocio__precio';
     precio.textContent = negocio.precioPromedio == null
-      ? 'Precio no disponible'
-      : `$${Number(negocio.precioPromedio).toLocaleString('es-CO')} promedio`;
+      ? traducir('home.precioNoDisponible', 'Precio no disponible')
+      : `${formatoPrecio(negocio.precioPromedio)} ${traducir('home.promedio', 'promedio')}`;
     cuerpo.appendChild(precio);
     tarjeta.append(imagen, cuerpo);
     return tarjeta;
@@ -84,13 +113,13 @@
       const respuesta = await AC_API.listarNegocios({ orden: 'mejor-calificados', limite: 4 });
       const negocios = respuesta.negocios || respuesta.data || [];
       if (!Array.isArray(negocios) || negocios.length === 0) {
-        gridNegociosDestacados.textContent = 'Pronto encontrarás aquí lugares para disfrutar la cocina caucana.';
+        gridNegociosDestacados.textContent = traducir('home.proximamenteNegocios', 'Pronto encontrarás aquí lugares para disfrutar la cocina caucana.');
         return;
       }
       gridNegociosDestacados.replaceChildren(...negocios.slice(0, 4).map(crearTarjetaNegocio));
     } catch (error) {
       console.error('No se pudieron cargar los negocios destacados:', error);
-      gridNegociosDestacados.textContent = 'No fue posible cargar los negocios en este momento.';
+      gridNegociosDestacados.textContent = traducir('home.errorNegocios', 'No fue posible cargar los negocios en este momento.');
     }
   }
 
@@ -100,10 +129,12 @@
 
   let categoriaActiva = null;
   let terminoBusqueda = '';
+  let ultimaSolicitudEventos = 0;
 
   function formatearFecha(iso) {
     try {
-      return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', hour: 'numeric', minute: '2-digit' });
+      const locale = { es: 'es-CO', en: 'en-US', fr: 'fr-FR' }[AC_API.getLocale()] || 'es-CO';
+      return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'short', hour: 'numeric', minute: '2-digit' });
     } catch { return iso; }
   }
 
@@ -113,8 +144,8 @@
       : Number(evento.precioReferencial);
     const gratis = precio === 0;
     const etiqueta = gratis
-      ? '<span class="etiqueta-flotante etiqueta-gratis">Gratis</span>'
-      : `<span class="etiqueta-flotante etiqueta-precio">$${precio.toLocaleString('es-CO')}</span>`;
+      ? `<span class="etiqueta-flotante etiqueta-gratis">${traducir('home.gratis', 'Gratis')}</span>`
+      : `<span class="etiqueta-flotante etiqueta-precio">${formatoPrecio(precio)}</span>`;
     return `
       <a class="tarjeta-evento" href="evento.html?slug=${encodeURIComponent(evento.slug)}">
         <div class="tarjeta-evento__imagen">
@@ -133,24 +164,34 @@
   }
 
   async function cargarEventos() {
+    const solicitud = ++ultimaSolicitudEventos;
     try {
       const params = {};
-      params.orden = 'recientes';
+      params.orden = filtroOrden?.value || 'fecha';
       if (categoriaActiva) params.categoriaSlug = categoriaActiva;
       if (terminoBusqueda) params.q = terminoBusqueda;
+      if (filtroDesde?.value) params.desde = filtroDesde.value;
+      if (filtroHasta?.value) params.hasta = filtroHasta.value;
+      if (filtroPrecio?.value) params.precioMax = filtroPrecio.value;
       const respuesta = await AC_API.listarEventos(params);
+      if (solicitud !== ultimaSolicitudEventos) return;
       const eventos = respuesta.eventos || respuesta.data || respuesta;
       if (!Array.isArray(eventos) || eventos.length === 0) {
-        grid.innerHTML = '<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">No encontramos eventos con ese filtro. Prueba con otra categoría o búsqueda.</p>';
-        if (contadorResultados) contadorResultados.textContent = '0 eventos encontrados';
+        grid.innerHTML = `<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">${traducir('home.sinEventos', 'No encontramos eventos con ese filtro. Prueba con otra categoría o búsqueda.')}</p>`;
+        if (contadorResultados) contadorResultados.textContent = traducir('home.ceroEventos', '0 eventos encontrados');
         return;
       }
       grid.innerHTML = eventos.map(tarjetaHtml).join('');
-      if (contadorResultados) contadorResultados.textContent = `${eventos.length} eventos destacados encontrados`;
+      if (contadorResultados) {
+        const clave = eventos.length === 1 ? 'home.unEvento' : 'home.variosEventos';
+        contadorResultados.textContent = traducir(clave, `${eventos.length} eventos destacados encontrados`)
+          .replace('{n}', String(eventos.length));
+      }
     } catch (error) {
+      if (solicitud !== ultimaSolicitudEventos) return;
       console.error('No se pudieron cargar las publicaciones desde la API:', error);
-      grid.innerHTML = '<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">No se pudieron cargar las publicaciones. Verifica que el backend esté iniciado e intenta recargar la página.</p>';
-      if (contadorResultados) contadorResultados.textContent = 'Error al cargar publicaciones';
+      grid.innerHTML = `<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">${traducir('home.errorCarga', 'No se pudieron cargar las publicaciones. Verifica que el backend esté iniciado e intenta recargar la página.')}</p>`;
+      if (contadorResultados) contadorResultados.textContent = traducir('home.errorContador', 'Error al cargar publicaciones');
     }
   }
 
@@ -164,8 +205,10 @@
         return;
       }
 
-      const pildoraTodos = '<button class="pildora" type="button" data-categoria="" aria-pressed="true" data-i18n="filtros.todos">Todos</button>';
-      const resto = categorias.map((cat) => `<button class="pildora" type="button" data-categoria="${cat.slug}" aria-pressed="false">${cat.nombre}</button>`).join('');
+      const pildoraTodos = `<button class="pildora" type="button" data-categoria="" aria-pressed="true">${traducir('filtros.todos', 'Todos')}</button>`;
+      const resto = categorias.map((cat) => {
+        return `<button class="pildora" type="button" data-categoria="${cat.slug}" aria-pressed="false">${cat.nombre}</button>`;
+      }).join('');
       contenedorPildoras.innerHTML = pildoraTodos + resto;
       activarEscuchaPildoras();
     } catch (error) {
@@ -191,6 +234,24 @@
       cargarEventos();
     });
   }
+
+  [filtroDesde, filtroHasta, filtroPrecio, filtroOrden].forEach((filtro) => {
+    filtro?.addEventListener('change', cargarEventos);
+  });
+  limpiarFiltros?.addEventListener('click', () => {
+    if (filtroDesde) filtroDesde.value = '';
+    if (filtroHasta) filtroHasta.value = '';
+    if (filtroPrecio) filtroPrecio.value = '';
+    if (filtroOrden) filtroOrden.value = 'fecha';
+    if (inputBusqueda) inputBusqueda.value = '';
+    terminoBusqueda = '';
+    cargarEventos();
+  });
+  document.addEventListener('ac:locale-cambiado', () => {
+    cargarNegociosDestacados();
+    cargarCategorias();
+    cargarEventos();
+  });
 
   cargarCategorias();
   cargarEventos();

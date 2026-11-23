@@ -13,8 +13,6 @@
       "direccion": "Lugares participantes",
       "precioReferencial": 0,
       "esMayorDeEdad": false,
-      "urlExternaBoletas": null,
-      "gestionaTaquillaInterna": false,
       "slug": "salchifest-2026-popayan-1792464138106",
       "destacado": false,
       "categoria": {
@@ -47,8 +45,6 @@
       "direccion": "Cra. 11 #3-45",
       "precioReferencial": 0,
       "esMayorDeEdad": false,
-      "urlExternaBoletas": "http://ciudadlibro.com/",
-      "gestionaTaquillaInterna": false,
       "slug": "feria-del-libro-1792002228232",
       "destacado": true,
       "categoria": {
@@ -81,8 +77,6 @@
       "direccion": "Carrera 9 # 11N-17, barrio Santa Clara",
       "precioReferencial": 15000,
       "esMayorDeEdad": false,
-      "urlExternaBoletas": "https://latiquetera.com/site/kany-garcia-tour-2026",
-      "gestionaTaquillaInterna": false,
       "slug": "velada-del-barrio-vol-2-1791996708878",
       "destacado": false,
       "categoria": {

@@ -10,8 +10,9 @@
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/admin.css">
 </head>
-<body>
+<body class="admin-panel">
 <div class="layout-panel">
   <aside class="sidebar" data-sidebar>
     <div class="sidebar__marca">
@@ -22,8 +23,9 @@
       <a href="resumen.html" aria-current="page">Resumen</a>
       <a href="eventos.html">Eventos</a>
       <a href="organizadores.html">Organizadores</a>
+      <a href="negocios.html">Negocios</a>
       <a href="#">Categorías y ciudades</a>
-      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+      <a href="#" data-logout>Cerrar sesión</a>
     </nav>
     <div class="sidebar__pie">
       <span class="avatar-inicial">AD</span>
@@ -33,18 +35,20 @@
 
   <div class="panel-principal">
     <header class="panel-header">
-      <div style="display:flex; align-items:center; gap:0.75rem;">
+      <div class="panel-header__titulo">
         <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
         <h1>Resumen</h1>
       </div>
       <div class="panel-header__acciones">
-        <button class="boton-icono" aria-label="Notificaciones"><span class="punto-notificacion"></span>🔔</button>
+        <button type="button" class="boton-icono" data-admin-notificaciones aria-label="Notificaciones" aria-expanded="false" aria-controls="admin-notificaciones-panel">
+          <span class="punto-notificacion" hidden></span>🔔
+        </button>
         <div class="panel-header__usuario"><span>Admin</span> <span class="avatar-inicial">AD</span></div>
       </div>
     </header>
 
     <div class="panel-cuerpo">
-      <p style="margin-bottom:1.5rem; color:var(--tinta-70); font-family:var(--fuente-titulos, serif); font-size:1.2rem;" data-admin-nombre>
+      <p class="admin-bienvenida" data-admin-nombre>
         ¡Bienvenido!
       </p>
 
@@ -89,6 +93,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/admin-notificaciones.js"></script>
 <script src="../js/admin.js"></script>
 </body>
 </html>

@@ -468,6 +468,8 @@
     document.querySelector('[data-negocio-categoria]').textContent = etiquetaCategoria(negocio.categoria);
     document.querySelector('[data-negocio-nombre]').textContent = negocio.nombre;
     document.querySelector('[data-negocio-descripcion]').textContent = negocio.descripcion || 'Este negocio aún no tiene descripción.';
+    document.querySelector('[data-negocio-organizador]').textContent =
+      negocio.organizador?.nombreEntidad || 'Sin organizador asociado';
     document.querySelector('[data-negocio-horario]').textContent = negocio.horarioAtencion || 'Horario no disponible.';
     document.querySelector('[data-negocio-horario-panel]').textContent = negocio.horarioAtencion || 'Horario no disponible.';
     document.querySelector('[data-negocio-precio]').textContent = `${formatearPrecio(negocio.precioPromedio)}${negocio.precioPromedio == null ? '' : ' promedio'}`;

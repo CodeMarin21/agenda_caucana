@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Rol } from '@prisma/client';
 import { prisma } from '../../config/database';
+import { inferirEspecialidad } from '../organizadores/especialidad.util';
 
 interface TokenPair {
   accessToken: string;
@@ -61,7 +62,19 @@ export class AuthService {
     email: string,
     password: string
   ): Promise<{ usuario: object; tokens: TokenPair }> {
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
+    const usuario = await prisma.usuario.findUnique({
+      where: { email },
+      include: {
+        organizador: {
+          select: {
+            especialidad: true,
+            nombreEntidad: true,
+            descripcion: true,
+            _count: { select: { eventos: true, negocios: true } },
+          },
+        },
+      },
+    });
 
     if (!usuario || !usuario.activo) {
       throw new Error('Credenciales incorrectas');
@@ -80,6 +93,9 @@ export class AuthService {
         nombre: usuario.nombre,
         email: usuario.email,
         rol: usuario.rol,
+        especialidad: usuario.organizador
+          ? inferirEspecialidad(usuario.organizador.especialidad, usuario.organizador._count, usuario.organizador)
+          : null,
       },
       tokens,
     };
@@ -120,7 +136,7 @@ export class AuthService {
         ...USUARIO_PUBLICO_SELECT,
         activo: true,
         organizador: {
-          select: { id: true, nombreEntidad: true, estado: true },
+          select: { id: true, nombreEntidad: true, estado: true, especialidad: true },
         },
       },
     });

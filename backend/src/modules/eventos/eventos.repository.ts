@@ -10,18 +10,36 @@ export class EventosRepository {
     pagina = 1,
     limite = 12,
     orden: 'fecha' | 'recientes' = 'fecha',
+    q?: string,
   ) {
     const skip = (pagina - 1) * limite;
+    const termino = q?.trim();
     const filtroPublico: Prisma.EventoWhereInput = {
       AND: [
         { estadoPublicacion: 'APROBADO' },
         {
           OR: [
             { organizadorId: null },
-            { organizador: { is: { estado: 'VERIFICADO', vetado: false } } },
+            {
+              organizador: {
+                is: { especialidad: 'EVENTOS', estado: 'VERIFICADO', vetado: false },
+              },
+            },
           ],
         },
         where,
+        ...(termino ? [{
+          OR: [
+            { titulo: { contains: termino, mode: 'insensitive' as const } },
+            { slug: { contains: termino, mode: 'insensitive' as const } },
+            { descripcion: { contains: termino, mode: 'insensitive' as const } },
+            { direccion: { contains: termino, mode: 'insensitive' as const } },
+            { lugar: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
+            { lugar: { is: { direccion: { contains: termino, mode: 'insensitive' as const } } } },
+            { categoria: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
+            { ciudad: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
+          ],
+        }] : []),
       ],
     };
 
@@ -64,7 +82,6 @@ export class EventosRepository {
         lugar:        true,
         ciudad:       true,
         organizador:  { include: { usuario: { select: { nombre: true, email: true } } } },
-        boletas:      true,
       },
     });
   }
@@ -76,6 +93,7 @@ export class EventosRepository {
         categoria: true,
         lugar:     true,
         ciudad:    true,
+        organizador: { select: { id: true, nombreEntidad: true } },
       },
     });
   }
@@ -86,7 +104,8 @@ export class EventosRepository {
       include: {
         categoria:   { select: { nombre: true } },
         lugar:       { select: { nombre: true } },
-        organizador: { select: { nombreEntidad: true } },
+        ciudad:      { select: { nombre: true } },
+        organizador: { select: { id: true, nombreEntidad: true } },
       },
       orderBy: { creadoEn: 'asc' },
     });
@@ -97,6 +116,8 @@ export class EventosRepository {
       include: {
         categoria: { select: { nombre: true } },
         lugar:     { select: { nombre: true } },
+        ciudad:    { select: { nombre: true } },
+        organizador: { select: { id: true, nombreEntidad: true } },
       },
       orderBy: { creadoEn: 'desc' },
     });
@@ -195,5 +216,59 @@ export class EventosRepository {
 
       await tx.evento.delete({ where: { id } });
     });
+  }
+
+  async deleteFinalizedEvents(now: Date) {
+    const candidates = await prisma.evento.findMany({
+      where: {
+        fechaFin: { not: null, lt: now },
+        estadoPublicacion: 'APROBADO',
+        organizadorId: { not: null },
+      },
+      select: {
+        id: true,
+        titulo: true,
+        publicIdImagen: true,
+        organizadorId: true,
+      },
+    });
+
+    const deleted = [];
+    for (const evento of candidates) {
+      const organizadorId = evento.organizadorId;
+      if (organizadorId === null) continue;
+
+      const wasDeleted = await prisma.$transaction(async (tx) => {
+        const result = await tx.evento.deleteMany({
+          where: {
+            id: evento.id,
+            fechaFin: { not: null, lt: now },
+            estadoPublicacion: 'APROBADO',
+            organizadorId,
+          },
+        });
+        if (result.count === 0) return false;
+
+        const organizador = await tx.organizador.findUnique({
+          where: { id: organizadorId },
+          select: { usuarioId: true },
+        });
+        if (organizador) {
+          await tx.notificacion.create({
+            data: {
+              usuarioId: organizador.usuarioId,
+              tipo: TipoNotificacion.EVENTO_ELIMINADO,
+              mensaje: `Tu evento "${evento.titulo}" finalizó y se eliminó automáticamente según la fecha de fin.`,
+            },
+          });
+        }
+
+        return true;
+      });
+
+      if (wasDeleted) deleted.push(evento);
+    }
+
+    return deleted;
   }
 }

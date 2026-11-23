@@ -14,6 +14,7 @@ const chatLimiter = rateLimit({
   message: { error: 'Demasiadas consultas al asistente. Espera unos minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (_req) => process.env.NODE_ENV !== 'production',
 });
 
 // POST /api/chat

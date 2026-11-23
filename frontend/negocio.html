@@ -34,11 +34,8 @@
           <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
         </div>
       </div>
-      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
-        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
-      </select>
       <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
-      <a href="organizador/registro.html" class="boton boton-primario">Registrar negocio</a>
+      <a href="organizador/registro.html?especialidad=GASTRONOMIA" class="boton boton-primario">Crear cuenta en Sabores</a>
     </div>
     <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
   </div>
@@ -48,7 +45,7 @@
     <a href="rutas.html">Rutas</a>
     <a href="sabores.html" aria-current="page">Sabores</a>
     <a href="login.html">Mi perfil</a>
-    <a href="organizador/registro.html" class="boton boton-primario">Registrar negocio</a>
+    <a href="organizador/registro.html?especialidad=GASTRONOMIA" class="boton boton-primario">Crear cuenta en Sabores</a>
   </div>
 </header>
 
@@ -94,6 +91,7 @@
         <div data-contacto-whatsapp hidden><dt>WhatsApp</dt><dd><a data-negocio-whatsapp target="_blank" rel="noopener noreferrer">Escribir por WhatsApp</a></dd></div>
         <div data-contacto-instagram hidden><dt>Instagram</dt><dd><a data-negocio-instagram target="_blank" rel="noopener noreferrer">Ver perfil</a></dd></div>
         <div><dt>Precio promedio</dt><dd data-negocio-precio></dd></div>
+        <div><dt>Organizador</dt><dd data-negocio-organizador></dd></div>
       </dl>
       <p><strong>Horario de atención</strong></p>
       <p class="negocio-panel__horario" data-negocio-horario-panel></p>
@@ -183,7 +181,6 @@
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
-<script src="js/i18n.js"></script>
 <script src="js/accesibilidad.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/negocio.js"></script>

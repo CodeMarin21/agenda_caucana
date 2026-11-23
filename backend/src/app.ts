@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -17,6 +18,7 @@ import organizadoresRoutes                   from './modules/organizadores/organ
 import suscripcionesRoutes                   from './modules/usuarios/usuarios.routes';
 import { eventoAprobadoSubject }             from './patterns/observer/EventoAprobadoSubject';
 import { NotificacionSuscriptoresObserver }  from './modules/notificaciones/notificaciones.service';
+import notificacionesRoutes from './modules/notificaciones/notificaciones.routes';
 setupUncaughtHandlers();
 import uploadRoutes from './modules/upload/upload.routes';
 import negociosRoutes from './modules/negocios/negocios.routes';
@@ -93,11 +95,22 @@ app.use(rateLimit({
   message:  { error: 'Demasiadas peticiones. Intenta en unos minutos.' },
   standardHeaders: true,
   legacyHeaders:   false,
+  skip: (_req) => process.env.NODE_ENV !== 'production',
 }));
 
 // ── 5. Body parsers ─────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads'), {
+    dotfiles: 'deny',
+    index: false,
+    immutable: true,
+    maxAge: '1y',
+    setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff'),
+  }));
+}
 
 // ── 6. i18n ─────────────────────────────────────────────────────
 app.use(i18nMiddleware);
@@ -134,6 +147,7 @@ app.use('/api/chat',          aiRoutes);
 app.use('/api/categorias',    categoriasRoutes);
 app.use('/api/ciudades',      ciudadesRoutes);
 app.use('/api/organizadores', organizadoresRoutes);
+app.use('/api/notificaciones', notificacionesRoutes);
 app.use('/api/suscripciones', suscripcionesRoutes);
 app.use('/api/upload',        uploadRoutes);
 app.use('/api/negocios',      negociosRoutes);

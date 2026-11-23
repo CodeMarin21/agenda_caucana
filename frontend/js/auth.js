@@ -11,6 +11,8 @@
  * de logout automáticamente. No hace falta enganchar el botón a mano.
  */
 
+let acPaginaProtegida = false;
+
 /**
  * Detecta la ruta relativa al login según dónde esté montada la página.
  *  - /admin|organizador/... → ../login.html
@@ -40,6 +42,7 @@ function acDestinoSiguiente() {
  * se detecta automáticamente.
  */
 function acProtegerPagina(rutaLogin) {
+  acPaginaProtegida = true;
   const token = AC_API.getToken();
   if (!token) {
     window.location.href = rutaLogin || acRutaLogin();
@@ -47,6 +50,16 @@ function acProtegerPagina(rutaLogin) {
   }
   return true;
 }
+
+window.addEventListener('pageshow', (evento) => {
+  if (!evento.persisted || !acPaginaProtegida) return;
+  if (!AC_API.getToken()) {
+    document.documentElement.style.visibility = 'hidden';
+    window.location.replace(acRutaLogin());
+    return;
+  }
+  window.location.reload();
+});
 
 /**
  * Cierra sesión de forma completa:
@@ -82,6 +95,17 @@ document.addEventListener('click', (evento) => {
   const formLogin = document.querySelector('[data-form-login]');
   if (formLogin) {
     const mensaje = document.querySelector('[data-login-mensaje]');
+    const especialidadLogin = new URLSearchParams(window.location.search).get('especialidad');
+    const pieRegistro = formLogin.parentElement?.querySelector('.auth-card__pie:last-of-type');
+    const subtituloLogin = formLogin.parentElement?.querySelector('.auth-card__subtitulo');
+    if (especialidadLogin === 'GASTRONOMIA') {
+      if (subtituloLogin) subtituloLogin.textContent = 'Para publicar y gestionar tu negocio en Sabores.';
+      if (pieRegistro) {
+        pieRegistro.innerHTML =
+          '¿Aún no tienes cuenta para Sabores? ' +
+          '<a href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html">Regístrate como dueño de negocio</a>';
+      }
+    }
     formLogin.addEventListener('submit', async (evento) => {
       evento.preventDefault();
       const datos = new FormData(formLogin);
@@ -103,7 +127,13 @@ document.addEventListener('click', (evento) => {
         let destino;
         switch (rol) {
           case 'ADMIN':        destino = 'admin/resumen.html';            break;
-          case 'ORGANIZADOR':  destino = 'organizador/mis-eventos.html';  break;
+          case 'ORGANIZADOR':
+            destino = respuesta.usuario?.especialidad === 'GASTRONOMIA'
+              ? 'organizador/mis-negocios.html'
+              : respuesta.usuario?.especialidad === 'EVENTOS'
+                ? 'organizador/mis-eventos.html'
+                : 'organizador/perfil.html';
+            break;
           default:             destino = 'index.html';
         }
         destino = acDestinoSiguiente() || destino;
@@ -120,6 +150,31 @@ document.addEventListener('click', (evento) => {
   const formRegistro = document.querySelector('[data-form-registro-organizador]');
   if (formRegistro) {
     const mensaje = document.querySelector('[data-registro-mensaje]');
+    const parametroEspecialidad = new URLSearchParams(window.location.search).get('especialidad');
+    const especialidad = parametroEspecialidad === 'GASTRONOMIA' ? 'GASTRONOMIA' : 'EVENTOS';
+    const campoEspecialidad = formRegistro.querySelector('[name="especialidad"]');
+    if (campoEspecialidad) campoEspecialidad.value = especialidad;
+    const tituloRegistro = document.querySelector('[data-registro-titulo]');
+    const subtituloRegistro = document.querySelector('[data-registro-subtitulo]');
+    const botonRegistro = document.querySelector('[data-registro-boton]');
+    if (tituloRegistro) {
+      tituloRegistro.textContent = especialidad === 'GASTRONOMIA'
+        ? 'Crea tu cuenta para publicar en Sabores'
+        : 'Crea tu cuenta de organizador de eventos';
+    }
+    if (botonRegistro) {
+      botonRegistro.textContent = especialidad === 'GASTRONOMIA'
+        ? 'Crear cuenta para Sabores'
+        : 'Crear cuenta de organizador de eventos';
+    }
+    document.querySelectorAll('[data-registro-ayuda]').forEach((enlace) => {
+      enlace.hidden = enlace.dataset.registroAyuda !== especialidad;
+    });
+    if (subtituloRegistro) {
+      subtituloRegistro.textContent = especialidad === 'GASTRONOMIA'
+        ? 'Tu cuenta gastronómica queda habilitada para publicar negocios inmediatamente.'
+        : 'Después de registrarte, un administrador verificará tu perfil antes de que puedas publicar eventos.';
+    }
     formRegistro.addEventListener('submit', async (evento) => {
       evento.preventDefault();
       const datos = new FormData(formRegistro);
@@ -133,12 +188,15 @@ document.addEventListener('click', (evento) => {
           nombre:        datos.get('nombreContacto'),
           email:         datos.get('email'),
           telefono:      datos.get('telefono'),
-          password:      datos.get('password')
+          password:      datos.get('password'),
+          especialidad:  datos.get('especialidad')
         };
         const respuesta = await AC_API.registrarOrganizador(payload);
         const token = respuesta.token || respuesta.accessToken || respuesta.jwt;
         if (token) AC_API.setToken(token);
-        mensaje.textContent = '✓ Cuenta creada. Tu solicitud queda en espera de verificación por un administrador.';
+        mensaje.textContent = especialidad === 'GASTRONOMIA'
+          ? '✓ Cuenta creada. Ya puedes iniciar sesión y publicar tu negocio inmediatamente.'
+          : '✓ Cuenta creada. Tu perfil de eventos queda pendiente de verificación administrativa.';
         mensaje.classList.add('auth-card__mensaje--ok');
         formRegistro.reset();
         const destinoSiguiente = acDestinoSiguiente();

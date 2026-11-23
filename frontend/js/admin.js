@@ -70,7 +70,7 @@
 
     const renderOrganizadores = (lista) => {
       if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="tabla__vacio">No hay organizadores registrados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="tabla__vacio">No hay organizadores registrados.</td></tr>';
         return;
       }
       tbody.innerHTML = lista.map((o) => {
@@ -90,29 +90,42 @@
           botones.push(`<button class="boton boton-sm boton-rechazo" data-accion="vetar" data-id="${o.id}">Vetar</button>`);
         }
         const eventos = o._count?.eventos ?? 0;
+        const negocios = o._count?.negocios ?? 0;
+        const especialidad = o.especialidad === 'GASTRONOMIA'
+          ? 'Gastronomía'
+          : o.especialidad === 'EVENTOS'
+            ? 'Eventos'
+            : 'Sin definir';
         return `
           <tr data-id="${o.id}">
             <td class="celda-titulo">
               ${esc(o.nombreEntidad)}
-              <span class="celda-subtitulo">${eventos} evento${eventos === 1 ? '' : 's'} publicado${eventos === 1 ? '' : 's'}</span>
+              <span class="celda-subtitulo">${eventos} eventos · ${negocios} negocios</span>
             </td>
             <td class="celda-secundaria">${esc(o.usuario?.email || '—')}</td>
             <td class="celda-secundaria">${fmtFecha(o.creadoEn)}</td>
             <td>${badgeEstado(o.estado, o.vetado)}</td>
+            <td><span class="estado ${o.especialidad === 'GASTRONOMIA' ? 'estado-verificado' : ''}">${esc(especialidad)}</span></td>
             <td class="columna-acciones">${botones.join(' ')}</td>
           </tr>`;
       }).join('');
     };
 
     const cargarOrganizadores = async () => {
-      tbody.innerHTML = '<tr><td colspan="5" class="tabla__cargando">Cargando organizadores…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="tabla__cargando">Cargando organizadores…</td></tr>';
       try {
         organizadores = await apiArray(() => AC_API.listarOrganizadores());
         renderOrganizadores(organizadores);
+        return true;
       } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="5" class="tabla__error">No se pudieron cargar los organizadores: ${esc(error.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="tabla__error">No se pudieron cargar los organizadores: ${esc(error.message)}</td></tr>`;
+        return false;
       }
     };
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) void cargarOrganizadores();
+    });
 
     if (inputBuscar) {
       inputBuscar.addEventListener('input', () => {
@@ -205,10 +218,21 @@
         ['Email',          o.usuario?.email],
         ['Teléfono',       o.telefono],
         ['NIT',            o.nit],
+        ['Tipo de entidad', o.tipoEntidad?.replaceAll('_', ' ')],
+        ['Ciudad base',    o.ciudadBase?.nombre],
+        ['Dirección',      o.direccion],
+        ['Año de fundación', o.anioFundacion],
         ['Motivo de estado', o.detalleMotivoEstado || o.motivoEstado],
         ['Descripción',    o.descripcion],
         ['Estado',         null, badgeEstado(o.estado, o.vetado)],
+        ['Especialidad elegida por el usuario', o.especialidad === 'GASTRONOMIA'
+          ? 'Gastronomía'
+          : o.especialidad === 'EVENTOS'
+            ? 'Eventos'
+            : 'Sin definir'],
+        ['Negocios publicados', (o._count?.negocios ?? 0) + ' registro(s)'],
         ['Registrado',     fmtFecha(o.creadoEn)],
+        ['Última actualización', fmtFecha(o.actualizadoEn)],
         ['Eventos',        (o._count?.eventos ?? 0) + ' publicado(s)']
       ].filter(([, v, html]) => html || (v !== null && v !== undefined && v !== ''));
 
@@ -294,6 +318,10 @@
         if (tipo === 'verificar') {
           await AC_API.verificarOrganizador(id);
         } else if (tipo === 'detalle') {
+          if (!await cargarOrganizadores()) {
+            origenBoton.disabled = false;
+            return;
+          }
           const o = organizadores.find((x) => x.id === Number(id));
           if (o) abrirModal(o);
           origenBoton.disabled = false;
@@ -496,7 +524,7 @@
             ${esc(evento.titulo || '—')}
             <span class="celda-subtitulo">${esc(evento.lugar?.nombre || evento.direccion || '—')}</span>
           </td>
-          <td class="celda-secundaria">${esc(evento.organizador?.nombreEntidad || organizadoresPorId.get(evento.organizadorId)?.nombreEntidad || (evento.organizadorId ? `Organizador #${evento.organizadorId}` : '—'))}</td>
+          <td class="celda-secundaria">${esc(evento.organizador?.nombreEntidad || organizadoresPorId.get(evento.organizadorId)?.nombreEntidad || (evento.organizadorId ? `Organizador #${evento.organizadorId}` : 'Sin organizador asociado'))}</td>
           <td>${esc(evento.categoria?.nombre || '—')}</td>
           <td class="celda-secundaria">${fmtFecha(evento.fechaInicio)}</td>
           <td>${badgeEstadoEvento(evento.estadoPublicacion)}</td>
@@ -512,9 +540,6 @@
     const abrirDetalleEvento = (evento) => {
       if (!modalDetalle || !contenidoDetalle) return;
       const imagen = urlImagenEvento(evento.imagenUrl);
-      const enlaceBoletas = evento.urlExternaBoletas
-        ? `<a href="${esc(evento.urlExternaBoletas)}" target="_blank" rel="noopener noreferrer">${esc(evento.urlExternaBoletas)}</a>`
-        : '—';
       const fechaFin = evento.fechaFin ? formatearFechaCompleta(evento.fechaFin) : '—';
       contenidoDetalle.innerHTML = `
         <div class="modal-eventos__detalle">
@@ -534,8 +559,8 @@
               <dt>Edad</dt><dd>${evento.esMayorDeEdad ? '+18 años' : 'Todas las edades'}</dd>
               <dt>Lugar</dt><dd>${esc(evento.lugar?.nombre || '—')}</dd>
               <dt>Dirección</dt><dd>${esc(evento.direccion || evento.lugar?.direccion || '—')}</dd>
-              <dt>Organizador</dt><dd>${esc(evento.organizador?.nombreEntidad || organizadoresPorId.get(evento.organizadorId)?.nombreEntidad || (evento.organizadorId ? `Organizador #${evento.organizadorId}` : '—'))}</dd>
-              <dt>URL de ticketera</dt><dd>${enlaceBoletas}</dd>
+              <dt>Ciudad</dt><dd>${esc(evento.ciudad?.nombre || '—')}</dd>
+              <dt>Organizador</dt><dd>${esc(evento.organizador?.nombreEntidad || organizadoresPorId.get(evento.organizadorId)?.nombreEntidad || (evento.organizadorId ? `Organizador #${evento.organizadorId}` : 'Sin organizador asociado'))}</dd>
             </dl>
           </div>
         </div>`;

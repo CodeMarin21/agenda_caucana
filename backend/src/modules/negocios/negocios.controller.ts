@@ -37,13 +37,15 @@ export const listarNegocios = async (req: Request, res: Response): Promise<void>
     const filtros: FiltrosNegocios = {
       categoria: query.categoria as CategoriaNegocio | undefined,
       ciudadId: query.ciudadId ? Number(query.ciudadId) : undefined,
+      precioMin: query.precioMin ? Number(query.precioMin) : undefined,
       precioMax: query.precioMax ? Number(query.precioMax) : undefined,
       orden: (query.orden as FiltrosNegocios['orden']) || 'recientes',
       pagina: query.pagina ? Number(query.pagina) : 1,
       limite: query.limite ? Number(query.limite) : 12,
       q,
     };
-    res.json(await service.listarAprobados(filtros));
+    const resultado = await service.listarAprobados(filtros);
+    res.json(resultado);
   } catch (error) {
     responderError(res, error);
   }
@@ -51,7 +53,8 @@ export const listarNegocios = async (req: Request, res: Response): Promise<void>
 
 export const obtenerNegocio = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.json(await service.obtenerPorSlug(req.params.slug));
+    const negocio = await service.obtenerPorSlug(req.params.slug);
+    res.json(negocio);
   } catch (error) {
     responderError(res, error);
   }
@@ -122,9 +125,7 @@ export const crearNegocio = async (req: Request, res: Response): Promise<void> =
     }, req.usuarioId);
 
     res.status(201).json({
-      mensaje: negocio.estadoPublicacion === 'APROBADO'
-        ? 'Negocio creado y publicado'
-        : 'Negocio enviado para revisión',
+      mensaje: 'Negocio creado y publicado',
       negocio,
     });
   } catch (error) {

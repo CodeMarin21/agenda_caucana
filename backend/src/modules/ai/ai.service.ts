@@ -12,7 +12,10 @@ import { detectIntent } from './ai.intent';
 import {
   responderEvento,
   responderEventoNoEncontrado,
+  responderEventosPorPeriodo,
   responderNegocios,
+  responderComoLlegarNegocio,
+  responderNegocioParaLlegarNoEncontrado,
 } from './catalogo.responses';
 import {
   ChatRequest,
@@ -47,20 +50,51 @@ export class AiService {
   }
 
   async chat(req: ChatRequest): Promise<ChatResponse> {
-    const { pregunta, idioma, eventoId, ip } = req;
+    const { pregunta, idioma, eventoId, negocioSlug, ip } = req;
 
     // 1. Caché: si hay hit, no gastamos cuota ni tocamos la BD
-    const cacheKey = this.buildCacheKey(pregunta, idioma, eventoId);
+    const cacheKey = this.buildCacheKey(pregunta, idioma, eventoId, negocioSlug);
     const cached = this.cache.get<ChatResponse>(cacheKey);
     if (cached) {
       this.guardarLog(pregunta, cached.respuesta, idioma, ip);
       return { ...cached, fuente: 'cache' };
     }
 
+    if (negocioSlug && this.preguntaComoLlegar(pregunta)) {
+      const negocio = await this.repository.findNegocioPublicadoPorSlug(negocioSlug);
+      const respuesta = negocio
+        ? responderComoLlegarNegocio(negocio, idioma)
+        : responderNegocioParaLlegarNoEncontrado(idioma);
+      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+    }
+
     // 2. Pre-filtrado en PostgreSQL según intención
     const intent = detectIntent(pregunta, eventoId);
 
     if (intent.type === 'EVENTO_BUSQUEDA') {
+      if (intent.periodo || intent.soloFinalizados) {
+        const eventos = intent.periodo
+          ? await this.repository.findEventosEnPeriodo(
+            intent.periodo,
+            intent.terminos,
+            intent.soloFinalizados,
+          )
+          : await this.repository.findFinalizados();
+        const respuesta = responderEventosPorPeriodo(
+          eventos,
+          idioma,
+          intent.periodo,
+          intent.soloFinalizados,
+        );
+        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+      }
+
+      if (intent.terminos.length === 0) {
+        const eventos = await this.repository.findProximos();
+        const respuesta = generarFallback({ eventos, idioma, tipo: 'GENERAL' });
+        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+      }
+
       const eventos = await this.repository.findEventosPorTerminos(intent.terminos);
       const evento = eventos[0];
       const respuesta = evento
@@ -77,6 +111,7 @@ export class AiService {
         idioma,
         intent.presupuesto,
         intent.personas,
+        intent.tipoPresupuesto,
       );
       return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
     }
@@ -162,7 +197,12 @@ export class AiService {
     return response;
   }
 
-  private buildCacheKey(pregunta: string, idioma: string, eventoId?: number): string {
+  private buildCacheKey(
+    pregunta: string,
+    idioma: string,
+    eventoId?: number,
+    negocioSlug?: string,
+  ): string {
     const norm = pregunta
       .toLowerCase()
       .normalize('NFD')
@@ -176,7 +216,16 @@ export class AiService {
       .attr('q', norm)
       .attr('lang', idioma)
       .attr('evt', eventoId ?? 'general')
+      .attr('biz', negocioSlug ?? 'general')
       .build();
+  }
+
+  private preguntaComoLlegar(pregunta: string): boolean {
+    const normalizada = pregunta
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+    return /\b(como llegar|como voy|llegar|ruta|mapa|maps|google maps|enlace directo|direcciones|directions|how do i get|how to get|map link|itineraire|comment aller|aller a)\b/.test(normalizada);
   }
 
   private async cargarContexto(

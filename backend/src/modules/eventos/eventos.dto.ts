@@ -1,5 +1,14 @@
 import { body, query } from 'express-validator';
 
+export const validarImagenUrl = body('imagenUrl')
+  .optional({ values: 'falsy' })
+  .isURL({
+    protocols: ['http', 'https'],
+    require_protocol: true,
+    require_tld: process.env.NODE_ENV === 'production',
+  })
+  .withMessage('La URL de la imagen no es válida');
+
 export const crearEventoValidacion = [
   body('titulo')
     .trim()
@@ -44,10 +53,7 @@ export const crearEventoValidacion = [
     .isLength({ max: 300 })
     .withMessage('La dirección no puede superar 300 caracteres'),
 
-  body('imagenUrl')
-    .optional({ values: 'falsy' })
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('La URL de la imagen no es válida'),
+  validarImagenUrl,
 
   body('categoriaId')
     .notEmpty().withMessage('La categoría es obligatoria')
@@ -82,11 +88,6 @@ export const crearEventoValidacion = [
     .optional({ values: 'null' })
     .isFloat({ min: 0 }).withMessage('El precio debe ser mayor o igual a 0')
     .toFloat(),
-
-  body('urlExternaBoletas')
-    .optional({ values: 'falsy' })
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('La URL de boletas no es válida'),
 
   body('esMayorDeEdad')
     .optional()

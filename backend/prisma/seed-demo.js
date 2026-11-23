@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const fs = require('node:fs');
 const path = require('node:path');
 const { Prisma, PrismaClient } = require('@prisma/client');
@@ -75,8 +77,6 @@ async function seedEvent(eventData) {
     direccion: eventData.direccion,
     precioReferencial: eventData.precioReferencial,
     esMayorDeEdad: eventData.esMayorDeEdad,
-    urlExternaBoletas: eventData.urlExternaBoletas,
-    gestionaTaquillaInterna: eventData.gestionaTaquillaInterna,
     estadoPublicacion: 'APROBADO',
     slug: eventData.slug,
     destacado: eventData.destacado,

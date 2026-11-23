@@ -4,6 +4,7 @@ export interface ChatRequestDTO {
   pregunta: string;
   idioma?: 'es' | 'en' | 'fr';
   eventoId?: number;
+  negocioSlug?: string;
 }
 
 export const chatValidacion = [
@@ -20,4 +21,8 @@ export const chatValidacion = [
     .optional()
     .isInt({ min: 1 }).withMessage('ID de evento inválido')
     .toInt(),
+
+  body('negocioSlug')
+    .optional()
+    .matches(/^[a-z0-9-]{1,120}$/i).withMessage('Negocio de contexto inválido'),
 ];

@@ -37,8 +37,23 @@ function formatearPrecio(precio: number | null, idioma: Idioma): string {
 }
 
 function formatearEvento(e: EventoContexto, idioma: Idioma): string {
+  const inicio = new Date(e.fechaInicio).toLocaleString(LOCALE[idioma], {
+    timeZone: 'America/Bogota',
+    dateStyle: 'long',
+    timeStyle: 'short',
+  });
+  const fin = e.fechaFin
+    ? new Date(e.fechaFin).toLocaleString(LOCALE[idioma], {
+      timeZone: 'America/Bogota',
+      dateStyle: 'long',
+      timeStyle: 'short',
+    })
+    : null;
+  const fecha = e.fechaFin && e.fechaFin.getTime() > e.fechaInicio.getTime()
+    ? `${inicio} — ${fin}`
+    : inicio;
   const precio = formatearPrecio(e.precioReferencial, idioma);
-  return `• [${e.titulo}](/eventos/${e.slug}) — ${e.lugar.nombre} — ${precio}`;
+  return `• [${e.titulo}](/eventos/${e.slug}) — ${fecha} — ${e.lugar.nombre} — ${precio}`;
 }
 
 export interface FallbackContexto {

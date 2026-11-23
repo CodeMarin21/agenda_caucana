@@ -12,6 +12,8 @@ const TIPOS_ENTIDAD = [
   'OTRO',
 ] as const;
 
+const ESPECIALIDADES_ORGANIZADOR = ['EVENTOS', 'GASTRONOMIA'] as const;
+
 const REDES_PERMITIDAS = ['instagram', 'facebook', 'x', 'tiktok', 'youtube', 'whatsapp', 'web'] as const;
 
 const sanearRedes = (val: unknown): unknown => {
@@ -46,6 +48,11 @@ export const registroOrganizadorValidacion = [
     .trim()
     .notEmpty().withMessage('El nombre de la entidad es obligatorio')
     .isLength({ min: 2, max: 150 }).withMessage('Nombre entre 2 y 150 caracteres'),
+
+  body('especialidad')
+    .notEmpty().withMessage('La especialidad es obligatoria')
+    .isIn(ESPECIALIDADES_ORGANIZADOR)
+    .withMessage(`La especialidad debe ser una de: ${ESPECIALIDADES_ORGANIZADOR.join(', ')}`),
 
   body('descripcion')
     .optional({ nullable: true })
@@ -121,7 +128,16 @@ export const actualizarPerfilValidacion = [
   body('avatarUrl')
     .optional({ nullable: true })
     .trim()
-    .isURL({ protocols: ['http', 'https'] })
+    .custom((valor) => {
+      if (typeof valor !== 'string' || valor.length === 0) return true;
+      if (valor.startsWith('/uploads/')) return true;
+      try {
+        const url = new URL(valor);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    })
     .withMessage('avatarUrl debe ser una URL válida'),
 
   body('direccion')

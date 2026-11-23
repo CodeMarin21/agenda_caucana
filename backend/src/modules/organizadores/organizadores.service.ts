@@ -1,7 +1,19 @@
 import bcrypt from 'bcryptjs';
-import { MotivoEstado, MotivoReactivacion, Prisma } from '@prisma/client';
+import {
+  EspecialidadOrganizador,
+  MotivoEstado,
+  MotivoReactivacion,
+  Prisma,
+} from '@prisma/client';
 import { OrganizadoresRepository } from './organizadores.repository';
-import { cifrar, descifrar, hashDocumento, enmascararDocumento } from '../../utils/crypto.util';
+import { inferirEspecialidad } from './especialidad.util';
+import {
+  cifrar,
+  descifrar,
+  hashDocumento,
+  enmascararDocumento,
+  tieneClaveIdentidadValida,
+} from '../../utils/crypto.util';
 import {
   MOTIVOS_REACTIVACION,
   MOTIVOS_RECHAZO,
@@ -13,6 +25,7 @@ export interface RegistroOrganizadorDTO {
   nombre: string;
   email: string;
   password: string;
+  especialidad: EspecialidadOrganizador;
   nombreEntidad: string;
   descripcion?: string | null;
   telefono?: string | null;
@@ -40,6 +53,8 @@ export interface ActualizarPerfilDTO {
 
 export class OrganizadoresService {
   private repo: OrganizadoresRepository;
+  private readonly advertenciaClaveIdentidad =
+    'La clave de cifrado de identidad del servidor no es válida. El documento permanece protegido y no se modificará. Contacta al administrador para restaurar la clave original.';
 
   constructor(repo?: OrganizadoresRepository) {
     this.repo = repo ?? new OrganizadoresRepository();
@@ -85,6 +100,7 @@ export class OrganizadoresService {
         passwordHash,
       },
       organizador: {
+        especialidad: data.especialidad,
         nombreEntidad: data.nombreEntidad,
         descripcion: data.descripcion ?? null,
         telefono: data.telefono ?? null,
@@ -101,17 +117,48 @@ export class OrganizadoresService {
 
   // ── Listados ───────────────────────────────────────────
   async listarTodos() {
-    return this.repo.listarTodos();
+    const organizadores = await this.repo.listarTodos();
+    return organizadores.map((organizador) => ({
+      ...organizador,
+      especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
+    }));
   }
 
   async listarPendientes() {
-    return this.repo.listarParaRevision();
+    const organizadores = await this.repo.listarParaRevision();
+    return organizadores.map((organizador) => ({
+      ...organizador,
+      especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
+    }));
+  }
+
+  private obtenerEstadoDocumento(org: {
+    documentoIdentidadCifrado: string | null;
+    documentoIdentidadHash: string | null;
+  }) {
+    const tieneDocumento = Boolean(org.documentoIdentidadHash);
+    if (!tieneClaveIdentidadValida()) {
+      return {
+        documentoIdentidadEnmascarado: null,
+        tieneDocumento,
+        advertenciaDocumento: this.advertenciaClaveIdentidad,
+      };
+    }
+
+    return {
+      documentoIdentidadEnmascarado: org.documentoIdentidadCifrado
+        ? enmascararDocumento(descifrar(org.documentoIdentidadCifrado))
+        : null,
+      tieneDocumento,
+      advertenciaDocumento: null,
+    };
   }
 
   // ── Acciones admin ─────────────────────────────────────
   async verificar(id: number) {
     return this.repo.verificarConNotificacion(id);
   }
+
 
   async cambiarEstado(id: number, motivo: MotivoEstado, detalle?: string) {
     const org = await this.repo.buscarPorId(id);
@@ -191,6 +238,7 @@ export class OrganizadoresService {
   async obtenerPerfil(usuarioId: number) {
     const org = await this.repo.buscarPorUsuarioIdConUsuario(usuarioId);
     if (!org) throw new Error('Organizador no encontrado');
+    const estadoDocumento = this.obtenerEstadoDocumento(org);
 
     return {
       id: org.id,
@@ -199,15 +247,13 @@ export class OrganizadoresService {
       telefono: org.telefono,
       nit: org.nit,
       avatarUrl: org.avatarUrl,
+      especialidad: inferirEspecialidad(org.especialidad, org._count, org),
       redesSociales: org.redesSociales,
       direccion: org.direccion,
       anioFundacion: org.anioFundacion,
       tipoEntidad: org.tipoEntidad,
       // El documento NO se devuelve completo. Solo enmascarado.
-      documentoIdentidadEnmascarado: org.documentoIdentidadCifrado
-        ? enmascararDocumento(descifrar(org.documentoIdentidadCifrado))
-        : null,
-      tieneDocumento: Boolean(org.documentoIdentidadHash),
+      ...estadoDocumento,
       estado: org.estado,
       motivoEstado: org.motivoEstado
         ? org.detalleMotivoEstado ||
@@ -289,6 +335,7 @@ export class OrganizadoresService {
     }
 
     const actualizado = await this.repo.actualizar(org.id, updateData);
+    const estadoDocumento = this.obtenerEstadoDocumento(actualizado);
 
     return {
       id: actualizado.id,
@@ -305,10 +352,7 @@ export class OrganizadoresService {
       motivoEstado: actualizado.detalleMotivoEstado,
       vetado: actualizado.vetado,
       motivoVeto: actualizado.motivoVeto,
-      documentoIdentidadEnmascarado: actualizado.documentoIdentidadHash && actualizado.documentoIdentidadCifrado
-        ? enmascararDocumento(descifrar(actualizado.documentoIdentidadCifrado))
-        : null,
-      tieneDocumento: Boolean(actualizado.documentoIdentidadHash),
+      ...estadoDocumento,
       creadoEn: actualizado.creadoEn,
       actualizadoEn: actualizado.actualizadoEn,
     };

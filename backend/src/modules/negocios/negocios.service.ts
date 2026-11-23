@@ -4,6 +4,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { NegociosRepository, FiltrosNegocios } from './negocios.repository';
+import { inferirEspecialidad } from '../organizadores/especialidad.util';
 import {
   withCache,
   CacheKeyBuilder,
@@ -114,11 +115,13 @@ export class NegociosService {
   async crear(data: CrearNegocioDTO, usuarioId: number) {
     const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
     if (!organizador) throw new Error('No tienes perfil de organizador');
+    if (inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA') {
+      throw new Error('Tu cuenta no está habilitada para publicar negocios de comida');
+    }
     if (organizador.vetado) throw new Error('La cuenta del organizador está vetada');
-
-    const estadoPublicacion = organizador.estado === 'VERIFICADO'
-      ? EstadoNegocio.APROBADO
-      : EstadoNegocio.PENDIENTE;
+    if (organizador.estado === 'SUSPENDIDO') {
+      throw new Error('La cuenta del organizador está suspendida');
+    }
     const datos: Prisma.NegocioCreateInput = {
       nombre: data.nombre.trim(),
       descripcion: data.descripcion.trim(),
@@ -140,7 +143,7 @@ export class NegociosService {
         })) }
         : {}),
       slug: generarSlug(data.nombre),
-      estadoPublicacion,
+      estadoPublicacion: EstadoNegocio.APROBADO,
       ciudad: { connect: { id: data.ciudadId } },
       organizador: { connect: { id: organizador.id } },
     };
@@ -153,6 +156,9 @@ export class NegociosService {
   async misNegocios(usuarioId: number) {
     const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
     if (!organizador) throw new Error('No tienes perfil de organizador');
+    if (inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA') {
+      throw new Error('Tu cuenta no está habilitada para gestionar negocios de comida');
+    }
     return repo.findByOrganizadorId(organizador.id);
   }
 
@@ -162,8 +168,15 @@ export class NegociosService {
     if (!esAdmin) {
       if (!usuarioId) throw new Error('No autenticado');
       const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
-      if (!organizador || negocio.organizadorId !== organizador.id) {
+      if (
+        !organizador ||
+        negocio.organizadorId !== organizador.id ||
+        inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA'
+      ) {
         throw new Error('No tienes permiso para eliminar este negocio');
+      }
+      if (organizador.vetado) {
+        throw new Error('Tu cuenta no está habilitada para gestionar negocios de comida');
       }
     }
     const resultado = await repo.delete(id, esAdmin ? motivo : undefined);

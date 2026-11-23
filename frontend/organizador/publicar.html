@@ -11,37 +11,131 @@
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/dashboard.css">
 <style>
-  .panel-header h1,
-  .form-seccion h2 {
-    font-family: var(--fuente-titulos);
+  .publicar-evento {
+    width: min(100%, 78rem);
+    margin-inline: auto;
+    padding: clamp(1rem, 3vw, 2rem);
   }
-  [data-form-publicar],
-  [data-form-publicar] label,
-  [data-form-publicar] input,
-  [data-form-publicar] select,
-  [data-form-publicar] textarea,
-  [data-form-publicar] button {
+  .publicar-evento__intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1.4rem 1.6rem;
+    border: 1px solid var(--tinta-10);
+    border-left: 4px solid var(--color-terracota);
+    border-radius: 12px;
+    background: linear-gradient(115deg, #fff 0%, var(--color-marfil, #faf6ef) 100%);
+  }
+  .publicar-evento__intro h2 {
+    margin: 0 0 .35rem;
+    font: 600 1.45rem/1.2 var(--fuente-titulos);
+  }
+  .publicar-evento__intro p { margin: 0; color: var(--tinta-55); line-height: 1.55; }
+  .publicar-evento__estado {
+    flex: 0 0 auto;
+    padding: .45rem .75rem;
+    border: 1px solid rgba(43, 122, 91, .25);
+    border-radius: 999px;
+    background: #eafaf1;
+    color: #236449;
+    font-size: .76rem;
+    font-weight: 700;
+  }
+  [data-form-publicar] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
     font-family: var(--fuente-cuerpo);
   }
   .form-seccion {
-    padding: var(--espacio-md) 0;
-    border-bottom: 1px solid var(--tinta-10);
+    min-width: 0;
+    padding: 1.35rem;
+    border: 1px solid var(--tinta-10);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(43, 31, 20, .04);
   }
-  .form-seccion:first-child { padding-top: 0; }
-  .form-seccion:last-of-type { border-bottom: 0; }
   .form-seccion h2 {
-    margin-bottom: var(--espacio-md);
-    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin: 0 0 1.1rem;
+    color: var(--color-tinta);
+    font: 600 1.18rem/1.25 var(--fuente-titulos);
   }
+  .form-seccion h2 span {
+    display: grid;
+    width: 1.8rem;
+    height: 1.8rem;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(184, 92, 58, .12);
+    color: var(--color-terracota);
+    font: 700 .78rem var(--fuente-cuerpo);
+  }
+  .form-seccion--ancha { grid-column: 1 / -1; }
+  [data-form-publicar] .form-grupo { margin-bottom: 1rem; }
+  [data-form-publicar] .form-grupo:last-child { margin-bottom: 0; }
   .form-etiqueta {
     display: block;
     margin-bottom: 0.4rem;
     font-size: 0.8rem;
     font-weight: 600;
   }
+  [data-form-publicar] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  [data-form-publicar] select,
+  [data-form-publicar] textarea {
+    width: 100%;
+    min-height: 2.85rem;
+    border: 1px solid var(--tinta-15);
+    border-radius: 7px;
+    background: #fff;
+    font: 400 .9rem var(--fuente-cuerpo);
+  }
+  [data-form-publicar] textarea { min-height: 7rem; resize: vertical; }
+  [data-form-publicar] input:focus,
+  [data-form-publicar] select:focus,
+  [data-form-publicar] textarea:focus {
+    border-color: var(--color-terracota);
+    outline: 3px solid rgba(184, 92, 58, .15);
+  }
+  .publicar-evento__ayuda { margin: .4rem 0 0; color: var(--tinta-55); font-size: .78rem; line-height: 1.5; }
+  .publicar-evento__preview { margin-top: .75rem; }
+  .publicar-evento__preview img { max-width: 100%; max-height: 15rem; border: 1px solid var(--tinta-15); border-radius: 8px; object-fit: contain; }
+  .publicar-evento__radio { display: flex; flex-wrap: wrap; gap: .75rem; }
+  .publicar-evento__radio label {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .65rem .8rem;
+    border: 1px solid var(--tinta-15);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .publicar-evento__acciones {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--tinta-10);
+    border-radius: 12px;
+    background: #fff;
+  }
+  .publicar-evento__acciones p { max-width: 40rem; margin: 0; color: var(--tinta-55); font-size: .8rem; line-height: 1.5; }
+  [data-form-publicar-mensaje] { grid-column: 1 / -1; min-height: 1.3rem; margin: 0; font-size: .88rem; font-weight: 600; }
+  @media (max-width: 760px) {
+    .publicar-evento__intro { align-items: flex-start; flex-direction: column; }
+    [data-form-publicar] { grid-template-columns: 1fr; }
+    .form-seccion--ancha, .publicar-evento__acciones, [data-form-publicar-mensaje] { grid-column: auto; }
+    .publicar-evento__acciones { align-items: stretch; flex-direction: column; }
+  }
 </style>
 </head>
-<body>
+<body data-especialidad-pagina="EVENTOS">
 <div class="layout-panel">
   <aside class="sidebar" data-sidebar>
     <div class="sidebar__marca">
@@ -49,10 +143,11 @@
       <p>Plataforma de creadores</p>
     </div>
     <nav class="sidebar__nav">
-      <a href="mis-eventos.html">🗓️ Mis eventos</a>
-      <a href="publicar.html" aria-current="page">➕ Publicar</a>
-      <a href="perfil.html">👤 Perfil</a>
-      <a href="#" data-logout style="margin-top:auto;">🚪 Cerrar sesión</a>
+      <a href="mis-eventos.html">Mis eventos</a>
+      <a href="publicar.html" aria-current="page">Publicar evento</a>
+      <a href="notificaciones.html">Notificaciones <span class="notificaciones-nav__contador" data-notificaciones-no-leidas hidden></span></a>
+      <a href="perfil.html">Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
     </nav>
     <div class="sidebar__pie">
       <span class="avatar-inicial" data-sidebar-inicial>··</span>
@@ -64,16 +159,22 @@
     <header class="panel-header">
       <div style="display:flex; align-items:center; gap:0.75rem;">
         <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
-        <h1>Publicar Evento</h1>
+        <h1 class="fuente-titulos">Publicar evento</h1>
       </div>
       <a href="mis-eventos.html" class="boton boton-secundario boton-sm">← Volver a mis eventos</a>
     </header>
 
-    <div class="panel-cuerpo">
-      <div class="bloque" style="max-width:44rem;">
-        <form data-form-publicar style="padding:var(--espacio-md);">
-          <section class="form-seccion">
-            <h2>Detalles del evento</h2>
+    <div class="panel-cuerpo publicar-evento">
+      <div class="publicar-evento__intro">
+        <div>
+          <h2>Cuéntale a Popayán qué estás organizando</h2>
+          <p>Completa los datos para que las personas puedan encontrar tu evento y llegar al lugar correcto.</p>
+        </div>
+        <span class="publicar-evento__estado">✓ Organizador verificado</span>
+      </div>
+      <form data-form-publicar>
+          <section class="form-seccion form-seccion--ancha">
+            <h2><span>1</span>Detalles del evento</h2>
             <div class="form-grupo">
               <label for="titulo">Título del evento *</label>
               <input id="titulo" name="titulo" type="text" required
@@ -85,7 +186,7 @@
               <textarea id="descripcion" name="descripcion" required rows="4"
                         minlength="10" maxlength="2000"
                         placeholder="Describe el evento: qué habrá, quién participa, por qué vale la pena asistir."></textarea>
-              <p class="form-ayuda">Mínimo 10 caracteres.</p>
+              <p class="publicar-evento__ayuda">Mínimo 10 caracteres. Explica qué sucederá y qué podrá esperar el público.</p>
             </div>
             <div class="form-grupo">
               <label for="categoriaId">Categoría *</label>
@@ -96,7 +197,7 @@
           </section>
 
           <section class="form-seccion">
-            <h2>Fecha y hora</h2>
+            <h2><span>2</span>Fecha y hora</h2>
             <div class="form-fila">
               <div class="form-grupo">
                 <label for="fechaInicio">Fecha y hora de inicio *</label>
@@ -105,12 +206,13 @@
               <div class="form-grupo">
                 <label for="fechaFin">Fecha y hora de fin <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
                 <input id="fechaFin" name="fechaFin" type="datetime-local">
+                <p class="publicar-evento__ayuda">Al indicar una fecha de fin, el evento se retirará automáticamente después de esa hora.</p>
               </div>
             </div>
           </section>
 
-          <section class="form-seccion">
-            <h2>Ubicación</h2>
+          <section class="form-seccion form-seccion--ancha">
+            <h2><span>3</span>Ubicación</h2>
             <div class="form-fila">
               <div class="form-grupo">
                 <label for="ciudadId">Ciudad *</label>
@@ -119,18 +221,19 @@
                 </select>
               </div>
               <div class="form-grupo">
-                <label for="lugarId">Lugar / Escenario *</label>
-                <select id="lugarId" name="lugarId" required disabled>
+                <label for="lugarId">Lugar o escenario de la lista</label>
+                <select id="lugarId" name="lugarId" disabled>
                   <option value="">Primero elige una ciudad</option>
                   <option value="__otro__">Otro (escribir manualmente)</option>
                 </select>
               </div>
             </div>
             <div class="form-grupo">
-              <label for="lugarTexto">Nombre del lugar o escenario *</label>
+              <label for="lugarTexto">O escribe el nombre del lugar o escenario</label>
               <input id="lugarTexto" name="lugarTexto" type="text"
-                     placeholder="Nombre del lugar o escenario"
-                     minlength="3" maxlength="150" hidden>
+                     placeholder="Ej. Casa de la Cultura, parque del barrio..."
+                     minlength="3" maxlength="150">
+              <p class="publicar-evento__ayuda">Si no aparece en la lista, escribe el nombre aquí. Si lo escribes, se usará esa ubicación.</p>
             </div>
             <div class="form-grupo">
               <label for="direccion">Dirección <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
@@ -140,33 +243,29 @@
           </section>
 
           <section class="form-seccion">
-            <h2>Afiche</h2>
+            <h2><span>4</span>Afiche</h2>
             <div class="form-grupo">
               <label for="imagen">Afiche del evento <span style="font-weight:400; color:var(--tinta-55);">(JPG, PNG o WebP, hasta 5MB)</span></label>
               <input id="imagen" name="imagen" type="file" accept="image/jpeg,image/png,image/webp">
-              <div id="previewImagen" style="margin-top:0.75rem; display:none;">
-                <img id="previewImagenImg" alt="Vista previa del afiche" style="max-width:100%; max-height:14rem; border:1px solid var(--tinta-15);">
+              <div id="previewImagen" class="publicar-evento__preview" style="display:none;">
+                <img id="previewImagenImg" alt="Vista previa del afiche">
               </div>
+              <p class="publicar-evento__ayuda">El archivo se sube de forma segura antes de enviar el evento.</p>
             </div>
           </section>
 
           <section class="form-seccion">
-            <h2>Acceso</h2>
+            <h2><span>5</span>Acceso</h2>
             <div class="form-grupo">
               <span class="form-etiqueta">Tipo de acceso</span>
-              <div class="radio-grupo" style="display:flex; gap:1.25rem;">
+              <div class="publicar-evento__radio">
                 <label><input type="radio" name="tipoAcceso" value="libre" checked> Entrada libre</label>
                 <label><input type="radio" name="tipoAcceso" value="pago"> De pago</label>
               </div>
             </div>
-            <div class="form-grupo" id="grupoPrecio" style="display:none;">
+            <div class="form-grupo" id="grupoPrecio" hidden>
               <label for="precioReferencial">Precio referencial (COP)</label>
               <input id="precioReferencial" name="precioReferencial" type="number" min="0" step="1000" placeholder="Ej. 15000">
-            </div>
-            <div class="form-grupo">
-              <label for="urlExternaBoletas">Enlace de ticketera <span style="font-weight:400; color:var(--tinta-55);">(opcional)</span></label>
-              <input id="urlExternaBoletas" name="urlExternaBoletas" type="url"
-                     placeholder="https://ticketera.com/mi-evento">
             </div>
             <div class="form-grupo">
               <label style="display:flex; align-items:center; gap:0.5rem;">
@@ -176,15 +275,14 @@
             </div>
           </section>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:1.5rem;">
-            <p style="font-size:0.78rem; color:var(--tinta-55); margin:0;">
+          <div class="publicar-evento__acciones">
+            <p>
               Los eventos publicados entran en revisión por el equipo administrador antes de ser mostrados en la agenda pública.
             </p>
-            <button type="submit" class="boton boton-primario" style="flex-shrink:0;">Enviar para revisión</button>
+            <button type="submit" class="boton boton-primario">Enviar para revisión</button>
           </div>
-          <p data-form-publicar-mensaje style="margin-top:1rem; font-size:0.85rem;"></p>
-        </form>
-      </div>
+          <p data-form-publicar-mensaje role="status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </div>
@@ -192,6 +290,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/notificaciones.js"></script>
 <script src="../js/admin.js"></script>
 <script src="../js/publicar.js"></script>
 </body>

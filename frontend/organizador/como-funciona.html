@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Conoce cómo registrarte, verificar tu perfil y publicar eventos o negocios gastronómicos en Agenda Caucana.">
+<title>Cómo funciona para organizadores — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/public.css">
+</head>
+<body class="pagina-organizadores">
+<header class="nav-publico">
+  <div class="contenedor nav-publico__fila">
+    <a href="../index.html" class="nav-publico__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>La cartelera cultural de Popayán</p>
+    </a>
+    <div class="nav-publico__acciones">
+      <a href="../index.html" class="org-enlace">Volver a explorar</a>
+      <a href="registro.html" class="boton boton-primario boton-sm">Crear cuenta</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="org-portada" aria-labelledby="titulo-guia">
+    <div class="contenedor org-portada__rejilla">
+      <div class="org-portada__texto">
+        <p class="org-ceja"><span aria-hidden="true"></span>GUÍA PARA ORGANIZADORES</p>
+        <h1 id="titulo-guia">Tu proyecto también hace parte de <em>Popayán.</em></h1>
+        <p class="org-portada__bajada">
+          Comparte tus eventos y sabores con quienes buscan qué hacer en la ciudad.
+          Aquí encuentras el proceso, los requisitos y lo que pasa después de registrarte.
+        </p>
+        <div class="org-portada__acciones">
+          <a href="registro.html" class="boton">Quiero participar <span aria-hidden="true">→</span></a>
+          <a href="#pasos" class="org-enlace">Conocer los pasos <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <aside class="org-sello" aria-label="Agenda Caucana reúne eventos y negocios locales">
+        <span class="org-sello__linea">Una vitrina para</span>
+        <strong>Ideas que<br>mueven la ciudad</strong>
+        <span class="org-sello__base">Cultura · encuentros · sabores</span>
+      </aside>
+    </div>
+    <div class="org-portada__borde" aria-hidden="true"></div>
+  </section>
+
+  <div class="contenedor org-contenido">
+    <section class="org-eleccion" aria-labelledby="titulo-eleccion" id="especialidades">
+      <div class="org-seccion-intro">
+        <p class="org-ceja org-ceja--tinta"><span aria-hidden="true"></span>ELIGE TU TIPO DE CUENTA</p>
+        <h2 id="titulo-eleccion">Dos formas de participar, según el apartado donde entraste.</h2>
+      </div>
+      <div class="org-eleccion__grid">
+        <article>
+          <p class="org-panel__ceja">DESDE RUTAS O EVENTOS</p>
+          <h3>Organizador de eventos</h3>
+          <p>Publica conciertos, ferias, muestras, encuentros y actividades culturales. La cuenta debe ser verificada por el administrador antes de publicar eventos.</p>
+          <a class="boton boton-primario" href="registro.html?especialidad=EVENTOS">Registrarme para eventos</a>
+        </article>
+        <article id="sabores-negocios">
+          <p class="org-panel__ceja">DESDE SABORES</p>
+          <h3>Dueño de negocio gastronómico</h3>
+          <p>Publica restaurantes, puestos, cafés y platos. La cuenta gastronómica queda habilitada para publicar; el administrador puede revisar, suspender o vetarla si detecta irregularidades.</p>
+          <a class="boton boton-primario" href="registro.html?especialidad=GASTRONOMIA&next=../publicar-negocio.html">Registrarme para mi negocio</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="pasos" class="org-pasos-seccion" aria-labelledby="titulo-pasos">
+      <div class="org-seccion-intro">
+        <p class="org-ceja org-ceja--tinta"><span aria-hidden="true"></span>EL RECORRIDO</p>
+        <h2 id="titulo-pasos">De tu primera cuenta a tu primera publicación.</h2>
+        <p>Avanza por los pasos para saber qué necesitas y cuándo podrás publicar.</p>
+      </div>
+
+      <div class="org-recorrido" data-recorrido>
+        <div class="org-tabs" role="tablist" aria-label="Pasos para publicar como organizador">
+          <button type="button" class="org-tab" id="paso-tab-1" role="tab" aria-selected="true" aria-controls="paso-panel-1" tabindex="0" data-paso-tab="0">
+            <span class="org-tab__numero">01</span><span>Crear cuenta</span>
+          </button>
+          <button type="button" class="org-tab" id="paso-tab-2" role="tab" aria-selected="false" aria-controls="paso-panel-2" tabindex="-1" data-paso-tab="1">
+            <span class="org-tab__numero">02</span><span>Completar perfil</span>
+          </button>
+          <button type="button" class="org-tab" id="paso-tab-3" role="tab" aria-selected="false" aria-controls="paso-panel-3" tabindex="-1" data-paso-tab="2">
+            <span class="org-tab__numero">03</span><span>Verificación</span>
+          </button>
+          <button type="button" class="org-tab" id="paso-tab-4" role="tab" aria-selected="false" aria-controls="paso-panel-4" tabindex="-1" data-paso-tab="3">
+            <span class="org-tab__numero">04</span><span>Publicar y gestionar</span>
+          </button>
+        </div>
+        <div class="org-progreso" aria-hidden="true"><span data-paso-progreso></span></div>
+
+        <section class="org-panel" id="paso-panel-1" role="tabpanel" aria-labelledby="paso-tab-1" tabindex="0" data-paso-panel>
+          <div class="org-panel__rejilla">
+            <div>
+              <p class="org-panel__ceja">PASO 01 · SOLICITUD</p>
+              <h3>Crea tu cuenta de organizador</h3>
+              <p>Registra el nombre de tu organización, una persona de contacto, correo, teléfono y una contraseña segura.</p>
+              <ul class="org-panel__lista">
+                <li>Usa un correo al que tengas acceso.</li>
+                <li>La contraseña debe tener mínimo 8 caracteres, mayúscula, minúscula y número.</li>
+                <li>La especialidad se fija al entrar desde Eventos/Rutas o desde Sabores.</li>
+              </ul>
+            </div>
+            <aside class="org-panel__nota">
+              <span aria-hidden="true">01</span>
+              <strong>Empieza con lo esencial</strong>
+              <p>Podrás completar los datos institucionales desde tu perfil después de crear la cuenta.</p>
+            </aside>
+          </div>
+          <div class="org-panel__navegacion">
+            <span>1 de 4 pasos</span>
+            <button type="button" class="boton boton-secundario" data-paso-siguiente>Continuar <span aria-hidden="true">→</span></button>
+          </div>
+        </section>
+
+        <section class="org-panel" id="paso-panel-2" role="tabpanel" aria-labelledby="paso-tab-2" tabindex="0" data-paso-panel hidden>
+          <div class="org-panel__rejilla">
+            <div>
+              <p class="org-panel__ceja">PASO 02 · PERFIL</p>
+              <h3>Cuéntanos quién está detrás del proyecto</h3>
+              <p>Completa el perfil de la organización para que el equipo pueda revisar tu solicitud y el público reconozca tu proyecto.</p>
+              <ul class="org-panel__lista">
+                <li>Tipo de entidad y nombre de la organización.</li>
+                <li>Documento del representante, ciudad base, dirección y datos de contacto.</li>
+                <li>Descripción, año de fundación, NIT y redes sociales, cuando correspondan.</li>
+              </ul>
+            </div>
+            <aside class="org-panel__nota org-panel__nota--segura">
+              <span aria-hidden="true">◈</span>
+              <strong>Tus datos, con cuidado</strong>
+              <p>El documento se guarda cifrado y se muestra enmascarado en tu perfil. No incluyas información personal en la descripción pública.</p>
+            </aside>
+          </div>
+          <div class="org-panel__navegacion">
+            <button type="button" class="boton boton-secundario" data-paso-anterior><span aria-hidden="true">←</span> Anterior</button>
+            <span>2 de 4 pasos</span>
+            <button type="button" class="boton boton-secundario" data-paso-siguiente>Continuar <span aria-hidden="true">→</span></button>
+          </div>
+        </section>
+
+        <section class="org-panel" id="paso-panel-3" role="tabpanel" aria-labelledby="paso-tab-3" tabindex="0" data-paso-panel hidden>
+          <div class="org-panel__rejilla">
+            <div>
+              <p class="org-panel__ceja">PASO 03 · REVISIÓN</p>
+              <h3>El equipo revisa tu solicitud</h3>
+              <p>Las cuentas de eventos comienzan como <strong>Pendientes</strong>. Un administrador verifica la información antes de habilitar eventos.</p>
+              <ul class="org-panel__lista">
+                <li>Los organizadores de eventos deben quedar verificados antes de publicar.</li>
+                <li>Si te rechazan, revisa el motivo, corrige el perfil y vuelve a enviarlo.</li>
+                <li>Si el perfil está suspendido o vetado, no intentes crear otra cuenta para evadir la medida.</li>
+              </ul>
+            </div>
+            <aside class="org-panel__nota org-panel__nota--pendiente">
+              <span aria-hidden="true">◷</span>
+              <strong>Mientras esperas</strong>
+              <p>Las cuentas gastronómicas pueden publicar negocios desde el registro. Las cuentas de eventos esperan aprobación antes de publicar.</p>
+            </aside>
+          </div>
+          <div class="org-panel__navegacion">
+            <button type="button" class="boton boton-secundario" data-paso-anterior><span aria-hidden="true">←</span> Anterior</button>
+            <span>3 de 4 pasos</span>
+            <button type="button" class="boton boton-secundario" data-paso-siguiente>Continuar <span aria-hidden="true">→</span></button>
+          </div>
+        </section>
+
+        <section class="org-panel" id="paso-panel-4" role="tabpanel" aria-labelledby="paso-tab-4" tabindex="0" data-paso-panel hidden>
+          <div class="org-panel__rejilla">
+            <div>
+              <p class="org-panel__ceja">PASO 04 · PUBLICACIÓN</p>
+              <h3>Comparte y administra tus publicaciones</h3>
+              <p>Publica eventos si tu cuenta fue aprobada o registra tu negocio si llegaste desde Sabores. Los paneles permanecen separados.</p>
+              <ul class="org-panel__lista">
+                <li>En <strong>Mis eventos</strong> y <strong>Mis negocios</strong> puedes revisar el estado de cada publicación.</li>
+                <li>Los negocios gastronómicos aprobados aparecen públicos y pueden ser consultados por el asistente IA.</li>
+                <li>Mantén los precios, horarios, fechas y medios de contacto actualizados.</li>
+              </ul>
+            </div>
+            <aside class="org-panel__nota">
+              <span aria-hidden="true">✦</span>
+              <strong>Una cuenta, dos vitrinas</strong>
+              <p>Tu perfil de organizador puede gestionar eventos y negocios gastronómicos.</p>
+            </aside>
+          </div>
+          <div class="org-panel__navegacion">
+            <button type="button" class="boton boton-secundario" data-paso-anterior><span aria-hidden="true">←</span> Anterior</button>
+            <span>4 de 4 pasos</span>
+            <a href="registro.html" class="boton boton-primario">Crear cuenta</a>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="org-requisitos" aria-labelledby="titulo-requisitos">
+      <div class="org-requisitos__encabezado">
+        <p class="org-ceja org-ceja--tinta"><span aria-hidden="true"></span>ANTES DE EMPEZAR</p>
+        <h2 id="titulo-requisitos">Prepara la información de tu proyecto.</h2>
+        <p>No necesitas tener todo perfecto para registrarte; estos datos te ayudarán a completar el perfil y publicar con claridad.</p>
+      </div>
+      <div class="org-requisitos__columnas">
+        <article class="org-lista">
+          <span class="org-lista__indice">01 · TU ORGANIZACIÓN</span>
+          <h3>Identidad y contacto</h3>
+          <ul>
+            <li><strong>Nombre y descripción</strong> de la organización o proyecto.</li>
+            <li><strong>Datos de contacto</strong> y ciudad base.</li>
+            <li><strong>Tipo de entidad</strong> y documento del representante para la revisión.</li>
+          </ul>
+          <p class="org-lista__nota">El NIT, año de fundación y redes sociales pueden completarse si aplican a tu caso.</p>
+        </article>
+        <article class="org-lista">
+          <span class="org-lista__indice">02 · TUS PUBLICACIONES</span>
+          <h3>Información útil para el público</h3>
+          <ul>
+            <li>Para eventos: fecha, hora, categoría, ciudad, lugar y descripción.</li>
+            <li>Para negocios: dirección, categoría, horarios y datos de contacto.</li>
+            <li>Fotos propias y, si ofreces platos, nombres, precios e imágenes.</li>
+          </ul>
+          <p class="org-lista__nota">Publica información precisa y usa únicamente imágenes y contenidos que tengas autorización para compartir.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="org-compromisos" aria-labelledby="titulo-compromisos">
+      <div class="org-compromisos__titulo">
+        <p class="org-ceja org-ceja--tinta"><span aria-hidden="true"></span>CONFIANZA</p>
+        <h2 id="titulo-compromisos">Una buena publicación empieza con información confiable.</h2>
+      </div>
+      <div class="org-compromisos__texto">
+        <p>Usa una contraseña que no compartas con otras personas. Mantén actualizado el correo y el teléfono de contacto, y revisa el estado de tus publicaciones desde tu cuenta.</p>
+        <p class="org-compromisos__nota">La plataforma valida la unicidad del correo y del documento de identidad. Si el administrador rechaza una solicitud, consulta el motivo y corrige tus datos antes de volver a postularte.</p>
+      </div>
+    </section>
+
+    <section class="org-preguntas" aria-labelledby="titulo-preguntas">
+      <div class="org-seccion-intro">
+        <p class="org-ceja org-ceja--tinta"><span aria-hidden="true"></span>RESPUESTAS RÁPIDAS</p>
+        <h2 id="titulo-preguntas">Preguntas frecuentes</h2>
+      </div>
+      <details class="org-pregunta">
+        <summary>¿Puedo publicar un evento apenas me registro?</summary>
+        <p>No. Tu perfil debe estar verificado para publicar eventos. Cuando lo esté, puedes crear y administrar tus eventos desde la sección “Mis eventos”.</p>
+      </details>
+      <details class="org-pregunta">
+        <summary>¿Puedo registrar mi negocio mientras revisan mi cuenta?</summary>
+        <p>Sí. Puedes enviar el negocio gastronómico y aparecerá como pendiente de aprobación mientras tu cuenta no esté verificada.</p>
+      </details>
+      <details class="org-pregunta">
+        <summary>¿Qué hago si rechazan mi solicitud?</summary>
+        <p>Consulta el motivo en tu perfil, corrige la información y guarda los cambios para volver a postularte.</p>
+      </details>
+      <details class="org-pregunta">
+        <summary>¿Puedo gestionar eventos y negocios con la misma cuenta?</summary>
+        <p>Sí. El perfil de organizador puede gestionar ambos tipos de publicación; cada uno tiene su propio listado y estado.</p>
+      </details>
+    </section>
+
+    <section class="org-cierre" aria-labelledby="titulo-cierre">
+      <div>
+        <p class="org-ceja"><span aria-hidden="true"></span>EL SIGUIENTE PASO</p>
+        <h2 id="titulo-cierre">¿Listo para compartir lo que haces?</h2>
+        <p>Crea tu cuenta y completa el perfil de tu organización.</p>
+      </div>
+      <a href="registro.html" class="boton boton-primario">Registrarme como organizador <span aria-hidden="true">→</span></a>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="contenedor footer__fila">
+    <div class="footer__marca">
+      <a href="../index.html" class="fuente-titulos">Agenda Caucana</a>
+      <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+    </div>
+    <div class="footer__columnas">
+      <div class="footer__columna">
+        <p class="titulo-columna">Organizadores</p>
+        <ul>
+          <li><a href="registro.html">Crear cuenta</a></li>
+          <li><a href="../login.html">Iniciar sesión</a></li>
+        </ul>
+      </div>
+      <div class="footer__columna">
+        <p class="titulo-columna">Explorar</p>
+        <ul>
+          <li><a href="../index.html">Eventos</a></li>
+          <li><a href="../sabores.html">Sabores del Cauca</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer__legal"><div class="contenedor">Agenda Caucana · Popayán, Cauca</div></div>
+</footer>
+
+<script src="../js/organizador-como-funciona.js"></script>
+</body>
+</html>

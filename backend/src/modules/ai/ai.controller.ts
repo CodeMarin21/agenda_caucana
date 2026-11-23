@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AiService } from './ai.service';
 import { ChatRequestDTO } from './ai.dto';
 import { ChatResponse, normalizeIdioma } from './ai.types';
+import { inferirIdiomaPregunta } from './idioma.util';
 
 const aiService = new AiService();
 const CHAT_REQUEST_BUDGET_MS = 2100;
@@ -23,14 +24,15 @@ function respuestaPorTiempo(idioma: ChatResponse['idioma']): ChatResponse {
 export async function chat(req: Request, res: Response): Promise<void> {
   let timeout: NodeJS.Timeout | undefined;
   try {
-    const { pregunta, idioma, eventoId } = req.body as ChatRequestDTO;
-    const idiomaRespuesta = idioma ?? normalizeIdioma(req.idioma);
+    const { pregunta, idioma, eventoId, negocioSlug } = req.body as ChatRequestDTO;
+    const idiomaRespuesta = inferirIdiomaPregunta(pregunta) ?? idioma ?? normalizeIdioma(req.idioma);
 
     const result = await Promise.race([
       aiService.chat({
         pregunta: pregunta.trim(),
         idioma: idiomaRespuesta,
         eventoId,
+        negocioSlug,
         ip: req.ip,
       }),
       new Promise<ChatResponse>((resolve) => {

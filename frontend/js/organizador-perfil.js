@@ -16,6 +16,10 @@
   const bannerIcono = document.querySelector('[data-banner-icono]');
   const bannerTitulo = document.querySelector('[data-banner-titulo]');
   const bannerTexto = document.querySelector('[data-banner-texto]');
+  const bannerDocumento = document.querySelector('[data-banner-documento]');
+  const bannerDocumentoTexto = document.querySelector('[data-banner-documento-texto]');
+  const enlacesEspecialidad = document.querySelectorAll('[data-especialidad-link]');
+  const enlacesPublicar = document.querySelectorAll('[data-publicar-link]');
 
   const avatarPreview = document.querySelector('[data-avatar-preview]');
   const avatarBtn = document.querySelector('[data-avatar-btn]');
@@ -31,6 +35,7 @@
   const mensaje = document.querySelector('[data-perfil-mensaje]');
   const botonGuardar = document.querySelector('[data-boton-guardar]');
   const docAyuda = document.querySelector('[data-doc-ayuda]');
+  const docEtiqueta = form.querySelector('label[for="documentoIdentidad"]');
 
   const REDES_LABEL = {
     instagram: '📷 Instagram',
@@ -68,8 +73,19 @@
       bannerIcono.textContent = '🚫';
       bannerTitulo.textContent = 'Cuenta vetada';
       bannerTexto.textContent = perfil.motivoVeto
-        ? `Motivo: ${perfil.motivoVeto}. Contacta a soporte técnico.`
-        : 'Tu cuenta ha sido vetada. Contacta a soporte técnico.';
+        ? `Motivo: ${perfil.motivoVeto}. No puedes editar el perfil ni publicar contenido. Contacta al administrador si consideras que es un error.`
+        : 'No puedes editar el perfil ni publicar contenido mientras la cuenta esté vetada. Contacta al administrador si consideras que es un error.';
+      return;
+    }
+    if (
+      perfil.especialidad === 'GASTRONOMIA' &&
+      ['PENDIENTE', 'EN_REVISION', 'RECHAZADO'].includes(perfil.estado)
+    ) {
+      banner.hidden = false;
+      banner.className = 'aviso';
+      bannerIcono.textContent = '🕒';
+      bannerTitulo.textContent = 'Perfil en revisión';
+      bannerTexto.textContent = 'Puedes configurar este perfil y enviar negocios. Cada negocio se revisa por separado y solo aparece al público después de su aprobación.';
       return;
     }
     if (perfil.estado === 'VERIFICADO') {
@@ -119,6 +135,36 @@
     bannerTexto.textContent = 'Tu cuenta está siendo verificada para asegurar la validez de los eventos culturales presentados. Esto puede tomar hasta 24 horas.';
   };
 
+  const renderAdvertenciaDocumento = (perfil) => {
+    bannerDocumento.hidden = !perfil.advertenciaDocumento;
+    bannerDocumentoTexto.textContent = perfil.advertenciaDocumento || '';
+  };
+
+  const renderNavegacion = (perfil) => {
+    enlacesEspecialidad.forEach((enlace) => {
+      enlace.hidden = enlace.dataset.especialidadLink !== perfil.especialidad;
+    });
+    enlacesPublicar.forEach((enlace) => {
+      const puedePublicarEventos = perfil.especialidad === 'EVENTOS' &&
+        perfil.estado === 'VERIFICADO' && !perfil.vetado;
+      const puedePublicarNegocios = perfil.especialidad === 'GASTRONOMIA' &&
+        !perfil.vetado && perfil.estado !== 'SUSPENDIDO';
+      enlace.hidden = !(
+        (enlace.dataset.especialidadLink === 'EVENTOS' && puedePublicarEventos) ||
+        (enlace.dataset.especialidadLink === 'GASTRONOMIA' && puedePublicarNegocios)
+      );
+    });
+  };
+
+  const mostrarErrorCarga = (error) => {
+    banner.hidden = false;
+    banner.className = 'aviso aviso--rojo';
+    bannerIcono.textContent = '⚠️';
+    bannerTitulo.textContent = 'No se pudo cargar el perfil';
+    bannerTexto.textContent = error.message;
+    mostrarMensaje(`No se pudo cargar el perfil: ${error.message}`, 'error');
+  };
+
   // ── Rellenar formulario ───────────────────────────────
   const rellenarForm = (perfil) => {
     form.nombreEntidad.value = perfil.nombreEntidad || '';
@@ -131,12 +177,26 @@
     form.ciudadBaseId.value = perfil.ciudadBase?.id || '';
 
     // Documento: solo mostrar placeholder con la máscara si ya tiene.
-    if (perfil.tieneDocumento && perfil.documentoIdentidadEnmascarado) {
-      form.documentoIdentidad.placeholder = `${perfil.documentoIdentidadEnmascarado} (ingresa 7 a 10 dígitos para cambiarlo)`;
+    form.documentoIdentidad.disabled = Boolean(perfil.advertenciaDocumento);
+    if (perfil.advertenciaDocumento) {
+      form.documentoIdentidad.placeholder = 'Temporalmente no disponible; no ingreses otro documento';
       form.documentoIdentidad.required = false;
+      docEtiqueta.textContent = 'Documento de identidad del representante (no disponible temporalmente)';
+      docAyuda.textContent = perfil.advertenciaDocumento;
+    } else if (perfil.tieneDocumento) {
+      form.documentoIdentidad.placeholder = perfil.documentoIdentidadEnmascarado
+        ? `${perfil.documentoIdentidadEnmascarado} (ingresa 7 a 10 dígitos para cambiarlo)`
+        : 'Documento guardado (déjalo vacío para mantenerlo)';
+      form.documentoIdentidad.required = false;
+      docEtiqueta.textContent = 'Documento de identidad del representante (opcional si ya está guardado)';
+      docAyuda.textContent = perfil.documentoIdentidadEnmascarado
+        ? `Ya guardado: ${perfil.documentoIdentidadEnmascarado}. Déjalo vacío para mantenerlo; si quieres cambiarlo, ingresa el documento completo de 7 a 10 dígitos.`
+        : 'Ya existe un documento guardado. Déjalo vacío para mantenerlo.';
     } else {
       form.documentoIdentidad.placeholder = 'Solo dígitos (7 a 10)';
       form.documentoIdentidad.required = true;
+      docEtiqueta.textContent = 'Documento de identidad del representante *';
+      docAyuda.textContent = 'Se guarda cifrado. Solo el admin ve los últimos 4 dígitos.';
     }
 
     // Redes sociales
@@ -170,13 +230,9 @@
     // Si está vetado → desactivar form
     if (perfil.vetado) {
       form.querySelectorAll('input, select, textarea, button').forEach((el) => { el.disabled = true; });
-      avatarBtn.disabled = true;
+      enlacesPublicar.forEach((enlace) => { enlace.hidden = true; });
     }
 
-    // Si ya tiene documento → cambiar la ayuda
-    if (perfil.tieneDocumento) {
-      docAyuda.textContent = `Ya guardado: ${perfil.documentoIdentidadEnmascarado}. Déjalo vacío para mantenerlo; si quieres cambiarlo, ingresa el documento completo de 7 a 10 dígitos.`;
-    }
   };
 
   // ── Cargar ciudades ───────────────────────────────────
@@ -208,9 +264,11 @@
           }).then((r) => r.json());
 
       renderBanner(perfilActual);
+      renderAdvertenciaDocumento(perfilActual);
+      renderNavegacion(perfilActual);
       rellenarForm(perfilActual);
     } catch (error) {
-      mostrarMensaje(`No se pudo cargar el perfil: ${error.message}`, 'error');
+      mostrarErrorCarga(error);
     }
   };
 
@@ -291,6 +349,7 @@
         perfilActual = { ...perfilActual, ...resp.organizador };
       }
       renderBanner(perfilActual);
+      renderAdvertenciaDocumento(perfilActual);
       rellenarForm(perfilActual);
       mostrarMensaje('✓ Cambios guardados', 'ok');
     } catch (error) {

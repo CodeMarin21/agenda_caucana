@@ -18,6 +18,7 @@ export const registroOrganizador = async (req: Request, res: Response): Promise<
         id: resultado.organizador.id,
         nombreEntidad: resultado.organizador.nombreEntidad,
         estado: resultado.organizador.estado,
+        especialidad: resultado.organizador.especialidad,
       },
     });
   } catch (error) {

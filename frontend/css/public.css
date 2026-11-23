@@ -190,6 +190,22 @@
   color: var(--tinta-55);
 }
 .barra-resultados__orden { display: flex; gap: 1.25rem; }
+.barra-resultados__filtros { align-items: end; flex-wrap: wrap; gap: 0.6rem; }
+.barra-resultados__filtros label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--tinta-70);
+  font-size: 0.72rem;
+}
+.barra-resultados__filtros input,
+.barra-resultados__filtros select {
+  min-width: 7rem;
+  padding: 0.4rem;
+  border: 1px solid var(--tinta-15);
+  background: var(--color-cal);
+  color: var(--color-tinta);
+}
 
 /* -------------------- Grid de eventos -------------------- */
 .grid-eventos {
@@ -325,6 +341,32 @@
   background: repeating-linear-gradient(135deg, var(--color-terracota) 0 0.55rem, var(--color-oro) 0.55rem 1.1rem, var(--color-papel) 1.1rem 1.65rem);
 }
 .org-contenido { padding-block: var(--espacio-xl); }
+.org-eleccion { padding-bottom: var(--espacio-xl); }
+.org-eleccion__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espacio-md);
+}
+.org-eleccion__grid article {
+  padding: var(--espacio-lg);
+  border: 1px solid var(--tinta-10);
+  background: var(--color-papel);
+}
+.org-eleccion__grid h3 { margin: 0.35rem 0 0.65rem; font-size: 1.35rem; }
+.org-eleccion__grid p:not(.org-panel__ceja) { min-height: 5.5rem; color: var(--tinta-70); line-height: 1.65; }
+.org-eleccion__grid .boton { margin-top: 0.5rem; }
+.cta-organizador-contexto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-md);
+  margin-bottom: var(--espacio-lg);
+  padding: var(--espacio-md);
+  border: 1px solid var(--tinta-10);
+  background: var(--color-cal);
+}
+.cta-organizador-contexto h2 { margin: 0.25rem 0 0.35rem; font-size: 1.35rem; }
+.cta-organizador-contexto p:last-child { margin: 0; max-width: 38rem; color: var(--tinta-70); }
 .org-pasos-seccion { padding-bottom: var(--espacio-xl); }
 .org-seccion-intro { max-width: 42rem; margin-bottom: var(--espacio-lg); }
 .org-ceja--tinta { color: var(--color-terracota); }
@@ -406,12 +448,55 @@
 .org-cierre h2 { margin: 0.55rem 0; font-size: clamp(1.7rem, 3vw, 2.4rem); }
 .org-cierre > div > p:last-child { color: rgba(241, 230, 211, 0.72); }
 .org-cierre .boton { flex-shrink: 0; }
+.org-recorrido { overflow: hidden; border: 1px solid var(--tinta-15); background: var(--color-cal); }
+.org-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.org-tab {
+  display: flex; align-items: center; gap: 0.7rem; min-height: 4.5rem;
+  padding: 0.8rem 1rem; border: 0; border-right: 1px solid var(--tinta-10);
+  border-bottom: 1px solid var(--tinta-15); background: var(--color-papel);
+  color: var(--tinta-70); text-align: left; font-size: 0.8rem; font-weight: 700;
+}
+.org-tab:last-child { border-right: 0; }
+.org-tab[aria-selected="true"] { background: var(--color-tinta); color: var(--color-cal); }
+.org-tab:focus-visible, .org-pregunta summary:focus-visible {
+  position: relative; z-index: 1; outline: 3px solid var(--color-oro); outline-offset: -3px;
+}
+.org-tab__numero { color: var(--color-terracota); font-family: var(--fuente-titulos); font-size: 1.15rem; }
+.org-tab[aria-selected="true"] .org-tab__numero { color: var(--color-oro); }
+.org-progreso { height: 3px; background: var(--tinta-08); }
+.org-progreso span { display: block; width: 25%; height: 100%; background: var(--color-oro); transition: width .2s ease; }
+.org-panel { padding: clamp(1.25rem, 4vw, 2.5rem); }
+.org-panel[hidden] { display: none; }
+.org-panel__rejilla { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(13rem, 0.6fr); gap: var(--espacio-xl); align-items: center; min-height: 15rem; }
+.org-panel__ceja { margin-bottom: 0.6rem; color: var(--color-terracota); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; }
+.org-panel h3 { margin-bottom: 0.7rem; font-size: clamp(1.5rem, 3vw, 2rem); }
+.org-panel__rejilla > div > p:not(.org-panel__ceja) { max-width: 42rem; color: var(--tinta-70); line-height: 1.7; }
+.org-panel__lista { display: grid; gap: 0.55rem; margin: 1rem 0 0; padding-left: 1.2rem; color: var(--tinta-70); line-height: 1.6; }
+.org-panel__nota { padding: 1.25rem; border-top: 3px solid var(--color-oro); background: var(--color-papel); }
+.org-panel__nota > span { display: block; margin-bottom: 0.8rem; color: var(--color-terracota); font-family: var(--fuente-titulos); font-size: 2rem; }
+.org-panel__nota strong { display: block; margin-bottom: 0.4rem; }
+.org-panel__nota p { color: var(--tinta-70); font-size: 0.85rem; line-height: 1.65; }
+.org-panel__nota--segura { border-color: var(--color-patina); }
+.org-panel__nota--pendiente { border-color: var(--color-oro); }
+.org-panel__navegacion { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--tinta-10); }
+.org-panel__navegacion > span { color: var(--tinta-55); font-size: 0.78rem; }
+.org-preguntas { margin-bottom: var(--espacio-xl); }
+.org-pregunta { border-top: 1px solid var(--tinta-15); }
+.org-pregunta:last-child { border-bottom: 1px solid var(--tinta-15); }
+.org-pregunta summary { padding: 1rem 2rem 1rem 0; cursor: pointer; font-weight: 700; }
+.org-pregunta summary::marker { color: var(--color-terracota); }
+.org-pregunta p { max-width: 52rem; padding: 0 0 1rem; color: var(--tinta-70); line-height: 1.7; }
 .pagina-organizadores .footer { margin-top: 0; }
 @media (max-width: 760px) {
   .org-portada__rejilla { grid-template-columns: 1fr; gap: var(--espacio-lg); padding-block: var(--espacio-xl); }
   .org-sello { width: min(100%, 22rem); min-height: 13rem; justify-self: center; }
   .org-requisitos { margin-inline: calc(-1 * var(--espacio-md)); padding-inline: var(--espacio-md); }
   .org-compromisos { grid-template-columns: 1fr; gap: var(--espacio-md); }
+  .org-panel__rejilla { grid-template-columns: 1fr; gap: var(--espacio-md); }
+  .org-eleccion__grid { grid-template-columns: 1fr; }
+  .org-eleccion__grid p:not(.org-panel__ceja) { min-height: 0; }
+  .cta-organizador-contexto { align-items: flex-start; flex-direction: column; }
+  .cta-organizador-contexto .boton { width: 100%; }
   .org-cierre { align-items: flex-start; flex-direction: column; }
   .org-cierre .boton { width: 100%; white-space: normal; }
 }
@@ -419,6 +504,11 @@
   .org-paso { grid-template-columns: 2.8rem minmax(0, 1fr); gap: 0.65rem; }
   .org-paso__marca { display: none; }
   .org-requisitos__columnas { grid-template-columns: 1fr; }
+  .org-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .org-tab:nth-child(2) { border-right: 0; }
+  .org-tab:nth-child(-n + 2) { border-bottom: 1px solid var(--tinta-15); }
+  .org-panel__navegacion { flex-wrap: wrap; }
+  .org-panel__navegacion > span { order: 2; width: 100%; text-align: center; }
   .org-lista { padding: var(--espacio-md); }
   .org-portada__acciones { align-items: stretch; flex-direction: column; }
   .org-portada__acciones .boton { width: 100%; }
@@ -574,7 +664,40 @@
 .ruta-sabores__portada img { display: block; width: 100%; max-height: 25rem; object-fit: cover; }
 .ruta-sabores__portada figcaption { margin-top: 0.45rem; color: var(--tinta-55); font-size: 0.74rem; }
 .sabores-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espacio-md); }
-.sabor-card { padding: var(--espacio-md); background: var(--color-papel); border: 1px solid var(--tinta-08); }
+.sabor-card {
+  padding: var(--espacio-md);
+  background: var(--color-papel);
+  border: 1px solid var(--tinta-08);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sabor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(36, 27, 20, .12);
+}
+.sabor-card__imagen {
+  height: 12rem;
+  margin: calc(-1 * var(--espacio-md)) calc(-1 * var(--espacio-md)) var(--espacio-md);
+  overflow: hidden;
+  background: var(--color-cal);
+}
+.sabor-card__imagen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.sabor-card:hover .sabor-card__imagen img { transform: scale(1.05); }
+.sabor-card__imagen--empanadas img { object-position: 8% 82%; }
+.sabor-card__imagen--tamal img { object-position: 76% 93%; }
+.sabor-card__imagen--carantanta img { object-position: 48% 92%; }
+.sabor-card__imagen--champus img { object-position: 76% 55%; }
+.sabor-card__imagen--aplanchados img { object-position: 60% 48%; }
+.ruta-detalle--descubierta .sabores-cards { animation: sabores-aparecen .45s ease both; }
+@keyframes sabores-aparecen {
+  from { opacity: .4; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .sabor-card .tarjeta-evento__categoria { margin-bottom: 0.45rem; }
 .sabor-card .lugar-card__titulo { margin-bottom: 0.5rem; }
 .sabor-card .lugar-card__historia { margin: 0; }
@@ -730,6 +853,61 @@
 .buscador-sabores select { min-width: 11rem; }
 .buscador-sabores input:focus, .buscador-sabores select:focus { outline: 2px solid var(--color-terracota); outline-offset: 1px; }
 .buscador-sabores .boton { flex-shrink: 0; }
+
+.lugares-destacados-sabores {
+  margin-top: var(--espacio-lg);
+  padding: var(--espacio-lg) 0 var(--espacio-md);
+  border-bottom: 1px solid var(--tinta-10);
+}
+.lugares-destacados-sabores__encabezado {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--espacio-md);
+  margin-bottom: var(--espacio-md);
+}
+.lugares-destacados-sabores__encabezado h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0.35rem 0 0; }
+.lugares-destacados-sabores__encabezado > p { max-width: 28rem; color: var(--tinta-55); font-size: 0.82rem; text-align: right; }
+.lugares-destacados-sabores__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espacio-md);
+}
+.lugar-destacado-sabor {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  min-height: 11rem;
+  overflow: hidden;
+  border: 1px solid var(--tinta-08);
+  background: var(--color-papel);
+  color: inherit;
+  text-decoration: none;
+  transition: transform .15s, box-shadow .15s;
+}
+.lugar-destacado-sabor:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--tinta-10); }
+.lugar-destacado-sabor__imagen { min-width: 9rem; background: var(--color-cal); }
+.lugar-destacado-sabor__imagen img { width: 100%; height: 100%; object-fit: cover; }
+.lugar-destacado-sabor__imagen--vacio {
+  display: grid;
+  place-items: center;
+  color: var(--color-terracota);
+  font-family: var(--fuente-titulos);
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--color-cal), var(--color-papel));
+}
+.lugar-destacado-sabor__cuerpo { min-width: 0; padding: 0.85rem; }
+.lugar-destacado-sabor__categoria {
+  margin: 0 0 0.35rem;
+  color: var(--color-terracota);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.lugar-destacado-sabor h3 { margin: 0 0 0.35rem; font-family: var(--fuente-titulos); font-size: 1rem; }
+.lugar-destacado-sabor__direccion { margin: 0 0 0.35rem; color: var(--tinta-70); font-size: 0.72rem; font-weight: 700; }
+.lugar-destacado-sabor__resumen { margin: 0; color: var(--tinta-55); font-size: 0.72rem; line-height: 1.45; }
+.lugar-destacado-sabor__pie { margin: 0.55rem 0 0; color: var(--color-terracota); font-size: 0.72rem; font-weight: 800; }
 
 .categorias-circulos {
   display: flex;
@@ -965,6 +1143,7 @@
 
 @media (max-width: 960px) {
   .grid-negocios, .grid-negocios--home { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lugares-destacados-sabores__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
   .negocio-detalle { grid-template-columns: 1fr; }
@@ -975,6 +1154,11 @@
   .buscador-sabores { flex-direction: column; align-items: stretch; margin-top: -1.25rem; }
   .buscador-sabores select { min-width: 0; }
   .buscador-sabores .boton { width: 100%; }
+  .lugares-destacados-sabores__encabezado { align-items: flex-start; flex-direction: column; }
+  .lugares-destacados-sabores__encabezado > p { text-align: left; }
+  .lugares-destacados-sabores__grid { grid-template-columns: 1fr; }
+  .lugar-destacado-sabor { grid-template-columns: 7.5rem 1fr; }
+  .lugar-destacado-sabor__imagen { min-width: 7.5rem; }
   .grid-negocios, .grid-negocios--home { grid-template-columns: 1fr; }
   .seccion-sabores-home__cabecera { align-items: flex-start; flex-direction: column; }
   .cta-registro-negocio { align-items: stretch; flex-direction: column; }

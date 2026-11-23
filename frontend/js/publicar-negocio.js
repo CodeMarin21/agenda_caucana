@@ -1,4 +1,6 @@
 (function () {
+  if (typeof acProtegerPagina === 'function' && !acProtegerPagina('login.html')) return;
+
   const estadoCargando = document.getElementById('estado-cargando');
   const estadoNoAuth = document.getElementById('estado-no-auth');
   const estadoNoOrg = document.getElementById('estado-no-org');
@@ -299,11 +301,7 @@
       const respuesta = await AC_API.crearNegocio(payload);
       mostrarMensaje(respuesta.mensaje || 'Negocio publicado correctamente.', 'ok');
       window.setTimeout(() => {
-        if (respuesta.negocio?.slug) {
-          window.location.href = `negocio.html?slug=${encodeURIComponent(respuesta.negocio.slug)}`;
-        } else {
-          window.location.href = 'sabores.html';
-        }
+        window.location.href = 'organizador/mis-negocios.html';
       }, 1200);
     } catch (error) {
       mostrarMensaje(`No se pudo publicar el negocio: ${error.message}`, 'error');
@@ -330,8 +328,25 @@
     }
 
     try {
-      const perfil = await AC_API.perfil();
-      if (perfil?.rol !== 'ORGANIZADOR') {
+      const perfil = await AC_API.perfilOrganizador();
+      if (perfil.especialidad !== 'GASTRONOMIA') {
+        window.location.replace(
+          perfil.especialidad === 'EVENTOS'
+            ? 'organizador/mis-eventos.html'
+            : 'organizador/perfil.html'
+        );
+        return;
+      }
+      if (perfil.vetado || perfil.estado === 'SUSPENDIDO') {
+        const titulo = estadoNoOrg.querySelector('h2');
+        const detalle = estadoNoOrg.querySelector('p');
+        const enlaceRegistro = estadoNoOrg.querySelector('a');
+        if (titulo) titulo.textContent = perfil.vetado ? 'Cuenta vetada' : 'Cuenta suspendida';
+        if (detalle) {
+          detalle.textContent = perfil.motivoVeto || perfil.motivoEstado ||
+            'No puedes publicar negocios mientras tu cuenta esté restringida. Contacta al administrador.';
+        }
+        if (enlaceRegistro) enlaceRegistro.hidden = true;
         mostrarEstado(estadoNoOrg);
         return;
       }
@@ -340,6 +355,10 @@
     } catch (error) {
       if (error.status === 401) {
         window.location.href = 'login.html?next=publicar-negocio.html';
+        return;
+      }
+      if (error.status === 403) {
+        mostrarEstado(estadoNoOrg);
         return;
       }
       mostrarEstado(estadoForm);

@@ -130,7 +130,7 @@
       setText('[data-evento-descripcion]', evento.descripcion);
       setText('[data-evento-lugar]', nombreLugar);
       setText('[data-evento-lugar-corto]', nombreLugar);
-      setText('[data-evento-organiza]', evento.organizador?.nombreEntidad);
+      setText('[data-evento-organiza]', evento.organizador?.nombreEntidad, 'Sin organizador asociado');
       setText('[data-evento-categoria-ficha]', categoria);
       setText('[data-evento-publico]', publico);
       setText('[data-evento-precio]', precio);

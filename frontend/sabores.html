@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sabores de Popayán — Agenda Caucana</title>
-<meta name="description" content="Descubre restaurantes, cafés y cocinas tradicionales de Popayán y el Cauca.">
+<title data-i18n="saboresPagina.titulo">Sabores de Popayán — Agenda Caucana</title>
+<meta name="description" data-i18n-content="page.foodDescription" content="Descubre restaurantes, cafés y cocinas tradicionales de Popayán y el Cauca.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -64,38 +64,35 @@
   <div class="contenedor nav-publico__fila">
     <a href="index.html" class="nav-publico__marca">
       <span class="fuente-titulos">Agenda Caucana</span>
-      <p>La cartelera cultural de Popayán</p>
+      <p data-i18n="nav.tagline">La cartelera cultural de Popayán</p>
     </a>
     <nav class="nav-publico__links" aria-label="Navegación principal">
-      <a href="index.html">Explorar</a>
-      <a href="index.html#categorias">Categorías</a>
-      <a href="rutas.html">Rutas</a>
-      <a href="sabores.html" aria-current="page">Sabores</a>
+      <a href="index.html" data-i18n="nav.explorar">Explorar</a>
+      <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+      <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+      <a href="sabores.html" aria-current="page" data-i18n="nav.sabores">Sabores</a>
     </nav>
     <div class="nav-publico__acciones">
       <div class="a11y-panel-wrap">
-        <button class="a11y-boton" data-a11y-boton aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
+        <button class="a11y-boton" data-a11y-boton data-i18n-aria-label="a11y.herramientas" data-i18n-title="a11y.accesibilidad" aria-label="Herramientas de accesibilidad" title="Accesibilidad">Aa</button>
         <div class="a11y-panel" data-a11y-panel role="menu">
-          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox">Alto contraste</button>
-          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox">Colores invertidos</button>
-          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
+          <button type="button" data-a11y-toggle="contraste" role="menuitemcheckbox" data-i18n="a11y.contraste">Alto contraste</button>
+          <button type="button" data-a11y-toggle="invertido" role="menuitemcheckbox" data-i18n="a11y.invertidos">Colores invertidos</button>
+          <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox" data-i18n="a11y.lectura">Modo lectura</button>
         </div>
       </div>
-      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
-        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
-      </select>
-      <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
-      <a href="publicar-negocio.html" class="boton boton-primario">Registrar negocio</a>
+      <a href="login.html" class="avatar-perfil" data-i18n-title="nav.miPerfil" data-i18n-aria-label="nav.miPerfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
+      <a href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html" class="boton boton-primario" data-i18n="saboresPagina.registrarNegocio">Registrar negocio</a>
     </div>
-    <button class="nav-publico__menu-movil" data-menu-movil-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
+    <button class="nav-publico__menu-movil" data-menu-movil-boton data-i18n-aria-label="nav.abrirMenu" aria-label="Abrir menú" aria-expanded="false" data-i18n="nav.menu">Menú</button>
   </div>
   <div class="menu-movil" data-menu-movil>
-    <a href="index.html">Explorar</a>
-    <a href="index.html#categorias">Categorías</a>
-    <a href="rutas.html">Rutas</a>
-    <a href="sabores.html" aria-current="page">Sabores</a>
-    <a href="login.html">Mi perfil</a>
-    <a href="publicar-negocio.html" class="boton boton-primario">Registrar negocio</a>
+    <a href="index.html" data-i18n="nav.explorar">Explorar</a>
+    <a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a>
+    <a href="rutas.html" data-i18n="nav.rutas">Rutas</a>
+    <a href="sabores.html" aria-current="page" data-i18n="nav.sabores">Sabores</a>
+    <a href="login.html" data-i18n="nav.miPerfil">Mi perfil</a>
+    <a href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html" class="boton boton-primario" data-i18n="saboresPagina.registrarNegocio">Registrar negocio</a>
   </div>
 </header>
 
@@ -104,52 +101,66 @@
     <img class="hero-sabores__imagen" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=85&w=1800" alt="" fetchpriority="high">
     <div class="hero-sabores__scrim"></div>
     <div class="hero-sabores__contenido">
-      <h1 id="titulo-sabores" class="fuente-titulos">Sabores de Popayán</h1>
-      <p>Restaurantes, cafés y cocinas tradicionales del Cauca.</p>
+      <h1 id="titulo-sabores" class="fuente-titulos" data-i18n="saboresPagina.titulo">Sabores de Popayán</h1>
+      <p data-i18n="saboresPagina.descripcion">Restaurantes, cafés y cocinas tradicionales del Cauca.</p>
     </div>
   </section>
 
   <div class="contenedor">
     <form class="buscador-sabores" data-form-busqueda-sabores role="search">
-      <label class="visualmente-oculto" for="buscar-negocio">Buscar restaurantes, cafés o platos</label>
-      <input id="buscar-negocio" type="search" data-buscar-negocio placeholder="Busca un lugar, plato o dirección">
-      <label class="visualmente-oculto" for="ciudad-negocio">Seleccionar ciudad</label>
+      <label class="visualmente-oculto" for="buscar-negocio" data-i18n="saboresPagina.busquedaLabel">Buscar restaurantes, cafés o platos</label>
+      <input id="buscar-negocio" type="search" data-buscar-negocio placeholder="Busca un lugar, plato o dirección" data-i18n="saboresPagina.busquedaPlaceholder" data-i18n-placeholder>
+      <label class="visualmente-oculto" for="ciudad-negocio" data-i18n="saboresPagina.ciudadLabel">Seleccionar ciudad</label>
       <select id="ciudad-negocio" data-ciudad-negocio>
-        <option value="">Todas las ciudades</option>
+        <option value="" data-i18n="saboresPagina.todasCiudades">Todas las ciudades</option>
       </select>
-      <button type="submit" class="boton boton-primario">Buscar</button>
+      <button type="submit" class="boton boton-primario" data-i18n="saboresPagina.buscar">Buscar</button>
     </form>
 
-    <section class="categorias-circulos" data-categorias-negocios role="group" aria-label="Filtrar por categoría"></section>
+    <section class="lugares-destacados-sabores" aria-labelledby="lugares-destacados-titulo">
+      <div class="lugares-destacados-sabores__encabezado">
+        <div>
+          <p class="tarjeta-evento__categoria" data-i18n="saboresPagina.destacadosEyebrow">Popayán y sus alrededores</p>
+          <h2 id="lugares-destacados-titulo" class="fuente-titulos" data-i18n="saboresPagina.destacadosTitulo">Lugares destacados para comer</h2>
+        </div>
+        <p data-i18n="saboresPagina.destacadosTexto">Seleccionados entre los negocios aprobados según valoración y presencia pública.</p>
+      </div>
+      <div class="lugares-destacados-sabores__grid" data-lugares-destacados aria-live="polite">
+        <p class="mensaje-carga-negocios" data-i18n="saboresPagina.cargandoDestacados">Cargando lugares destacados...</p>
+      </div>
+    </section>
 
-    <section class="filtros-sabores-secundarios" aria-label="Filtros de negocios">
+    <section class="categorias-circulos" data-categorias-negocios role="group" aria-label="Filtrar por categoría" data-i18n-aria-label="saboresPagina.filtroCategoria"></section>
+
+    <section class="filtros-sabores-secundarios" aria-label="Filtros de negocios" data-i18n-aria-label="saboresPagina.filtros">
       <div class="grupo-filtros-sabores" data-filtro-orden>
-        <span class="grupo-filtros-sabores__etiqueta">Orden:</span>
-        <button class="pildora pildora-sabor" type="button" data-orden="recientes" aria-pressed="true">Recientes</button>
-        <button class="pildora pildora-sabor" type="button" data-orden="destacados" aria-pressed="false">Destacados</button>
-        <button class="pildora pildora-sabor" type="button" data-orden="mejor-calificados" aria-pressed="false">Mejor calificados</button>
+        <span class="grupo-filtros-sabores__etiqueta" data-i18n="saboresPagina.orden">Orden:</span>
+        <button class="pildora pildora-sabor" type="button" data-orden="recientes" aria-pressed="true" data-i18n="saboresPagina.recientes">Recientes</button>
+        <button class="pildora pildora-sabor" type="button" data-orden="destacados" aria-pressed="false" data-i18n="saboresPagina.destacados">Destacados</button>
+        <button class="pildora pildora-sabor" type="button" data-orden="mejor-calificados" aria-pressed="false" data-i18n="saboresPagina.mejorCalificados">Mejor calificados</button>
       </div>
       <div class="grupo-filtros-sabores" data-filtro-precio>
-        <span class="grupo-filtros-sabores__etiqueta">Precio:</span>
-        <button class="pildora pildora-sabor" type="button" data-precio="todos" aria-pressed="true">Todos</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="hasta-10000" aria-pressed="false">Hasta $10.000</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="10000-30000" aria-pressed="false">$10.000–$30.000</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="mas-30000" aria-pressed="false">Más de $30.000</button>
+        <span class="grupo-filtros-sabores__etiqueta" data-i18n="saboresPagina.precio">Precio:</span>
+        <button class="pildora pildora-sabor" type="button" data-precio="todos" aria-pressed="true" data-i18n="saboresPagina.todos">Todos</button>
+        <button class="pildora pildora-sabor" type="button" data-precio="hasta-10000" aria-pressed="false" data-i18n="saboresPagina.hasta10">Hasta $10.000</button>
+        <button class="pildora pildora-sabor" type="button" data-precio="10000-30000" aria-pressed="false" data-i18n="saboresPagina.de10a30">$10.000–$30.000</button>
+        <button class="pildora pildora-sabor" type="button" data-precio="mas-30000" aria-pressed="false" data-i18n="saboresPagina.mas30">Más de $30.000</button>
       </div>
     </section>
 
     <p class="barra-resultados" data-contador-negocios aria-live="polite">Cargando negocios...</p>
     <section class="grid-negocios" data-grid-negocios aria-live="polite" aria-busy="true"></section>
     <div class="acciones-cargar-negocios">
-      <button type="button" class="boton boton-secundario" data-cargar-mas-negocios hidden>Cargar más lugares</button>
+      <button type="button" class="boton boton-secundario" data-cargar-mas-negocios hidden data-i18n="saboresPagina.cargarMas">Cargar más lugares</button>
     </div>
 
     <section class="cta-registro-negocio">
       <div>
-        <h2 class="fuente-titulos">¿Tienes un restaurante o puesto de comida?</h2>
-        <p>Comparte tu propuesta con quienes quieren descubrir la cocina caucana.</p>
+        <h2 class="fuente-titulos" data-i18n="saboresPagina.ctaTitulo">¿Tienes un restaurante o puesto de comida?</h2>
+        <p data-i18n="saboresPagina.ctaTexto">Comparte tu propuesta con quienes quieren descubrir la cocina caucana.</p>
+        <a class="ruta-resumen__enlace" href="organizador/como-funciona.html#sabores-negocios" data-i18n="saboresPagina.comoFunciona">Ver cómo funciona para negocios</a>
       </div>
-      <a class="boton" href="publicar-negocio.html">Registrar mi negocio</a>
+      <a class="boton" href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html" data-i18n="saboresPagina.registrarNegocio">Registrar mi negocio</a>
     </section>
   </div>
 </main>
@@ -158,47 +169,46 @@
   <div class="contenedor footer__fila">
     <div class="footer__marca">
       <span class="fuente-titulos">Agenda Caucana</span>
-      <p>La cartelera cultural de la Ciudad Blanca de Popayán.</p>
+      <p data-i18n="footer.descripcion">La cartelera cultural de la Ciudad Blanca de Popayán.</p>
     </div>
     <div class="footer__columnas">
       <div class="footer__columna">
-        <p class="titulo-columna">Explorar</p>
+        <p class="titulo-columna" data-i18n="footer.explorar">Explorar</p>
         <ul>
-          <li><a href="index.html">Eventos hoy</a></li>
-          <li><a href="index.html#categorias">Categorías</a></li>
-          <li><a href="rutas.html">Rutas históricas</a></li>
-          <li><a href="sabores.html">Sabores</a></li>
+          <li><a href="index.html" data-i18n="footer.eventosHoy">Eventos hoy</a></li>
+          <li><a href="index.html#categorias" data-i18n="nav.categorias">Categorías</a></li>
+          <li><a href="rutas.html" data-i18n="footer.rutasHistoricas">Rutas históricas</a></li>
+          <li><a href="sabores.html" data-i18n="nav.sabores">Sabores</a></li>
         </ul>
       </div>
       <div class="footer__columna">
-        <p class="titulo-columna">Contacto</p>
-        <ul><li><a href="#">Instagram</a></li><li><a href="#">WhatsApp</a></li><li><a href="#">Soporte</a></li></ul>
+        <p class="titulo-columna" data-i18n="footer.contacto">Contacto</p>
+        <ul><li><a href="#">Instagram</a></li><li><a href="#">WhatsApp</a></li><li><a href="#" data-i18n="footer.soporte">Soporte</a></li></ul>
       </div>
     </div>
   </div>
-  <p class="footer__legal">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.<br><a href="terminos.html">Términos y condiciones</a> · <a href="terminos.html#creditos">Créditos y licencias</a></p>
+  <p class="footer__legal"><span data-i18n="footer.derechosRuta">© 2026 Agenda Caucana. Todos los derechos reservados. Popayán, Colombia.</span><br><a href="terminos.html" data-i18n="footer.terminos">Términos y condiciones</a> · <a href="terminos.html#creditos" data-i18n="footer.creditos">Créditos y licencias</a></p>
 </footer>
 
-<button class="chat-flotante-boton" data-chat-boton aria-label="Pregúntale a la IA sobre restaurantes y comida en Popayán">
+<button class="chat-flotante-boton" data-chat-boton data-i18n-aria-label="chat.sabores.aria" aria-label="Pregúntale a la IA sobre restaurantes y comida en Popayán">
   💬 <span class="chat-flotante-boton__texto" data-i18n="chat.sabores.aria">Pregúntale a la IA</span>
 </button>
 <div class="chat-panel" data-chat-panel>
   <div class="chat-panel__header">
-    <span>Pregúntale a la IA</span>
-    <button type="button" data-chat-cerrar aria-label="Cerrar chat" style="background:none;border:none;color:inherit;">Cerrar</button>
+    <span data-i18n="chat.titulo">Pregúntale a la IA</span>
+    <button type="button" data-chat-cerrar aria-label="Cerrar chat" data-i18n-aria-label="chat.cerrar" style="background:none;border:none;color:inherit;" data-i18n="chat.cerrar">Cerrar</button>
   </div>
   <div class="chat-panel__mensajes" data-chat-mensajes>
-    <div class="chat-mensaje chat-mensaje--ia">¿Qué te gustaría encontrar para comer en Popayán?</div>
+    <div class="chat-mensaje chat-mensaje--ia" data-i18n="chat.sabores.bienvenida">¿Qué te gustaría encontrar para comer en Popayán?</div>
   </div>
   <form class="chat-panel__form" data-chat-form>
-    <input type="text" data-chat-input placeholder="Ej: ¿Dónde comer alitas para 4 por menos de 50 mil?" autocomplete="off">
-    <button type="submit" aria-label="Enviar pregunta">Enviar</button>
+    <input type="text" data-chat-input placeholder="Ej: ¿Dónde comer alitas para 4 por menos de 50 mil?" data-i18n="chat.sabores.placeholder" data-i18n-placeholder autocomplete="off">
+    <button type="submit" aria-label="Enviar pregunta" data-i18n-aria-label="chat.enviar" data-i18n="chat.enviar">Enviar</button>
   </form>
 </div>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
-<script src="js/i18n.js"></script>
 <script src="js/accesibilidad.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/sabores.js"></script>

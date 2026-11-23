@@ -7,6 +7,8 @@
 (function () {
   'use strict';
 
+  if (typeof acProtegerPagina === 'function' && !acProtegerPagina('../login.html')) return;
+
   function obtenerRolDelToken(token) {
     try {
       const payloadCodificado = token.split('.')[1];
@@ -217,13 +219,28 @@
 
   async function cargarPerfilSidebar() {
     try {
-      const perfil = await AC_API.perfil();
-      const nombre = perfil?.organizador?.nombreEntidad || perfil?.nombre || 'Organizador';
+      const perfil = await AC_API.perfilOrganizador();
+      if (perfil.especialidad !== 'EVENTOS') {
+        window.location.replace(
+          perfil.especialidad === 'GASTRONOMIA' ? 'mis-negocios.html' : 'perfil.html'
+        );
+        return false;
+      }
+      const nombre = perfil.nombreEntidad || 'Organizador';
       if (sidebarNombre) sidebarNombre.textContent = nombre;
       if (sidebarInicial) sidebarInicial.textContent = nombre.slice(0, 2).toUpperCase();
+      document.querySelectorAll('[data-publicar-evento]').forEach((enlace) => {
+        enlace.hidden = perfil.estado !== 'VERIFICADO' || perfil.vetado;
+      });
+      return true;
     } catch (e) {
-      if (manejar403(e)) return;
-      // silencioso: el sidebar queda con el texto por defecto
+      if (e.status === 401) {
+        window.location.replace('../login.html');
+        return false;
+      }
+      if (manejar403(e)) return false;
+      cargando.textContent = `No se pudo validar tu especialidad: ${e.message}`;
+      return false;
     }
   }
 
@@ -241,7 +258,8 @@
 
   /* ── Init ───────────────────────────────────────── */
 
-  cargarPerfilSidebar();
-  cargarCategorias();
-  cargarEventos();
+  (async () => {
+    if (!await cargarPerfilSidebar()) return;
+    await Promise.all([cargarCategorias(), cargarEventos()]);
+  })();
 })();

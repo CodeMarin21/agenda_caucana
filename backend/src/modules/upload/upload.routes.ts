@@ -6,7 +6,7 @@ import { subirImagen } from './upload.controller';
 
 const router = Router();
 
-// Multer en memoria — no escribimos a disco, el buffer va directo a Cloudinary
+// Multer en memoria; el almacenamiento local de desarrollo y Cloudinary usan el mismo límite.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB

@@ -17,12 +17,29 @@ function formatFecha(fecha: Date, idioma: Idioma): string {
     timeZone: 'America/Bogota',
     weekday: 'short',
     year: 'numeric',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
   });
+}
+
+function formatRangoFecha(evento: EventoContexto, idioma: Idioma): string {
+  const inicio = formatFecha(evento.fechaInicio, idioma);
+  if (!evento.fechaFin || evento.fechaFin.getTime() <= evento.fechaInicio.getTime()) return inicio;
+  return `${inicio} — ${formatFecha(evento.fechaFin, idioma)}`;
+}
+
+function formatEstadoTemporal(evento: EventoContexto, ahora: Date, idioma: Idioma): string {
+  const etiquetas = {
+    es: { proximo: 'Próximo', curso: 'En curso', finalizado: 'Finalizado' },
+    en: { proximo: 'Upcoming', curso: 'Ongoing', finalizado: 'Ended' },
+    fr: { proximo: 'À venir', curso: 'En cours', finalizado: 'Terminé' },
+  }[idioma];
+  if (evento.fechaInicio > ahora) return etiquetas.proximo;
+  if (evento.fechaFin && evento.fechaFin >= ahora) return etiquetas.curso;
+  return etiquetas.finalizado;
 }
 
 function formatPrecio(precio: number | null, idioma: Idioma): string {
@@ -33,10 +50,10 @@ function formatPrecio(precio: number | null, idioma: Idioma): string {
 }
 
 function formatEvento(e: EventoContexto, idioma: Idioma): string {
-  const fecha = formatFecha(e.fechaInicio, idioma);
+  const fecha = formatRangoFecha(e, idioma);
   const precio = formatPrecio(e.precioReferencial, idioma);
   const edad = e.esMayorDeEdad ? ' [Solo mayores]' : '';
-  return `- ID:${e.id} | [${e.titulo}](/eventos/${e.slug}) | ${e.categoria.nombre} | ${e.lugar.nombre} | ${fecha} | ${precio}${edad}`;
+  return `- ID:${e.id} | [${e.titulo}](/eventos/${e.slug}) | ${e.categoria.nombre} | ${e.lugar.nombre} | ${fecha} | ${idioma === 'es' ? 'Estado' : idioma === 'en' ? 'Status' : 'État'}: ${formatEstadoTemporal(e, new Date(), idioma)} | ${precio}${edad}`;
 }
 
 export interface PromptContext {
@@ -46,9 +63,15 @@ export interface PromptContext {
 }
 
 export function buildSystemPrompt({ eventos, idioma, eventoEspecifico }: PromptContext): string {
+  const ahora = new Date();
+  const fechaActual = ahora.toLocaleString(LOCALE[idioma], {
+    timeZone: 'America/Bogota',
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
   const lista = eventos.length > 0
     ? eventos.map((e) => formatEvento(e, idioma)).join('\n')
-    : '(No hay eventos próximos en la agenda)';
+    : '(No hay eventos en el contexto consultado)';
 
   const contextoEspecifico = eventoEspecifico
     ? `
@@ -56,13 +79,14 @@ export function buildSystemPrompt({ eventos, idioma, eventoEspecifico }: PromptC
 EVENTO ACTUALMENTE VISUALIZADO POR EL USUARIO:
 ${formatEvento(eventoEspecifico, idioma)}
 Descripción: ${eventoEspecifico.descripcion}
-Dirección: ${eventoEspecifico.lugar.direccion}${eventoEspecifico.urlExternaBoletas ? `\nBoletas: ${eventoEspecifico.urlExternaBoletas}` : ''}
+Dirección: ${eventoEspecifico.lugar.direccion}
 
 Si el usuario dice "este evento", "el concierto", "cuánto cuesta" sin más contexto, refiérete a ESTE evento.`
     : '';
 
   return `Eres el Asistente Virtual Oficial de "Agenda Caucana" en Popayán, Colombia (la Ciudad Blanca).
 Tu misión es recomendar planes culturales con calidez payanesa, usando ÚNICAMENTE los eventos reales listados abajo.
+Fecha y hora actual en Popayán: ${fechaActual}.
 
 REGLAS DE ORO (obligatorias):
 1. Responde SIEMPRE en ${IDIOMA_LABEL[idioma]}.
@@ -73,6 +97,8 @@ REGLAS DE ORO (obligatorias):
 6. Si la pregunta es ambigua, sugiere 2 o 3 eventos variados.
 7. Nunca inventes eventos, precios, fechas ni lugares.
 8. Tono cálido y cultural. Expresiones como "¡Claro que sí!" o "tenemos planes chéveres" son bienvenidas con moderación.
+9. No presentes como futuro un evento cuya fecha de inicio ya pasó: distingue entre "En curso" y "Finalizado" con el estado indicado.
+10. Cuando pregunten por una fecha o periodo, responde solo con eventos que se crucen con ese periodo; no sustituyas la fecha solicitada por el siguiente evento disponible.
 
 <eventos_disponibles>
 ${lista}

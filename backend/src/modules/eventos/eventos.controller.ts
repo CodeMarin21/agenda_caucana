@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { EventosService } from './eventos.service';
 import { prisma } from '../../config/database';
+import { inferirEspecialidad } from '../organizadores/especialidad.util';
 
 const service = new EventosService();
 
@@ -10,31 +11,37 @@ const service = new EventosService();
 // que un organizador publique en nombre de otro (spoofing).
 async function resolverOrganizadorDeJWT(
   usuarioId: number
-): Promise<{ id: number; estado: string; vetado: boolean } | null> {
-  return prisma.organizador.findUnique({
+){
+  const organizador = await prisma.organizador.findUnique({
     where: { usuarioId },
-    select: { id: true, estado: true, vetado: true },
+    include: { _count: { select: { eventos: true, negocios: true } } },
   });
+  if (!organizador) return null;
+  return {
+    ...organizador,
+    especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
+  };
 }
 
 // ─── Listado público ────────────────────────────────────
 export const listarEventos = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { categoriaSlug, desde, hasta, precioMax, pagina, limite, orden } = req.query as {
-      categoriaSlug?: string;
-      desde?: string;
-      hasta?: string;
-      precioMax?: string;
-      pagina?: string;
-      limite?: string;
-      orden?: 'fecha' | 'recientes';
-    };
+    const query = req.query as Record<string, unknown>;
+    const categoriaSlug = typeof query.categoriaSlug === 'string' ? query.categoriaSlug : undefined;
+    const desde = typeof query.desde === 'string' ? query.desde : undefined;
+    const hasta = typeof query.hasta === 'string' ? query.hasta : undefined;
+    const precioMax = typeof query.precioMax === 'string' ? query.precioMax : undefined;
+    const pagina = typeof query.pagina === 'string' ? query.pagina : undefined;
+    const limite = typeof query.limite === 'string' ? query.limite : undefined;
+    const orden = query.orden === 'recientes' ? 'recientes' : 'fecha';
+    const q = typeof query.q === 'string' ? query.q : undefined;
 
     const resultado = await service.listarAprobados({
       categoriaSlug,
       desde,
       hasta,
       precioMax: precioMax ? parseFloat(precioMax) : undefined,
+      q: q?.trim().slice(0, 100) || undefined,
       pagina:    pagina    ? parseInt(pagina)       : 1,
       limite:    limite    ? parseInt(limite)        : 12,
       orden,
@@ -91,8 +98,6 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
       direccion,
       precioReferencial,
       esMayorDeEdad,
-      urlExternaBoletas,
-      gestionaTaquillaInterna,
       categoriaId,
       lugarId: lugarIdBody,
       ciudadId,
@@ -109,8 +114,6 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
       direccion?: string;
       precioReferencial?: number;
       esMayorDeEdad?: boolean;
-      urlExternaBoletas?: string;
-      gestionaTaquillaInterna?: boolean;
       categoriaId: number;
       lugarId?: number;
       ciudadId: number;
@@ -162,6 +165,10 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
       res.status(403).json({ error: 'No tienes perfil de organizador' });
       return;
     }
+    if (organizador.especialidad !== 'EVENTOS') {
+      res.status(403).json({ error: 'Tu cuenta no está habilitada para publicar eventos.' });
+      return;
+    }
     if (organizador.vetado || organizador.estado !== 'VERIFICADO') {
       res.status(403).json({
         error: organizador.vetado
@@ -203,8 +210,6 @@ export const crearEvento = async (req: Request, res: Response): Promise<void> =>
       direccion,
       precioReferencial,
       esMayorDeEdad,
-      urlExternaBoletas,
-      gestionaTaquillaInterna,
       categoriaId,
       lugarId,
       ciudadId,
@@ -284,6 +289,10 @@ export const eliminarEvento = async (req: Request, res: Response): Promise<void>
 
     if (!esAdmin) {
       const organizador = await resolverOrganizadorDeJWT(req.usuarioId!);
+      if (organizador?.especialidad !== 'EVENTOS') {
+        res.status(403).json({ error: 'Tu cuenta no está habilitada para gestionar eventos.' });
+        return;
+      }
       if (!organizador || evento.organizadorId !== organizador.id) {
         res.status(403).json({ error: 'No tienes permiso para eliminar este evento' });
         return;
@@ -325,6 +334,10 @@ export const misEventos = async (req: Request, res: Response): Promise<void> => 
     const organizador = await resolverOrganizadorDeJWT(req.usuarioId!);
     if (!organizador) {
       res.status(403).json({ error: 'No tienes perfil de organizador' });
+      return;
+    }
+    if (organizador.especialidad !== 'EVENTOS') {
+      res.status(403).json({ error: 'Tu cuenta no está habilitada para gestionar eventos.' });
       return;
     }
 

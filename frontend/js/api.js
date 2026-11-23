@@ -1,11 +1,11 @@
 /**
  * Agenda Caucana — Cliente de la API.
  * Envuelve todos los endpoints documentados del backend (Node/Express/Prisma).
- * El middleware i18n del backend lee el header Accept-Language, así que
- * el idioma elegido en el frontend viaja en cada petición.
+ * Las publicaciones se muestran en su idioma original. El chat determina
+ * el idioma de respuesta a partir del texto de la pregunta.
  */
 const AC_API = (() => {
-  const { API_BASE_URL, TOKEN_STORAGE_KEY, LOCALE_STORAGE_KEY, DEFAULT_LOCALE } = window.AC_CONFIG;
+  const { API_BASE_URL, TOKEN_STORAGE_KEY, DEFAULT_LOCALE } = window.AC_CONFIG;
   const REFRESH_TOKEN_STORAGE_KEY = 'agendaCaucanaRefreshToken';
 
   function getToken() {
@@ -17,7 +17,7 @@ const AC_API = (() => {
   }
 
   function getLocale() {
-    return localStorage.getItem(LOCALE_STORAGE_KEY) || DEFAULT_LOCALE;
+    return DEFAULT_LOCALE;
   }
 
   async function solicitar(ruta, opciones = {}) {
@@ -146,6 +146,14 @@ const AC_API = (() => {
     actualizarPerfilOrganizador: (payload) =>
       solicitar('/organizadores/perfil', { method: 'PATCH', body: JSON.stringify(payload) }),
 
+    // ── Notificaciones del organizador ───────────────────
+    listarNotificaciones: (pagina = 1, limite = 20) =>
+      solicitar(`/notificaciones?pagina=${encodeURIComponent(pagina)}&limite=${encodeURIComponent(limite)}`),
+    marcarNotificacionLeida: (id) =>
+      solicitar(`/notificaciones/${encodeURIComponent(id)}/leida`, { method: 'PATCH' }),
+    marcarTodasNotificacionesLeidas: () =>
+      solicitar('/notificaciones/leidas', { method: 'PATCH' }),
+
     // ── Auth ─────────────────────────────────────────────
     login: (email, password) => solicitar('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     perfil: () => solicitar('/auth/perfil'),
@@ -190,11 +198,13 @@ const AC_API = (() => {
     cancelarSuscripcion: (payload) => solicitar('/suscripciones', { method: 'DELETE', body: JSON.stringify(payload) }),
 
     // ── Chat IA ──────────────────────────────────────────
-    preguntar: (pregunta) => solicitar('/chat', { method: 'POST', body: JSON.stringify({ pregunta }) }),
+    preguntar: (pregunta, negocioSlug) => solicitar('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ pregunta, ...(negocioSlug ? { negocioSlug } : {}) }),
+    }),
 
     // ── Utilidades ───────────────────────────────────────
     getLocale,
-    setLocale: (locale) => localStorage.setItem(LOCALE_STORAGE_KEY, locale),
     getToken,
     setToken: (token) => localStorage.setItem(TOKEN_STORAGE_KEY, token),
     getRefreshToken,

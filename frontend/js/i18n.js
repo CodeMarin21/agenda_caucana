@@ -24,9 +24,33 @@ const AC_I18N = (() => {
       if (texto === null || texto === undefined) return;
       if (el.hasAttribute('data-i18n-placeholder')) {
         el.setAttribute('placeholder', texto);
+      } else if (el.hasAttribute('data-i18n-preserve-children')) {
+        const nodoTexto = Array.from(el.childNodes).find((nodo) => nodo.nodeType === Node.TEXT_NODE);
+        if (nodoTexto) nodoTexto.textContent = texto;
       } else {
         el.textContent = texto;
       }
+    });
+    document.querySelectorAll('a.lugar-card__mapa:not([data-i18n])').forEach((el) => {
+      const texto = obtener('rutas.comoLlegar');
+      const nodoTexto = Array.from(el.childNodes).find((nodo) => nodo.nodeType === Node.TEXT_NODE);
+      if (texto && nodoTexto) nodoTexto.textContent = texto;
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+      const texto = obtener(el.getAttribute('data-i18n-title'));
+      if (texto !== null && texto !== undefined) el.setAttribute('title', texto);
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+      const texto = obtener(el.getAttribute('data-i18n-aria-label'));
+      if (texto !== null && texto !== undefined) el.setAttribute('aria-label', texto);
+    });
+    document.querySelectorAll('[data-i18n-alt]').forEach((el) => {
+      const texto = obtener(el.getAttribute('data-i18n-alt'));
+      if (texto !== null && texto !== undefined) el.setAttribute('alt', texto);
+    });
+    document.querySelectorAll('[data-i18n-content]').forEach((el) => {
+      const texto = obtener(el.getAttribute('data-i18n-content'));
+      if (texto !== null && texto !== undefined) el.setAttribute('content', texto);
     });
     document.documentElement.lang = AC_API.getLocale();
   }
@@ -51,20 +75,23 @@ const AC_I18N = (() => {
     const selectores = document.querySelectorAll('[data-selector-idioma]');
     const localeActual = AC_API.getLocale();
     selectores.forEach((sel) => { sel.value = localeActual; });
-    cargar(localeActual);
+    cargar(localeActual).then(() => {
+      document.dispatchEvent(new CustomEvent('ac:locale-cambiado', { detail: localeActual }));
+    });
 
     selectores.forEach((sel) => {
       sel.addEventListener('change', (evento) => {
         const nuevoLocale = evento.target.value;
         AC_API.setLocale(nuevoLocale);
         selectores.forEach((s) => { s.value = nuevoLocale; });
-        cargar(nuevoLocale);
-        document.dispatchEvent(new CustomEvent('ac:locale-cambiado', { detail: nuevoLocale }));
+        cargar(nuevoLocale).then(() => {
+          document.dispatchEvent(new CustomEvent('ac:locale-cambiado', { detail: nuevoLocale }));
+        });
       });
     });
   }
 
-  return { iniciar, obtener };
+  return { iniciar, obtener, aplicar };
 })();
 
 document.addEventListener('DOMContentLoaded', AC_I18N.iniciar);

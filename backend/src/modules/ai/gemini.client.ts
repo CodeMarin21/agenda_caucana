@@ -5,6 +5,7 @@ export interface GeminiClientConfig {
   modelos: string[];
   maxOutputTokens: number;
   temperature: number;
+  timeoutMs?: number;
 }
 
 export interface GeminiResult {
@@ -28,7 +29,7 @@ export class GeminiClient {
       ? new GoogleGenAI({
         apiKey: config.apiKey,
         httpOptions: {
-          timeout: 1400,
+          timeout: config.timeoutMs ?? 1400,
           retryOptions: { attempts: 1 },
         },
       })

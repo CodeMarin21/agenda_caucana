@@ -4,6 +4,11 @@ node_modules/
 .env.local
 .env.*.local
 backend/backup_gamificacion.json
+backend/uploads/
+backend/prisma/postgresql_backup/
+backend/prisma/schema.mongodb.prisma
+migracion-mongo/
+AgendaCaucana-pruebas.zip
 logs/
 *.log
 .DS_Store

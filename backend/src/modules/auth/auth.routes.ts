@@ -26,6 +26,7 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { error: 'Demasiados intentos. Espera 15 minutos.' },
+  skip: (_req) => process.env.NODE_ENV !== 'production',
 });
 
 // Solicitudes de reset: 3 por hora por IP
@@ -34,6 +35,7 @@ const solicitarResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 3,
   message: { error: 'Demasiadas solicitudes de recuperación. Intenta en una hora.' },
+  skip: (_req) => process.env.NODE_ENV !== 'production',
 });
 
 // Confirmaciones de reset: 5 por hora por IP
@@ -41,6 +43,7 @@ const confirmarResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
   message: { error: 'Demasiados intentos. Intenta en una hora.' },
+  skip: (_req) => process.env.NODE_ENV !== 'production',
 });
 
 // ── Rutas existentes ───────────────────────────────────

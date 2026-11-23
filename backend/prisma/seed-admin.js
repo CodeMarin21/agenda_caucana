@@ -1,14 +1,23 @@
 // Crea un ADMIN si no existe. Idempotente: si ya existe, no hace nada.
 // Uso: node prisma/seed-admin.js [email] [password]
 // Ej:  node prisma/seed-admin.js admin@agendacaucana.com MiClaveSegura123
+require('dotenv').config();
+
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
-const EMAIL = process.argv[2] || 'admin@agendacaucana.com';
-const PASSWORD = process.argv[3] || 'CambiarEstaClave123!';
+const EMAIL = process.argv[2];
+const PASSWORD = process.argv[3];
 
 (async () => {
+  if (!EMAIL || !PASSWORD) {
+    throw new Error('Uso: node prisma/seed-admin.js <email> <contraseña-segura>');
+  }
+  if (PASSWORD.length < 12) {
+    throw new Error('La contraseña del administrador debe tener al menos 12 caracteres.');
+  }
+
   const existente = await prisma.usuario.findUnique({ where: { email: EMAIL } });
   if (existente) {
     if (existente.rol === 'ADMIN') {
@@ -31,8 +40,6 @@ const PASSWORD = process.argv[3] || 'CambiarEstaClave123!';
     }
   });
   console.log(`✅ Admin creado: ${admin.email} (id=${admin.id})`);
-  console.log(`   Contraseña: ${PASSWORD}`);
-  console.log(`   ⚠️  Cámbiala en producción.`);
   await prisma.$disconnect();
 })().catch(async (e) => {
   console.error(e);

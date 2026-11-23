@@ -34,9 +34,6 @@
           <button type="button" data-a11y-toggle="lectura" role="menuitemcheckbox">Modo lectura</button>
         </div>
       </div>
-      <select class="selector-idioma" data-selector-idioma aria-label="Idioma">
-        <option value="es">ES</option><option value="en">EN</option><option value="fr">FR</option>
-      </select>
       <a href="login.html" class="avatar-perfil" title="Mi perfil" aria-label="Mi perfil">AC</a>
       <a href="publicar-negocio.html" class="boton boton-primario">Publicar negocio</a>
     </div>
@@ -68,14 +65,14 @@
   <section id="estado-no-auth" class="publicar-negocio__estado" aria-labelledby="titulo-no-auth" hidden>
     <h2 id="titulo-no-auth">Inicia sesión para continuar</h2>
     <p>Para publicar tu negocio necesitás iniciar sesión como organizador.</p>
-    <a class="boton boton-primario" href="login.html?next=publicar-negocio.html">Iniciar sesión</a>
-    <a class="boton boton-secundario" href="organizador/registro.html?next=publicar-negocio.html">Registrarme como organizador</a>
+    <a class="boton boton-primario" href="login.html?next=publicar-negocio.html&especialidad=GASTRONOMIA">Iniciar sesión</a>
+    <a class="boton boton-secundario" href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html">Registrarme en Sabores</a>
   </section>
 
   <section id="estado-no-org" class="publicar-negocio__estado" aria-labelledby="titulo-no-org" hidden>
     <h2 id="titulo-no-org">Publicación para organizadores</h2>
     <p>Solo organizadores pueden publicar negocios. Si ya tienes una cuenta de organizador, inicia sesión con ella. Si aún no, regístrate aquí.</p>
-    <a class="boton boton-secundario" href="organizador/registro.html?next=publicar-negocio.html">Registrarme como organizador</a>
+    <a class="boton boton-secundario" href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html">Registrarme en Sabores</a>
   </section>
 
   <section id="estado-form" hidden>
@@ -225,7 +222,6 @@
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/i18n.js"></script>
 <script src="js/accesibilidad.js"></script>
 <script src="js/publicar-negocio.js"></script>
 <script>

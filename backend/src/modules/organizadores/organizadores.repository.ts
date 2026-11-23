@@ -1,4 +1,5 @@
 import {
+  EspecialidadOrganizador,
   EstadoOrganizador,
   MotivoEstado,
   MotivoReactivacion,
@@ -43,6 +44,7 @@ export class OrganizadoresRepository {
           },
         },
         ciudadBase: { select: { id: true, nombre: true, departamento: true } },
+        _count: { select: { eventos: true, negocios: true } },
       },
     });
   }
@@ -53,7 +55,7 @@ export class OrganizadoresRepository {
       include: {
         usuario: { select: { id: true, nombre: true, email: true, activo: true } },
         ciudadBase: { select: { id: true, nombre: true } },
-        _count: { select: { eventos: true } },
+        _count: { select: { eventos: true, negocios: true } },
       },
       orderBy: { creadoEn: 'desc' },
     });
@@ -76,6 +78,7 @@ export class OrganizadoresRepository {
       include: {
         usuario: { select: { nombre: true, email: true } },
         ciudadBase: { select: { id: true, nombre: true } },
+        _count: { select: { eventos: true, negocios: true } },
       },
       orderBy: { creadoEn: 'asc' },
     });
@@ -252,6 +255,7 @@ export class OrganizadoresRepository {
       passwordHash: string;
     };
     organizador: {
+      especialidad: EspecialidadOrganizador;
       nombreEntidad: string;
       descripcion?: string | null;
       telefono?: string | null;
@@ -276,6 +280,7 @@ export class OrganizadoresRepository {
 
       const organizador = await tx.organizador.create({
         data: {
+          especialidad: data.organizador.especialidad,
           nombreEntidad: data.organizador.nombreEntidad,
           descripcion: data.organizador.descripcion,
           telefono: data.organizador.telefono,
@@ -288,7 +293,7 @@ export class OrganizadoresRepository {
           ...(data.organizador.ciudadBaseId && {
             ciudadBase: { connect: { id: data.organizador.ciudadBaseId } },
           }),
-          estado: 'PENDIENTE',
+          estado: data.organizador.especialidad === 'GASTRONOMIA' ? 'VERIFICADO' : 'PENDIENTE',
           usuario: { connect: { id: usuario.id } },
         },
       });

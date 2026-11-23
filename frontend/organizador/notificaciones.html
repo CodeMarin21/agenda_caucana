@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notificaciones — Agenda Caucana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+<div class="layout-panel">
+  <aside class="sidebar" data-sidebar>
+    <div class="sidebar__marca">
+      <span class="fuente-titulos">Agenda Caucana</span>
+      <p>Plataforma de creadores</p>
+    </div>
+    <nav class="sidebar__nav" aria-label="Navegación del organizador">
+      <a href="mis-eventos.html" data-especialidad-link="EVENTOS" hidden>Mis eventos</a>
+      <a href="publicar.html" data-especialidad-link="EVENTOS" data-publicar-link hidden>Publicar evento</a>
+      <a href="mis-negocios.html" data-especialidad-link="GASTRONOMIA" hidden>Mis negocios</a>
+      <a href="../publicar-negocio.html" data-especialidad-link="GASTRONOMIA" data-publicar-link hidden>Publicar negocio</a>
+      <a href="notificaciones.html" aria-current="page">Notificaciones <span class="notificaciones-nav__contador" data-notificaciones-no-leidas hidden></span></a>
+      <a href="perfil.html">Perfil</a>
+      <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
+    </nav>
+    <div class="sidebar__pie">
+      <span class="avatar-inicial" data-sidebar-inicial>AC</span>
+      <div>
+        <strong data-sidebar-nombre>Organizador</strong>
+        <span class="rol">Organizador</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="panel-principal">
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú" aria-expanded="false">☰</button>
+        <h1>Notificaciones</h1>
+      </div>
+      <button type="button" class="boton boton-secundario boton-sm" data-notificaciones-marcar-todas hidden>
+        Marcar todas como leídas
+      </button>
+    </header>
+
+    <main class="panel-cuerpo">
+      <section class="bloque" aria-labelledby="titulo-notificaciones">
+        <div class="bloque__header">
+          <div>
+            <h2 id="titulo-notificaciones">Avisos de tu cuenta y publicaciones</h2>
+            <p class="notificaciones__resumen" data-notificaciones-resumen></p>
+          </div>
+        </div>
+        <div class="notificaciones__contenido">
+          <p class="notificaciones__estado" data-notificaciones-estado role="status" aria-live="polite">
+            Cargando notificaciones…
+          </p>
+          <div class="notificaciones__lista" data-notificaciones-lista aria-live="polite"></div>
+          <button type="button" class="boton boton-secundario notificaciones__cargar-mas" data-notificaciones-cargar-mas hidden>
+            Cargar más
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/notificaciones.js"></script>
+</body>
+</html>

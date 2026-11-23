@@ -53,13 +53,20 @@
 
   function actualizarCampoLugar() {
     const esLugarManual = selectLugar.value === '__otro__';
-    inputLugarTexto.hidden = !esLugarManual;
     inputLugarTexto.required = esLugarManual;
-    selectLugar.required = !esLugarManual;
-    if (!esLugarManual) inputLugarTexto.value = '';
+    selectLugar.required = false;
   }
 
-  selectLugar.addEventListener('change', actualizarCampoLugar);
+  selectLugar.addEventListener('change', () => {
+    if (selectLugar.value !== '__otro__') inputLugarTexto.value = '';
+    actualizarCampoLugar();
+  });
+  inputLugarTexto.addEventListener('input', () => {
+    if (inputLugarTexto.value.trim() && !selectLugar.disabled) {
+      selectLugar.value = '__otro__';
+    }
+    actualizarCampoLugar();
+  });
 
   /* ── Carga de selects ───────────────────────────── */
 
@@ -150,7 +157,7 @@
   radiosAcceso.forEach((radio) => {
     radio.addEventListener('change', () => {
       const esPago = form.querySelector('input[name="tipoAcceso"]:checked').value === 'pago';
-      grupoPrecio.style.display = esPago ? 'flex' : 'none';
+      grupoPrecio.hidden = !esPago;
       if (!esPago) {
         const inputPrecio = document.getElementById('precioReferencial');
         if (inputPrecio) inputPrecio.value = '';
@@ -198,10 +205,10 @@
       const descripcion = (datos.get('descripcion') || '').trim();
       const categoriaId = Number(datos.get('categoriaId'));
       const ciudadId = Number(datos.get('ciudadId'));
-      const lugarSeleccionado = datos.get('lugarId');
-      const esLugarManual = lugarSeleccionado === '__otro__';
-      const lugarId = esLugarManual ? undefined : Number(lugarSeleccionado);
+      const lugarSeleccionado = String(datos.get('lugarId') || '');
       const lugarTexto = String(datos.get('lugarTexto') || '').trim();
+      const esLugarManual = lugarTexto.length > 0 || lugarSeleccionado === '__otro__';
+      const lugarId = esLugarManual ? undefined : Number(lugarSeleccionado);
       const fechaInicio = datos.get('fechaInicio');
 
       if (titulo.length < 3) throw new Error('El título debe tener al menos 3 caracteres.');
@@ -212,7 +219,7 @@
         if (lugarTexto.length < 3 || lugarTexto.length > 150) {
           throw new Error('El nombre del lugar debe tener entre 3 y 150 caracteres.');
         }
-      } else if (!lugarId) {
+      } else if (!lugarId || !Number.isInteger(lugarId)) {
         throw new Error('Selecciona un lugar.');
       }
       if (!fechaInicio) throw new Error('La fecha de inicio es obligatoria.');
@@ -223,11 +230,13 @@
 
       // 1. Subir imagen si hay
       let imagenUrl;
+      let publicIdImagen;
       const archivoImagen = datos.get('imagen');
       if (archivoImagen && archivoImagen.size > 0) {
         pintarMensaje('Subiendo afiche...', 'info');
         const subida = await AC_API.subirImagen(archivoImagen, 'eventos');
         imagenUrl = subida.url;
+        publicIdImagen = subida.publicId;
         if (!imagenUrl) throw new Error('No se obtuvo la URL de la imagen subida.');
       }
 
@@ -242,10 +251,10 @@
         fechaFin: datos.get('fechaFin') || undefined,
         direccion: (datos.get('direccion') || '').trim() || undefined,
         imagenUrl,
+        publicIdImagen,
         precioReferencial: tipoAcceso === 'pago'
           ? Number(datos.get('precioReferencial')) || 0
           : 0,
-        urlExternaBoletas: (datos.get('urlExternaBoletas') || '').trim() || undefined,
         esMayorDeEdad: datos.get('esMayorDeEdad') === 'true',
       };
 
@@ -256,7 +265,7 @@
       form.reset();
       actualizarCampoLugar();
       previewImagen.style.display = 'none';
-      grupoPrecio.style.display = 'none';
+      grupoPrecio.hidden = true;
 
       setTimeout(() => { window.location.href = 'mis-eventos.html'; }, 1800);
     } catch (error) {
@@ -273,6 +282,12 @@
   (async () => {
     try {
       const perfil = await AC_API.perfilOrganizador();
+      if (perfil.especialidad !== 'EVENTOS') {
+        window.location.replace(
+          perfil.especialidad === 'GASTRONOMIA' ? 'mis-negocios.html' : 'perfil.html'
+        );
+        return;
+      }
       if (sidebarNombre) sidebarNombre.textContent = perfil.nombreEntidad || 'Organizador';
       if (sidebarInicial) {
         sidebarInicial.textContent = (perfil.nombreEntidad || 'Organizador')

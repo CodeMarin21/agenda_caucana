@@ -5,6 +5,7 @@ export interface ChatRequest {
   pregunta: string;
   idioma: Idioma;
   eventoId?: number;
+  negocioSlug?: string;
   ip?: string;
 }
 
@@ -27,7 +28,6 @@ export interface EventoContexto {
   direccion: string | null;
   precioReferencial: number | null;
   esMayorDeEdad: boolean;
-  urlExternaBoletas: string | null;
   categoria: { nombre: string };
   lugar: { nombre: string; direccion: string };
   ciudad: { nombre: string };

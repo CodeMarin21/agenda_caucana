@@ -132,7 +132,8 @@
     }
 
     tbody.innerHTML = visibles.map((negocio) => {
-      const nombreEntidad = negocio.organizador?.nombreEntidad || '—';
+      const nombreEntidad = negocio.organizador?.nombreEntidad ||
+        (negocio.organizadorId ? `Organizador #${negocio.organizadorId}` : 'Sin organizador asociado');
       const ciudad = negocio.ciudad?.nombre || negocio.ciudad?.nombreCiudad || '—';
       return `
         <tr data-id="${escapar(negocio.id)}">
@@ -179,7 +180,7 @@
         <div>
           <dl class="modal-eventos__datos">
             <dt>Descripción</dt><dd class="modal-eventos__descripcion">${escapar(negocio.descripcion || '—')}</dd>
-            <dt>Organizador</dt><dd>${escapar(negocio.organizador?.nombreEntidad || '—')}</dd>
+            <dt>Organizador</dt><dd>${escapar(negocio.organizador?.nombreEntidad || (negocio.organizadorId ? `Organizador #${negocio.organizadorId}` : 'Sin organizador asociado'))}</dd>
             <dt>Ciudad</dt><dd>${escapar(negocio.ciudad?.nombre || negocio.ciudad?.nombreCiudad || '—')}</dd>
             <dt>Dirección</dt><dd>${escapar(negocio.direccion || '—')}</dd>
             <dt>Teléfono</dt><dd>${escapar(negocio.telefono || '—')}</dd>

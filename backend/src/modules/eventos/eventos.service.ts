@@ -1,4 +1,3 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { Prisma } from '@prisma/client';
 import { EventosRepository } from './eventos.repository';
 import { eventoAprobadoSubject } from '../../patterns/observer/EventoAprobadoSubject';
@@ -8,14 +7,10 @@ import { FiltroPorPrecio }    from '../../patterns/strategy/FiltroPorPrecio';
 import { IEstrategiaFiltro }  from '../../patterns/strategy/IEstrategiaFiltro';
 import { logger } from '../../config/logger';
 import { CacheKeyBuilder, getCacheService } from '../../cache';
+import { UploadService } from '../upload/upload.service';
 
 const repo = new EventosRepository();
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const uploadService = new UploadService();
 
 function generarSlug(titulo: string): string {
   return titulo
@@ -38,8 +33,6 @@ interface CrearEventoDTO {
   direccion?: string;
   precioReferencial?: number;
   esMayorDeEdad?: boolean;
-  urlExternaBoletas?: string;
-  gestionaTaquillaInterna?: boolean;
   imagenUrl?: string;
   publicIdImagen?: string;
   categoriaId: number;
@@ -62,6 +55,7 @@ export class EventosService {
     desde?: string;
     hasta?: string;
     precioMax?: number;
+    q?: string;
     pagina?: number;
     limite?: number;
     orden?: 'fecha' | 'recientes';
@@ -71,11 +65,25 @@ export class EventosService {
     if (filtros.categoriaSlug) {
       estrategias.push(new FiltroPorCategoria(filtros.categoriaSlug));
     }
-    if (filtros.desde && filtros.hasta) {
-      estrategias.push(new FiltroPorFecha(
-        new Date(filtros.desde),
-        new Date(filtros.hasta)
-      ));
+    if (filtros.desde || filtros.hasta) {
+      const inicio = filtros.desde
+        ? new Date(`${filtros.desde}T00:00:00-05:00`)
+        : undefined;
+      const fin = filtros.hasta
+        ? new Date(`${filtros.hasta}T23:59:59.999-05:00`)
+        : undefined;
+      if (inicio && fin) {
+        estrategias.push(new FiltroPorFecha(inicio, fin));
+      } else {
+        estrategias.push({
+          aplicar: () => ({
+            fechaInicio: {
+              ...(inicio ? { gte: inicio } : {}),
+              ...(fin ? { lte: fin } : {}),
+            },
+          }),
+        });
+      }
     }
     if (filtros.precioMax !== undefined) {
       estrategias.push(new FiltroPorPrecio(filtros.precioMax));
@@ -90,6 +98,7 @@ export class EventosService {
       filtros.pagina || 1,
       filtros.limite || 12,
       filtros.orden || 'fecha',
+      filtros.q,
     );
   }
 
@@ -127,8 +136,6 @@ export class EventosService {
       direccion:              data.direccion,
       precioReferencial:      data.precioReferencial,
       esMayorDeEdad:          data.esMayorDeEdad ?? false,
-      urlExternaBoletas:      data.urlExternaBoletas,
-      gestionaTaquillaInterna: data.gestionaTaquillaInterna ?? false,
       imagenUrl:              data.imagenUrl,
       publicIdImagen:         data.publicIdImagen,
       slug,
@@ -205,27 +212,42 @@ export class EventosService {
   async eliminar(id: number, motivo: string) {
     const evento = await repo.findById(id);
     if (!evento) throw new Error('Evento no encontrado');
-    if (evento.publicIdImagen) {
-      try {
-        const resultado = await cloudinary.uploader.destroy(evento.publicIdImagen);
-        if (resultado.result !== 'ok') {
-          logger.warn({
-            mensaje: 'No se pudo eliminar la imagen del evento en Cloudinary',
-            eventoId: id,
-            publicIdImagen: evento.publicIdImagen,
-            resultado: resultado.result,
-          });
-        }
-      } catch (error) {
+    await repo.delete(id, motivo);
+    await this.eliminarImagen(evento.id, evento.publicIdImagen);
+    this.invalidarCacheIA();
+  }
+
+  async eliminarFinalizados(now = new Date()): Promise<number> {
+    const eliminados = await repo.deleteFinalizedEvents(now);
+    for (const evento of eliminados) {
+      await this.eliminarImagen(evento.id, evento.publicIdImagen);
+    }
+    if (eliminados.length > 0) {
+      this.invalidarCacheIA();
+      logger.info({ job: 'eventos-finalizados', eliminados: eliminados.length });
+    }
+    return eliminados.length;
+  }
+
+  private async eliminarImagen(eventoId: number, publicIdImagen: string | null): Promise<void> {
+    if (!publicIdImagen) return;
+    try {
+      const resultado = await uploadService.eliminarImagen(publicIdImagen);
+      if (resultado.result !== 'ok') {
         logger.warn({
-          mensaje: 'Falló la eliminación de la imagen del evento en Cloudinary; se continuará con el borrado',
-          eventoId: id,
-          publicIdImagen: evento.publicIdImagen,
-          error: error instanceof Error ? error.message : String(error),
+          mensaje: 'No se pudo eliminar la imagen del evento',
+          eventoId,
+          publicIdImagen,
+          resultado: resultado.result,
         });
       }
+    } catch (error) {
+      logger.warn({
+        mensaje: 'Falló la eliminación de la imagen del evento',
+        eventoId,
+        publicIdImagen,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
-    await repo.delete(id, motivo);
-    this.invalidarCacheIA();
   }
 }

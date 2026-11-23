@@ -9,6 +9,7 @@ import { prisma } from '../../config/database';
 export interface FiltrosNegocios {
   categoria?: CategoriaNegocio;
   ciudadId?: number;
+  precioMin?: number;
   precioMax?: number;
   /** Búsqueda de texto libre en nombre y descripción. */
   q?: string;
@@ -41,11 +42,7 @@ export class NegociosRepository {
     });
   }
 
-  /**
-   * Pre-query con `unaccent` para conseguir IDs que matchean la
-   * búsqueda, sin distinguir mayúsculas ni acentos.
-   * Retorna `null` si el filtro `q` no aplica.
-   */
+  /** Busca la frase completa primero y, si no hay coincidencias, prueba palabras significativas. */
   private async obtenerIdsPorBusqueda(
     q: string | undefined,
   ): Promise<number[] | null> {
@@ -53,12 +50,38 @@ export class NegociosRepository {
     if (!term) return null;
 
     const patron = `%${term}%`;
-    const filas = await prisma.$queryRaw<Array<{ id: number }>>`
+    const exactas = await prisma.$queryRaw<Array<{ id: number }>>`
       SELECT id FROM "Negocio"
       WHERE unaccent(nombre) ILIKE unaccent(${patron})
          OR unaccent(descripcion) ILIKE unaccent(${patron})
+         OR unaccent(direccion) ILIKE unaccent(${patron})
+         OR unaccent(slug) ILIKE unaccent(${patron})
     `;
-    return filas.map((f) => f.id);
+    if (exactas.length > 0) return exactas.map((fila) => fila.id);
+
+    const palabras = [...new Set(
+      term
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((palabra) => palabra.length >= 4),
+    )];
+    if (palabras.length === 0) return [];
+
+    const condiciones = Prisma.join(palabras.map((palabra) => {
+      const palabraPatron = `%${palabra}%`;
+      return Prisma.sql`(
+        unaccent(nombre) ILIKE unaccent(${palabraPatron})
+        OR unaccent(descripcion) ILIKE unaccent(${palabraPatron})
+        OR unaccent(direccion) ILIKE unaccent(${palabraPatron})
+        OR unaccent(slug) ILIKE unaccent(${palabraPatron})
+      )`;
+    }), ' OR ');
+    const parciales = await prisma.$queryRaw<Array<{ id: number }>>`
+      SELECT id FROM "Negocio" WHERE ${condiciones}
+    `;
+    return parciales.map((fila) => fila.id);
   }
 
   private construirWhere(
@@ -72,14 +95,23 @@ export class NegociosRepository {
         { organizadorId: null },
         {
           organizador: {
-            is: { estado: 'VERIFICADO', vetado: false },
+            is: {
+              especialidad: 'GASTRONOMIA',
+              estado: { not: 'SUSPENDIDO' },
+              vetado: false,
+            },
           },
         },
       ],
       ...(filtros.categoria ? { categoria: filtros.categoria } : {}),
       ...(filtros.ciudadId ? { ciudadId: filtros.ciudadId } : {}),
-      ...(filtros.precioMax !== undefined
-        ? { precioPromedio: { lte: filtros.precioMax } }
+      ...(filtros.precioMin !== undefined || filtros.precioMax !== undefined
+        ? {
+          precioPromedio: {
+            ...(filtros.precioMin !== undefined ? { gte: filtros.precioMin } : {}),
+            ...(filtros.precioMax !== undefined ? { lte: filtros.precioMax } : {}),
+          },
+        }
         : {}),
     };
 
@@ -162,7 +194,11 @@ export class NegociosRepository {
           { organizadorId: null },
           {
             organizador: {
-              is: { estado: 'VERIFICADO', vetado: false },
+              is: {
+                especialidad: 'GASTRONOMIA',
+                estado: { not: 'SUSPENDIDO' },
+                vetado: false,
+              },
             },
           },
         ],
@@ -203,7 +239,15 @@ export class NegociosRepository {
         activo: true,
         OR: [
           { organizadorId: null },
-          { organizador: { is: { estado: 'VERIFICADO', vetado: false } } },
+          {
+            organizador: {
+              is: {
+                especialidad: 'GASTRONOMIA',
+                estado: { not: 'SUSPENDIDO' },
+                vetado: false,
+              },
+            },
+          },
         ],
       },
       select: { id: true },
@@ -278,7 +322,15 @@ export class NegociosRepository {
   async findOrganizadorByUsuarioId(usuarioId: number) {
     return prisma.organizador.findUnique({
       where: { usuarioId },
-      select: { id: true, estado: true, vetado: true },
+      select: {
+        id: true,
+        estado: true,
+        vetado: true,
+        especialidad: true,
+        nombreEntidad: true,
+        descripcion: true,
+        _count: { select: { eventos: true, negocios: true } },
+      },
     });
   }
 

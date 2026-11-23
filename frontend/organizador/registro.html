@@ -18,11 +18,15 @@
       <a href="../index.html"><span class="fuente-titulos">Agenda Caucana</span></a>
       <p>Plataforma de creadores</p>
     </div>
-    <h1>Crea tu cuenta de organizador</h1>
-    <p class="auth-card__subtitulo">Después de registrarte, un administrador revisa y verifica tu cuenta antes de que puedas publicar eventos.</p>
-    <p class="auth-card__subtitulo"><a href="como-funciona.html">Consulta los pasos, requisitos y condiciones para organizadores</a></p>
+    <h1 data-registro-titulo>Crea tu cuenta de organizador de eventos</h1>
+    <p class="auth-card__subtitulo" data-registro-subtitulo>Después de registrarte, un administrador verificará tu perfil antes de que puedas publicar eventos.</p>
+    <p class="auth-card__subtitulo">
+      <a href="como-funciona.html" data-registro-ayuda="EVENTOS">Consulta los pasos y requisitos para organizadores de eventos</a>
+      <a href="../sabores.html" data-registro-ayuda="GASTRONOMIA" hidden>Consulta los espacios gastronómicos de Sabores</a>
+    </p>
 
     <form data-form-registro-organizador>
+      <input type="hidden" name="especialidad" value="EVENTOS">
       <div class="form-grupo">
         <label for="nombreOrg">Nombre de la organización</label>
         <input id="nombreOrg" name="nombreOrganizacion" type="text" required placeholder="Ej. Fundación Folclórica del Cauca">
@@ -46,7 +50,7 @@
         <input id="password" name="password" type="password" required minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}" title="Usa al menos 8 caracteres, una mayúscula, una minúscula y un número." aria-describedby="ayuda-password" autocomplete="new-password">
         <small id="ayuda-password" class="auth-card__subtitulo">Mínimo 8 caracteres, con al menos una mayúscula, una minúscula y un número.</small>
       </div>
-      <button type="submit" class="boton boton-primario">Crear cuenta de organizador</button>
+      <button type="submit" class="boton boton-primario" data-registro-boton>Crear cuenta de organizador de eventos</button>
       <p class="auth-card__mensaje" data-registro-mensaje></p>
     </form>
 

@@ -12,6 +12,8 @@
   if (!boton || !panel || !form || !input || !mensajes) return;
 
   const submit = form.querySelector('button[type="submit"]');
+  let ultimoNegocioSlug = null;
+  const textoTraducido = (clave, respaldo) => window.AC_I18N?.obtener(clave) || respaldo;
 
   function enlazarUrl(destino) {
     const internoEvento = destino.match(/^\/eventos\/([a-z0-9-]+)$/i);
@@ -79,19 +81,27 @@
     input.value = '';
     if (submit) submit.disabled = true;
     input.disabled = true;
-    const cargando = agregarMensaje('Buscando en eventos y negocios publicados…', 'ia');
+    const cargando = agregarMensaje(
+      textoTraducido('chat.busquedaCargando', 'Buscando en eventos y negocios publicados…'),
+      'ia',
+    );
 
     try {
-      const respuesta = await AC_API.preguntar(pregunta);
+      const respuesta = await AC_API.preguntar(pregunta, ultimoNegocioSlug);
       const texto = respuesta?.respuesta;
       if (typeof texto !== 'string' || !texto.trim()) {
         throw new Error('El asistente devolvió una respuesta vacía.');
       }
+      const negocioEncontrado = texto.match(/negocio\.html\?slug=([a-z0-9-]+)/i);
+      if (negocioEncontrado) ultimoNegocioSlug = negocioEncontrado[1];
       cargando.remove();
       agregarMensaje(texto, 'ia');
     } catch (error) {
       cargando.remove();
-      agregarMensaje('No pude consultar la agenda en este momento. Intenta de nuevo en unos segundos.', 'ia');
+      agregarMensaje(
+        textoTraducido('chat.error', 'No pude consultar la agenda en este momento. Intenta de nuevo en unos segundos.'),
+        'ia',
+      );
       console.error('Error en POST /api/chat:', error);
     } finally {
       if (submit) submit.disabled = false;

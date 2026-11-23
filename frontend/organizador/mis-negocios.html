@@ -11,15 +11,17 @@
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/dashboard.css">
 </head>
-<body>
+<body data-especialidad-pagina="GASTRONOMIA">
 <div class="layout-panel">
   <aside class="sidebar" data-sidebar>
     <div class="sidebar__marca">
       <span class="fuente-titulos">Agenda Caucana</span>
-      <p>Espacio de sabores</p>
+      <p>Plataforma de creadores</p>
     </div>
     <nav class="sidebar__nav" aria-label="Navegación de negocios">
       <a href="mis-negocios.html" aria-current="page">Mis negocios</a>
+      <a href="../publicar-negocio.html" data-publicar-negocio hidden>Publicar negocio</a>
+      <a href="notificaciones.html">Notificaciones <span class="notificaciones-nav__contador" data-notificaciones-no-leidas hidden></span></a>
       <a href="perfil.html">Perfil</a>
       <a href="#" data-logout style="margin-top:auto;">Cerrar sesión</a>
     </nav>
@@ -33,23 +35,20 @@
   </aside>
 
   <div class="panel-principal">
-    <header class="panel-header mis-negocios__panel-header">
-      <div class="mis-negocios__encabezado">
-        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú" aria-expanded="false">Menú</button>
-        <div>
-          <p class="mis-negocios__sobretitulo">Tu espacio gastronómico</p>
-          <h1>Mis negocios</h1>
-        </div>
+    <header class="panel-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="boton-menu-movil" data-menu-boton aria-label="Abrir menú">☰</button>
+        <h1>Mis negocios</h1>
       </div>
-      <a href="../publicar-negocio.html" class="boton boton-primario boton-sm">Publicar nuevo negocio</a>
+      <a href="../publicar-negocio.html" class="boton boton-primario boton-sm" data-publicar-negocio hidden>Publicar nuevo negocio</a>
     </header>
 
     <main class="panel-cuerpo">
       <section class="bloque" aria-labelledby="titulo-lista-negocios">
         <div class="bloque__header">
           <div>
-            <h2 id="titulo-lista-negocios">Tus espacios publicados</h2>
-            <p class="mis-negocios__ayuda">Consulta su estado y cómo se ven en Sabores.</p>
+              <h2 id="titulo-lista-negocios">Historial de publicaciones</h2>
+              <p>Consulta el estado de tus negocios y cómo se ven en Sabores.</p>
           </div>
           <div class="bloque__acciones filtros-negocios">
             <select id="filtroCategoriaNegocio" aria-label="Filtrar por categoría">
@@ -64,7 +63,7 @@
           </div>
         </div>
 
-        <div class="mis-negocios__contenido">
+        <div>
           <p id="cargandoNegocios" class="estado-carga" role="status" aria-live="polite">Cargando negocios…</p>
 
           <div id="estadoErrorNegocios" class="estado-error" role="alert" hidden>
@@ -73,11 +72,11 @@
             <button type="button" class="boton boton-secundario boton-sm" data-reintentar>Intentar de nuevo</button>
           </div>
 
-          <div id="estadoVacioNegocios" class="estado-vacio-negocios" hidden>
-            <p class="estado-vacio-negocios__indice" aria-hidden="true">01</p>
+          <div id="estadoVacioNegocios" class="estado-vacio-panel estado-vacio-negocios" hidden>
+            <p class="estado-vacio-panel__indice" aria-hidden="true">01</p>
             <h3>Aún no has compartido un negocio</h3>
             <p>Cuando publiques tu propuesta gastronómica, aquí podrás revisar su estado y abrir su ficha pública.</p>
-            <a href="../publicar-negocio.html" class="boton boton-primario">Publicar mi primer negocio</a>
+            <a href="../publicar-negocio.html" class="boton boton-primario" data-publicar-negocio hidden>Publicar mi primer negocio</a>
           </div>
 
           <div id="sinResultadosNegocios" class="sin-resultados-negocios" hidden>
@@ -94,6 +93,7 @@
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/notificaciones.js"></script>
 <script src="../js/mis-negocios.js"></script>
 </body>
 </html>

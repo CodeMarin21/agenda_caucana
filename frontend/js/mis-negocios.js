@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  if (typeof acProtegerPagina === 'function' && !acProtegerPagina('../login.html')) return;
+
   function obtenerRolDelToken(token) {
     try {
       const payloadCodificado = token.split('.')[1];
@@ -234,13 +236,30 @@
 
   async function cargarPerfilSidebar() {
     try {
-      const perfil = await AC_API.perfil();
-      const nombre = perfil?.organizador?.nombreEntidad || perfil?.nombre || 'Organizador';
+      const perfil = await AC_API.perfilOrganizador();
+      if (perfil.especialidad !== 'GASTRONOMIA') {
+        window.location.replace(
+          perfil.especialidad === 'EVENTOS' ? 'mis-eventos.html' : 'perfil.html'
+        );
+        return false;
+      }
+      const nombre = perfil.nombreEntidad || 'Organizador';
       sidebarNombre.textContent = nombre;
       sidebarInicial.textContent = nombre.trim().slice(0, 2).toLocaleUpperCase('es-CO');
+      document.querySelectorAll('[data-publicar-negocio]').forEach((enlace) => {
+        enlace.hidden = perfil.vetado || perfil.estado === 'SUSPENDIDO';
+      });
+      return true;
     } catch (error) {
-      if (manejar403(error)) return;
-      console.warn('No se pudo cargar el perfil del organizador para el sidebar:', error.message);
+      if (error.status === 401) {
+        window.location.replace('../login.html');
+        return false;
+      }
+      if (manejar403(error)) return false;
+      estadoErrorNegocios.hidden = false;
+      mensajeError.textContent = `No se pudo validar tu especialidad: ${error.message}`;
+      cargando.hidden = true;
+      return false;
     }
   }
 
@@ -259,6 +278,8 @@
     });
   }
 
-  cargarPerfilSidebar();
-  cargarNegocios();
+  (async () => {
+    if (!await cargarPerfilSidebar()) return;
+    await cargarNegocios();
+  })();
 })();
