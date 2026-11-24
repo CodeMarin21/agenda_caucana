@@ -287,6 +287,13 @@ export class NegociosRepository {
     });
   }
 
+  async findByIdAndOrganizador(id: number, organizadorId: number) {
+    return prisma.negocio.findFirst({
+      where: { id, organizadorId },
+      select: { id: true },
+    });
+  }
+
   async findByOrganizadorId(organizadorId: number) {
     const negocios = await prisma.negocio.findMany({
       where: { organizadorId },
@@ -329,15 +336,27 @@ export class NegociosRepository {
         especialidad: true,
         nombreEntidad: true,
         descripcion: true,
-        _count: { select: { eventos: true, negocios: true } },
+        negocioCreado: true,
+        negocio: { select: { id: true } },
+        _count: { select: { eventos: true } },
       },
     });
   }
 
-  async create(data: Prisma.NegocioCreateInput) {
-    return prisma.negocio.create({
-      data,
-      include: { ciudad: true },
+  async create(data: Prisma.NegocioCreateInput, organizadorId: number) {
+    return prisma.$transaction(async (tx) => {
+      const resultado = await tx.organizador.updateMany({
+        where: { id: organizadorId, negocioCreado: false },
+        data: { negocioCreado: true, especialidad: 'GASTRONOMIA' },
+      });
+      if (resultado.count !== 1) {
+        throw new Error('Ya tienes un negocio registrado. Edita el existente en Mis negocios.');
+      }
+
+      return tx.negocio.create({
+        data,
+        include: { ciudad: true },
+      });
     });
   }
 
@@ -345,11 +364,11 @@ export class NegociosRepository {
     return prisma.negocio.update({ where: { id }, data });
   }
 
-  async delete(id: number, motivo?: string) {
+  async delete(id: number, motivo?: string, liberarCupoOrganizador = false) {
     return prisma.$transaction(async (tx) => {
       const negocio = await tx.negocio.findUnique({
         where: { id },
-        include: { organizador: { select: { usuarioId: true } } },
+        include: { organizador: { select: { id: true, usuarioId: true } } },
       });
       if (!negocio) throw new Error('Negocio no encontrado');
 
@@ -363,7 +382,14 @@ export class NegociosRepository {
         });
       }
 
-      return tx.negocio.delete({ where: { id } });
+      const eliminado = await tx.negocio.delete({ where: { id } });
+      if (liberarCupoOrganizador && negocio.organizador) {
+        await tx.organizador.update({
+          where: { id: negocio.organizador.id },
+          data: { negocioCreado: false },
+        });
+      }
+      return eliminado;
     });
   }
 

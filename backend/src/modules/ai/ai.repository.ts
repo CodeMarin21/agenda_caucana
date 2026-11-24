@@ -43,21 +43,6 @@ function filtroNegocioPublico(): Prisma.NegocioWhereInput {
   };
 }
 
-function filtroTerminos(terminos: string[]): Prisma.EventoWhereInput[] {
-  return terminos
-    .filter((termino) => termino.length >= 3)
-    .slice(0, 5)
-    .map((termino) => ({
-      OR: [
-        { titulo: { contains: termino, mode: 'insensitive' } },
-        { descripcion: { contains: termino, mode: 'insensitive' } },
-        { categoria: { is: { nombre: { contains: termino, mode: 'insensitive' } } } },
-        { lugar: { is: { nombre: { contains: termino, mode: 'insensitive' } } } },
-        { ciudad: { is: { nombre: { contains: termino, mode: 'insensitive' } } } },
-      ],
-    }));
-}
-
 const FILTROS_PUBLICOS = {
   estadoPublicacion: 'APROBADO',
   ...filtroOrganizadorPublico(),
@@ -80,14 +65,91 @@ const EVENTO_SELECT = {
 } as const;
 
 export class AiRepository {
+  private async findIdsEventosPublicosPorTerminos(
+    terminos: string[],
+    limite: number,
+    periodo?: PeriodoEventos,
+    soloFinalizados = false,
+  ): Promise<number[] | null> {
+    const palabras = terminos
+      .filter((termino) => termino.length >= 3)
+      .slice(0, 5);
+    if (palabras.length === 0) return null;
+
+    const condiciones: Prisma.Sql[] = palabras.map((termino) => {
+      const patron = `%${termino}%`;
+      return Prisma.sql`(
+        unaccent(evento."titulo") ILIKE unaccent(${patron})
+        OR unaccent(evento."slug") ILIKE unaccent(${patron})
+        OR unaccent(evento."descripcion") ILIKE unaccent(${patron})
+        OR unaccent(evento."direccion") ILIKE unaccent(${patron})
+        OR unaccent(categoria."nombre") ILIKE unaccent(${patron})
+        OR unaccent(lugar."nombre") ILIKE unaccent(${patron})
+        OR unaccent(lugar."direccion") ILIKE unaccent(${patron})
+        OR unaccent(ciudad."nombre") ILIKE unaccent(${patron})
+      )`;
+    });
+    condiciones.push(Prisma.sql`evento."estadoPublicacion" = 'APROBADO'`);
+    condiciones.push(Prisma.sql`(
+      evento."organizadorId" IS NULL
+      OR (
+        organizador."especialidad" = 'EVENTOS'
+        AND organizador."estado" = 'VERIFICADO'
+        AND organizador."vetado" = false
+      )
+    )`);
+    if (periodo) {
+      condiciones.push(Prisma.sql`evento."fechaInicio" < ${periodo.hasta}`);
+      condiciones.push(Prisma.sql`(
+        evento."fechaFin" >= ${periodo.desde}
+        OR (
+          evento."fechaFin" IS NULL
+          AND evento."fechaInicio" >= ${periodo.desde}
+        )
+      )`);
+      if (periodo.soloVigentes) {
+        const ahora = new Date();
+        condiciones.push(Prisma.sql`(
+          evento."fechaFin" >= ${ahora}
+          OR (
+            evento."fechaFin" IS NULL
+            AND evento."fechaInicio" >= ${ahora}
+          )
+        )`);
+      }
+    }
+    if (soloFinalizados) {
+      const ahora = new Date();
+      condiciones.push(Prisma.sql`(
+        evento."fechaFin" < ${ahora}
+        OR (
+          evento."fechaFin" IS NULL
+          AND evento."fechaInicio" < ${ahora}
+        )
+      )`);
+    }
+    const filas = await prisma.$queryRaw<Array<{ id: number }>>`
+      SELECT evento."id"
+      FROM "Evento" AS evento
+      LEFT JOIN "Categoria" AS categoria ON categoria."id" = evento."categoriaId"
+      LEFT JOIN "Lugar" AS lugar ON lugar."id" = evento."lugarId"
+      LEFT JOIN "Ciudad" AS ciudad ON ciudad."id" = evento."ciudadId"
+      LEFT JOIN "Organizador" AS organizador ON organizador."id" = evento."organizadorId"
+      WHERE ${Prisma.join(condiciones, ' AND ')}
+      ORDER BY evento."fechaInicio" ASC
+      LIMIT ${limite}
+    `;
+    return filas.map((fila) => fila.id);
+  }
+
   async findEventosPorTerminos(terminos: string[]): Promise<EventoContexto[]> {
-    const palabras = filtroTerminos(terminos);
-    if (palabras.length === 0) return [];
+    const ids = await this.findIdsEventosPublicosPorTerminos(terminos, 8);
+    if (!ids || ids.length === 0) return [];
 
     return prisma.evento.findMany({
       where: {
         ...FILTROS_PUBLICOS,
-        AND: palabras,
+        id: { in: ids },
       },
       select: EVENTO_SELECT,
       take: 8,
@@ -153,6 +215,13 @@ export class AiRepository {
     });
   }
 
+  async findEventoPublicadoPorSlug(slug: string): Promise<EventoContexto | null> {
+    return prisma.evento.findFirst({
+      where: { slug, ...FILTROS_PUBLICOS },
+      select: EVENTO_SELECT,
+    });
+  }
+
   async findProximos(limit = 15): Promise<EventoContexto[]> {
     return prisma.evento.findMany({
       where: {
@@ -172,7 +241,6 @@ export class AiRepository {
           filtroFechaProximos(),
           {
             OR: [
-              { precioReferencial: null },
               { precioReferencial: 0 },
             ],
           },
@@ -205,6 +273,14 @@ export class AiRepository {
     soloFinalizados = false,
     limit = 20,
   ): Promise<EventoContexto[]> {
+    const ids = await this.findIdsEventosPublicosPorTerminos(
+      terminos,
+      limit,
+      periodo,
+      soloFinalizados,
+    );
+    if (ids?.length === 0) return [];
+
     const condiciones: Prisma.EventoWhereInput[] = [
       FILTROS_PUBLICOS,
       {
@@ -214,8 +290,18 @@ export class AiRepository {
           { fechaFin: null, fechaInicio: { gte: periodo.desde } },
         ],
       },
-      ...filtroTerminos(terminos),
+      ...(ids ? [{ id: { in: ids } }] : []),
     ];
+
+    if (periodo.soloVigentes) {
+      const ahora = new Date();
+      condiciones.push({
+        OR: [
+          { fechaFin: { gte: ahora } },
+          { fechaFin: null, fechaInicio: { gte: ahora } },
+        ],
+      });
+    }
 
     if (soloFinalizados) {
       const ahora = new Date();

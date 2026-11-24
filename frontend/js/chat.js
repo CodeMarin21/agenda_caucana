@@ -13,6 +13,8 @@
 
   const submit = form.querySelector('button[type="submit"]');
   let ultimoNegocioSlug = null;
+  let ultimoEventoSlug = null;
+  let contextoEventos = [];
   const textoTraducido = (clave, respaldo) => window.AC_I18N?.obtener(clave) || respaldo;
 
   function enlazarUrl(destino) {
@@ -87,13 +89,34 @@
     );
 
     try {
-      const respuesta = await AC_API.preguntar(pregunta, ultimoNegocioSlug);
+      const respuesta = await AC_API.preguntar(
+        pregunta,
+        ultimoNegocioSlug,
+        ultimoEventoSlug,
+        contextoEventos,
+      );
       const texto = respuesta?.respuesta;
       if (typeof texto !== 'string' || !texto.trim()) {
         throw new Error('El asistente devolvió una respuesta vacía.');
       }
       const negocioEncontrado = texto.match(/negocio\.html\?slug=([a-z0-9-]+)/i);
-      if (negocioEncontrado) ultimoNegocioSlug = negocioEncontrado[1];
+      const eventosEncontrados = [...texto.matchAll(/(?:evento\.html\?slug=|\/eventos\/)([a-z0-9-]+)/gi)];
+      contextoEventos = Array.isArray(respuesta.contextoEventos)
+        ? respuesta.contextoEventos
+        : [];
+      if (negocioEncontrado) {
+        ultimoNegocioSlug = negocioEncontrado[1];
+        ultimoEventoSlug = null;
+      } else if (eventosEncontrados.length === 1) {
+        ultimoEventoSlug = eventosEncontrados[0][1];
+        ultimoNegocioSlug = null;
+      } else if (eventosEncontrados.length > 1) {
+        ultimoEventoSlug = null;
+        ultimoNegocioSlug = null;
+      } else if (Array.isArray(respuesta.contextoEventos)) {
+        ultimoEventoSlug = null;
+        ultimoNegocioSlug = null;
+      }
       cargando.remove();
       agregarMensaje(texto, 'ia');
     } catch (error) {

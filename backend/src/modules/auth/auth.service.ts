@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Rol } from '@prisma/client';
 import { prisma } from '../../config/database';
-import { inferirEspecialidad } from '../organizadores/especialidad.util';
+import { inferirEspecialidadOrganizador } from '../organizadores/especialidad.util';
 
 interface TokenPair {
   accessToken: string;
@@ -70,7 +70,8 @@ export class AuthService {
             especialidad: true,
             nombreEntidad: true,
             descripcion: true,
-            _count: { select: { eventos: true, negocios: true } },
+            negocio: { select: { id: true } },
+            _count: { select: { eventos: true } },
           },
         },
       },
@@ -94,7 +95,7 @@ export class AuthService {
         email: usuario.email,
         rol: usuario.rol,
         especialidad: usuario.organizador
-          ? inferirEspecialidad(usuario.organizador.especialidad, usuario.organizador._count, usuario.organizador)
+          ? inferirEspecialidadOrganizador(usuario.organizador)
           : null,
       },
       tokens,

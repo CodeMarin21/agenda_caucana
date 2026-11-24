@@ -30,8 +30,11 @@ const T = {
 const LOCALE: Record<Idioma, string> = { es: 'es-CO', en: 'en-US', fr: 'fr-FR' };
 
 function formatearPrecio(precio: number | null, idioma: Idioma): string {
-  if (precio === null || precio === 0) {
+  if (precio === 0) {
     return { es: 'Entrada libre', en: 'Free entry', fr: 'Entrée libre' }[idioma];
+  }
+  if (precio === null) {
+    return { es: 'Precio no informado', en: 'Price not listed', fr: 'Prix non indiqué' }[idioma];
   }
   return `$${precio.toLocaleString('es-CO')} COP`;
 }
@@ -81,16 +84,23 @@ export function generarFallback(ctx: FallbackContexto): string {
       dateStyle: 'long',
       timeStyle: 'short',
     });
+    const fechaFin = e.fechaFin
+      ? new Date(e.fechaFin).toLocaleString(LOCALE[idioma], {
+        timeZone: 'America/Bogota',
+        dateStyle: 'long',
+        timeStyle: 'short',
+      })
+      : null;
 
     const etiquetas = {
-      es: { ver: 'Ver detalles' },
-      en: { ver: 'See full details' },
-      fr: { ver: 'Voir les détails' },
+      es: { inicio: 'Inicio', fin: 'Fin', ver: 'Ver detalles' },
+      en: { inicio: 'Starts', fin: 'Ends', ver: 'See full details' },
+      fr: { inicio: 'Début', fin: 'Fin', ver: 'Voir les détails' },
     }[idioma];
 
     return `${e.titulo}
 📍 ${e.lugar.nombre}, ${e.lugar.direccion}
-🕐 ${fecha}
+🕐 ${etiquetas.inicio}: ${fecha}${fechaFin ? `\n🕐 ${etiquetas.fin}: ${fechaFin}` : ''}
 💰 ${precio}
 
 ${e.descripcion}

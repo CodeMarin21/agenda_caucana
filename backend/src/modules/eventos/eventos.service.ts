@@ -146,7 +146,7 @@ export class EventosService {
       organizador: data.organizadorId
         ? { connect: { id: data.organizadorId } }
         : undefined,
-    });
+    }, data.organizadorId);
     this.invalidarCacheIA();
 
     if (estadoPublicacion === 'APROBADO') {

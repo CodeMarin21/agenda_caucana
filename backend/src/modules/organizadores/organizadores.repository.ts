@@ -44,7 +44,8 @@ export class OrganizadoresRepository {
           },
         },
         ciudadBase: { select: { id: true, nombre: true, departamento: true } },
-        _count: { select: { eventos: true, negocios: true } },
+        negocio: { select: { id: true } },
+        _count: { select: { eventos: true } },
       },
     });
   }
@@ -55,7 +56,8 @@ export class OrganizadoresRepository {
       include: {
         usuario: { select: { id: true, nombre: true, email: true, activo: true } },
         ciudadBase: { select: { id: true, nombre: true } },
-        _count: { select: { eventos: true, negocios: true } },
+        negocio: { select: { id: true } },
+        _count: { select: { eventos: true } },
       },
       orderBy: { creadoEn: 'desc' },
     });
@@ -78,7 +80,8 @@ export class OrganizadoresRepository {
       include: {
         usuario: { select: { nombre: true, email: true } },
         ciudadBase: { select: { id: true, nombre: true } },
-        _count: { select: { eventos: true, negocios: true } },
+        negocio: { select: { id: true } },
+        _count: { select: { eventos: true } },
       },
       orderBy: { creadoEn: 'asc' },
     });

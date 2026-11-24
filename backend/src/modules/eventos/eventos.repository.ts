@@ -123,10 +123,24 @@ export class EventosRepository {
     });
   }
 
-  async create(data: Prisma.EventoCreateInput) {
-    return prisma.evento.create({
+  async create(data: Prisma.EventoCreateInput, organizadorId?: number) {
+    const crear = (tx: Prisma.TransactionClient) => tx.evento.create({
       data,
       include: { categoria: true, lugar: true, ciudad: true },
+    });
+
+    if (!organizadorId) return prisma.evento.create({
+      data,
+      include: { categoria: true, lugar: true, ciudad: true },
+    });
+
+    return prisma.$transaction(async (tx) => {
+      const evento = await crear(tx);
+      await tx.organizador.update({
+        where: { id: organizadorId },
+        data: { especialidad: 'EVENTOS' },
+      });
+      return evento;
     });
   }
 

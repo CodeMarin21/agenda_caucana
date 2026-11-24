@@ -23,6 +23,7 @@ const crearPerfil = (vetado = false): PerfilConUsuario => {
     detalleMotivoEstado: null,
     creadoEn: ahora,
     actualizadoEn: ahora,
+    negocioCreado: false,
     direccion: null,
     ciudadBaseId: null,
     anioFundacion: null,
@@ -44,7 +45,8 @@ const crearPerfil = (vetado = false): PerfilConUsuario => {
       notificaciones: [],
     },
     ciudadBase: null,
-    _count: { eventos: 0, negocios: 0 },
+    negocio: null,
+    _count: { eventos: 0 },
   };
 };
 

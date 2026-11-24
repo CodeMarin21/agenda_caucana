@@ -55,6 +55,8 @@
   let negocios = [];
   let cargaCompleta = false;
   let redireccionandoPor403 = false;
+  let puedePublicarNegocio = false;
+  let puedeCrearNegocio = true;
 
   function manejar403(error) {
     if (error.status !== 403) return false;
@@ -64,6 +66,13 @@
       window.location.replace('../login.html');
     }
     return true;
+  }
+
+  function mensajeDeError(error) {
+    if (!error?.status || error.status >= 500) {
+      return 'No se pudo completar la solicitud. Intenta de nuevo en unos momentos.';
+    }
+    return error.message || 'Ocurrió un error inesperado.';
   }
 
   function normalizarNegocios(respuesta) {
@@ -159,16 +168,43 @@
       acciones.appendChild(ver);
     }
 
+    const editar = document.createElement('a');
+    editar.className = 'boton boton-primario boton-sm';
+    editar.href = `../publicar-negocio.html?editar=${encodeURIComponent(negocio.id)}`;
+    editar.textContent = 'Editar negocio y platos';
+    acciones.appendChild(editar);
+
     const eliminar = document.createElement('button');
     eliminar.type = 'button';
     eliminar.className = 'boton boton-rechazo boton-sm';
-    eliminar.dataset.eliminar = String(negocio.id);
-    eliminar.textContent = 'Eliminar';
+    eliminar.dataset.eliminarNegocio = String(negocio.id);
+    eliminar.textContent = 'Eliminar negocio';
     acciones.appendChild(eliminar);
 
     cuerpo.appendChild(acciones);
     tarjeta.append(imagenContenedor, cuerpo);
     return tarjeta;
+  }
+
+  async function eliminarNegocio(id, boton) {
+    const negocio = negocios.find((item) => item.id === id);
+    if (!negocio) return;
+    const confirmar = window.confirm(
+      `¿Eliminar "${negocio.nombre}"?\n\nSe borrarán la publicación y su menú. Después podrás registrar otro negocio. Esta acción no se puede deshacer.`,
+    );
+    if (!confirmar) return;
+
+    boton.disabled = true;
+    boton.textContent = 'Eliminando…';
+    try {
+      await AC_API.eliminarNegocio(id);
+      await cargarNegocios();
+    } catch (error) {
+      if (manejar403(error)) return;
+      window.alert(`No se pudo eliminar el negocio: ${mensajeDeError(error)}`);
+      boton.disabled = false;
+      boton.textContent = 'Eliminar negocio';
+    }
   }
 
   function renderizar() {
@@ -177,6 +213,17 @@
     grid.replaceChildren();
     cargando.hidden = true;
     estadoVacio.hidden = negocios.length !== 0;
+    if (negocios.length === 0) {
+      const tituloVacio = estadoVacio.querySelector('[data-titulo-vacio-negocios]');
+      const descripcionVacia = estadoVacio.querySelector('[data-descripcion-vacio-negocios]');
+      if (puedeCrearNegocio) {
+        tituloVacio.textContent = 'Aún no has compartido un negocio';
+        descripcionVacia.textContent = 'Cuando publiques tu propuesta gastronómica, aquí podrás revisar su estado y abrir su ficha pública.';
+      } else {
+        tituloVacio.textContent = 'Ya publicaste un negocio con esta cuenta';
+        descripcionVacia.textContent = 'Tu publicación ya no está disponible para editar. Cada organizador puede registrar un solo negocio; contacta al administrador si necesitas ayuda.';
+      }
+    }
     sinResultados.hidden = negocios.length === 0 || filtrados.length !== 0;
     estadoError.hidden = true;
     grid.hidden = negocios.length === 0 || filtrados.length === 0;
@@ -195,7 +242,12 @@
     grid.replaceChildren();
 
     try {
-      negocios = normalizarNegocios(await AC_API.misNegocios());
+      const respuesta = await AC_API.misNegocios();
+      negocios = normalizarNegocios(respuesta);
+      puedeCrearNegocio = respuesta?.puedeCrear !== false;
+      document.querySelectorAll('[data-publicar-negocio]').forEach((enlace) => {
+        enlace.hidden = !puedePublicarNegocio || !puedeCrearNegocio || negocios.length > 0;
+      });
       poblarFiltroCategorias();
       cargaCompleta = true;
       filtroCategoria.disabled = false;
@@ -203,34 +255,10 @@
       renderizar();
     } catch (error) {
       if (manejar403(error)) return;
-      mensajeError.textContent = `No se pudieron cargar tus negocios: ${error.message}`;
+      mensajeError.textContent = `No se pudieron cargar tus negocios. ${mensajeDeError(error)}`;
       cargando.hidden = true;
       estadoError.hidden = false;
       console.error('No se pudieron cargar los negocios del organizador:', error);
-    }
-  }
-
-  async function eliminarNegocio(id, boton) {
-    const negocio = negocios.find((item) => String(item.id) === String(id));
-    if (!negocio) return;
-    if (!confirm(`¿Eliminar "${negocio.nombre}"?\n\nEsta acción es permanente y no se puede deshacer.`)) {
-      return;
-    }
-
-    boton.disabled = true;
-    boton.textContent = 'Eliminando…';
-    try {
-      await AC_API.eliminarNegocio(id);
-      negocios = negocios.filter((item) => String(item.id) !== String(id));
-      poblarFiltroCategorias();
-      renderizar();
-      alert('El negocio se eliminó correctamente.');
-    } catch (error) {
-      if (manejar403(error)) return;
-      alert(`No se pudo eliminar el negocio: ${error.message}`);
-      boton.disabled = false;
-      boton.textContent = 'Eliminar';
-      console.error('No se pudo eliminar el negocio:', error);
     }
   }
 
@@ -246,9 +274,7 @@
       const nombre = perfil.nombreEntidad || 'Organizador';
       sidebarNombre.textContent = nombre;
       sidebarInicial.textContent = nombre.trim().slice(0, 2).toLocaleUpperCase('es-CO');
-      document.querySelectorAll('[data-publicar-negocio]').forEach((enlace) => {
-        enlace.hidden = perfil.vetado || perfil.estado === 'SUSPENDIDO';
-      });
+      puedePublicarNegocio = !perfil.vetado && perfil.estado !== 'SUSPENDIDO';
       return true;
     } catch (error) {
       if (error.status === 401) {
@@ -257,19 +283,20 @@
       }
       if (manejar403(error)) return false;
       estadoErrorNegocios.hidden = false;
-      mensajeError.textContent = `No se pudo validar tu especialidad: ${error.message}`;
+      mensajeError.textContent = `No se pudo validar tu especialidad. ${mensajeDeError(error)}`;
       cargando.hidden = true;
       return false;
     }
   }
 
-  grid.addEventListener('click', (evento) => {
-    const boton = evento.target.closest('[data-eliminar]');
-    if (boton) eliminarNegocio(boton.dataset.eliminar, boton);
-  });
   filtroCategoria.addEventListener('change', renderizar);
   filtroEstado.addEventListener('change', renderizar);
   document.querySelector('[data-reintentar]').addEventListener('click', cargarNegocios);
+  grid.addEventListener('click', (evento) => {
+    const boton = evento.target.closest('[data-eliminar-negocio]');
+    if (!boton) return;
+    eliminarNegocio(Number(boton.dataset.eliminarNegocio), boton);
+  });
   if (botonMenu && sidebar) {
     botonMenu.addEventListener('click', () => {
       const abierto = sidebar.classList.toggle('abierto');

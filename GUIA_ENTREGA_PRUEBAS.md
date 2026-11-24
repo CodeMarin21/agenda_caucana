@@ -11,7 +11,7 @@ El proyecto tiene dos partes:
 - **Base de datos:** PostgreSQL. Las migraciones están en `backend/prisma/migrations`.
 - **Chat IA:** consulta eventos y negocios publicados desde PostgreSQL; usa respuestas de catálogo y fallback y, si se configura `GEMINI_API_KEY`, puede usar Gemini. Tiene una caché en memoria con expiración; se vacía al reiniciar el backend.
 
-El registro desde **Eventos/Rutas** crea una cuenta de organizador de eventos, que debe verificarse antes de publicar eventos. El registro desde **Sabores** crea una cuenta gastronómica, que puede publicar negocios inmediatamente. Las especialidades se eligen al registrarse desde la sección correspondiente. El panel administrativo permite revisar perfiles, eventos y negocios y tomar acciones administrativas; no se usa para escoger la especialidad del usuario.
+El registro desde **Eventos** crea una cuenta de organizador de eventos, que debe verificarse antes de publicar eventos. El registro desde **Sabores** crea una cuenta gastronómica, que puede tener un negocio a la vez y editar también sus platos desde **Mis negocios**. Si el organizador elimina su negocio, libera el cupo para publicar otro; una eliminación administrativa no lo libera. Las especialidades se eligen al registrarse desde la sección correspondiente. El panel administrativo permite revisar perfiles, eventos y negocios y tomar acciones administrativas; no se usa para escoger la especialidad del usuario.
 
 Los avisos se guardan en PostgreSQL. Los eventos de organizadores que ya finalizaron se limpian mediante una tarea programada y se invalida la caché del Chat IA. La página de rutas gastronómicas es contenido editorial y Sabores también muestra los negocios aprobados de la base.
 
@@ -85,7 +85,7 @@ Para detener cada servidor usa `Ctrl+C` en su ventana.
 
 1. **Administrador:** iniciar sesión, abrir los apartados de Eventos, Negocios y Organizadores; probar revisión, aprobación, rechazo, suspensión y notificaciones.
 2. **Eventos:** desde Rutas o la portada, registrarse como organizador de eventos. Completar el perfil y esperar la verificación administrativa antes de publicar. Revisar después **Mis eventos** y las notificaciones.
-3. **Gastronomía:** desde Sabores, registrarse para publicar un negocio. La cuenta puede publicar inmediatamente. Revisar que el negocio aprobado aparezca en Sabores y en la ficha de detalle.
+3. **Gastronomía:** desde Sabores, registrarse para publicar un negocio. La cuenta puede publicar uno inmediatamente y luego editar sus datos y platos desde **Mis negocios**. Revisar que aparezca en Sabores y en la ficha de detalle; verificar que una segunda publicación se bloquee mientras exista la primera, y que al eliminarla pueda crear otra.
 4. **Chat IA:** preguntar por eventos, fechas, comida, platos, direcciones o presupuestos. Solo debe presentar publicaciones públicas vigentes.
 5. **Recuperación de contraseña:** se usa el correo de prueba Ethereal cuando no hay SMTP propio. Revisa la salida de la consola del backend para abrir el enlace de vista previa del mensaje.
 
@@ -115,9 +115,9 @@ Para obtener los cambios más recientes después de clonar, ejecuta `git pull` d
 Estoy probando Agenda Caucana. Es una aplicación web con frontend estático en HTML/CSS/JavaScript, backend Node.js + TypeScript + Express, Prisma y PostgreSQL. La carpeta frontend contiene las páginas públicas, Sabores, Rutas, Chat IA, login y paneles de administración/organización. El backend contiene API, autenticación, permisos, publicaciones, notificaciones, tareas programadas y lógica del chat.
 
 Reglas centrales:
-- La especialidad se decide durante el registro desde la sección de origen: Eventos/Rutas -> organizador de eventos; Sabores -> organizador gastronómico. El administrador no la asigna.
+- La especialidad se decide durante el registro desde la sección de origen: Eventos -> organizador de eventos; Sabores -> organizador gastronómico. El administrador no la asigna.
 - Eventos: el organizador necesita verificación administrativa antes de publicar.
-- Gastronomía: el dueño puede publicar negocios inmediatamente; el administrador conserva las acciones de supervisión y puede suspender o vetar según corresponda.
+- Gastronomía: el dueño puede registrar un negocio inmediatamente y editar esa publicación y sus platos; si la elimina puede registrar otro. El administrador conserva las acciones de supervisión y puede suspender o vetar según corresponda.
 - Los paneles y publicaciones de eventos y gastronomía son separados.
 - El Chat IA consulta información publicada de eventos y negocios (incluyendo platos, fechas, direcciones y precios); debe evitar inventar información y sugerir alternativas solo si coinciden realmente con la búsqueda.
 - El backend usa caché en memoria; los datos de prueba viven en una base PostgreSQL local creada para este fin.

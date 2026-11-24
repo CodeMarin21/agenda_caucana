@@ -591,7 +591,7 @@
 .chat-panel__form input:focus { outline: none; }
 .chat-panel__form button { border: none; background: var(--color-terracota); color: var(--color-cal); padding: 0 1rem; font-weight: 700; }
 
-/* -------------------- Lugares emblemáticos (rutas.html) -------------------- */
+/* -------------------- Lugares emblemáticos -------------------- */
 .lugar-card {
   display: grid;
   grid-template-columns: 14rem 1fr;
@@ -1015,6 +1015,7 @@
 .negocio-detalle__categoria { color: var(--color-terracota); font-size: 0.72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 .negocio-detalle__titulo { margin: .3rem 0 .75rem; font-size: clamp(2rem, 4vw, 3rem); }
 .negocio-detalle__descripcion { color: var(--tinta-70); line-height: 1.75; white-space: pre-line; }
+.negocio-detalle [data-editar-negocio][hidden] { display: none !important; }
 .negocio-seccion { margin-top: var(--espacio-lg); }
 .negocio-seccion h2 { margin-bottom: var(--espacio-sm); font-size: 1.35rem; }
 .negocio-resenas { display: grid; gap: var(--espacio-sm); }
@@ -1094,6 +1095,8 @@
   border: 1px solid var(--tinta-15);
   border-radius: var(--radio);
 }
+.slot-plato[hidden],
+[data-agregar-plato][hidden] { display: none !important; }
 .slot-plato legend {
   padding-inline: var(--espacio-xs);
   font-weight: 700;

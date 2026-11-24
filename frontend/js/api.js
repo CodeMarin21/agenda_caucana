@@ -98,6 +98,10 @@ const AC_API = (() => {
     listarNegociosPendientes: () => solicitar('/negocios/admin/pendientes'),
     crearNegocio: (payload) =>
       solicitar('/negocios', { method: 'POST', body: JSON.stringify(payload) }),
+    actualizarNegocio: (id, payload) => solicitar(`/negocios/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
     aprobarNegocio: (id) =>
       solicitar(`/negocios/${encodeURIComponent(id)}/aprobar`, { method: 'PATCH' }),
     rechazarNegocio: (id, motivo) =>
@@ -198,9 +202,14 @@ const AC_API = (() => {
     cancelarSuscripcion: (payload) => solicitar('/suscripciones', { method: 'DELETE', body: JSON.stringify(payload) }),
 
     // ── Chat IA ──────────────────────────────────────────
-    preguntar: (pregunta, negocioSlug) => solicitar('/chat', {
+    preguntar: (pregunta, negocioSlug, eventoSlug, contextoEventos) => solicitar('/chat', {
       method: 'POST',
-      body: JSON.stringify({ pregunta, ...(negocioSlug ? { negocioSlug } : {}) }),
+      body: JSON.stringify({
+        pregunta,
+        ...(negocioSlug ? { negocioSlug } : {}),
+        ...(eventoSlug ? { eventoSlug } : {}),
+        ...(contextoEventos?.length ? { contextoEventos } : {}),
+      }),
     }),
 
     // ── Utilidades ───────────────────────────────────────

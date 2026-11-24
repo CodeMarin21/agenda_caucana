@@ -6,6 +6,8 @@ export interface ChatRequest {
   idioma: Idioma;
   eventoId?: number;
   negocioSlug?: string;
+  eventoSlug?: string;
+  contextoEventos?: string[];
   ip?: string;
 }
 
@@ -15,6 +17,7 @@ export interface ChatResponse {
   idioma: Idioma;
   modelo?: string;
   eventoId?: number;
+  contextoEventos?: string[];
 }
 
 export interface EventoContexto {

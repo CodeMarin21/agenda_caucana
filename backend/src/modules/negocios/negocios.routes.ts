@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import {
   aprobarNegocio,
+  actualizarNegocio,
   calificarNegocio,
   crearNegocio,
   destacarNegocio,
@@ -17,6 +18,7 @@ import {
 import {
   calificarValidacion,
   crearNegocioValidacion,
+  actualizarNegocioValidacion,
   filtrosCalificacionesValidacion,
   filtrosNegociosValidacion,
 } from './negocios.dto';
@@ -104,10 +106,19 @@ router.post(
   crearNegocio
 );
 
+router.put(
+  '/:id',
+  authMiddleware,
+  requireRole('ORGANIZADOR'),
+  actualizarNegocioValidacion,
+  validateRequest,
+  actualizarNegocio
+);
+
 router.delete(
   '/:id',
   authMiddleware,
-  requireRole('ORGANIZADOR', 'ADMIN'),
+  requireRole('ADMIN', 'ORGANIZADOR'),
   eliminarNegocio
 );
 

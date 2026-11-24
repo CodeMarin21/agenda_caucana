@@ -3,6 +3,8 @@ export interface PeriodoEventos {
   hasta: Date;
   diaCompleto?: boolean;
   anioCompleto?: boolean;
+  rangoDias?: boolean;
+  soloVigentes?: boolean;
 }
 
 export interface FiltroTemporalEventos {
@@ -24,6 +26,15 @@ const MESES: readonly (readonly string[])[] = [
   ['octubre', 'october', 'octobre'],
   ['noviembre', 'november', 'novembre'],
   ['diciembre', 'december', 'decembre'],
+] as const;
+const DIAS_SEMANA: readonly (readonly string[])[] = [
+  ['domingo', 'sunday', 'dimanche'],
+  ['lunes', 'monday', 'lundi'],
+  ['martes', 'tuesday', 'mardi'],
+  ['miercoles', 'wednesday', 'mercredi'],
+  ['jueves', 'thursday', 'jeudi'],
+  ['viernes', 'friday', 'vendredi'],
+  ['sabado', 'saturday', 'samedi'],
 ] as const;
 
 function normalizar(texto: string): string {
@@ -82,8 +93,21 @@ function obtenerMes(token: string): number | undefined {
   return undefined;
 }
 
-function fechaBogotaEnUTC(anio: number, mes: number, dia: number): Date {
-  return new Date(Date.UTC(anio, mes, dia, 5));
+function obtenerDiaSemana(token: string): number | undefined {
+  const exacto = DIAS_SEMANA.findIndex((sinonimos) => sinonimos.includes(token));
+  if (exacto >= 0) return exacto;
+  if (token.length < 5) return undefined;
+  const distancias = DIAS_SEMANA.map((sinonimos, indice) => ({
+    indice,
+    distancia: Math.min(...sinonimos.map((dia) => distanciaDamerau(token, dia))),
+  })).sort((a, b) => a.distancia - b.distancia);
+  return distancias[0]?.distancia === 1 && distancias[0].distancia < distancias[1]?.distancia
+    ? distancias[0].indice
+    : undefined;
+}
+
+function fechaBogotaEnUTC(anio: number, mes: number, dia: number, hora = 0): Date {
+  return new Date(Date.UTC(anio, mes, dia, 5 + hora));
 }
 
 function hoyEnBogota(ahora: Date): { anio: number; mes: number; dia: number } {
@@ -132,14 +156,72 @@ function construirPeriodo(anio: number, mes: number, dia?: number): PeriodoEvent
   };
 }
 
+function franjaHoraria(tokens: string[]): { desde: number; hasta: number } | undefined {
+  if (tokens.some((token) => ['noche', 'night', 'soir'].includes(token))) {
+    return { desde: 18, hasta: 24 };
+  }
+  if (tokens.some((token) => ['tarde', 'afternoon', 'apres', 'apres-midi'].includes(token))) {
+    return { desde: 12, hasta: 18 };
+  }
+  if (
+    tokens.some((token) => ['madrugada', 'dawn'].includes(token)) ||
+    (tokens.includes('early') && tokens.includes('morning'))
+  ) {
+    return { desde: 0, hasta: 5 };
+  }
+  if (
+    tokens.some((token) => ['morning', 'matin'].includes(token)) ||
+    tokens.some((token, indice) =>
+      token === 'manana' &&
+      tokens[indice - 1] === 'la' &&
+      ['por', 'en'].includes(tokens[indice - 2]),
+    )
+  ) {
+    return { desde: 5, hasta: 12 };
+  }
+  return undefined;
+}
+
+function mananaEsFranja(tokens: string[]): boolean {
+  return tokens.filter((token) => token === 'manana').length === 1 &&
+    tokens.some((token, indice) =>
+    token === 'manana' &&
+    tokens[indice - 1] === 'la' &&
+    ['por', 'en'].includes(tokens[indice - 2]),
+    );
+}
+
+function aplicarFranja(
+  periodo: PeriodoEventos,
+  franja: { desde: number; hasta: number } | undefined,
+): PeriodoEventos {
+  if (!franja || !periodo.diaCompleto) return periodo;
+  const fecha = new Date(periodo.desde);
+  return {
+    ...periodo,
+    desde: fechaBogotaEnUTC(fecha.getUTCFullYear(), fecha.getUTCMonth(), fecha.getUTCDate(), franja.desde),
+    hasta: fechaBogotaEnUTC(fecha.getUTCFullYear(), fecha.getUTCMonth(), fecha.getUTCDate(), franja.hasta),
+  };
+}
+
 function periodoRelativo(tokens: string[], actual: Date): PeriodoEventos | undefined {
   const hoy = hoyEnBogota(actual);
+  const franja = franjaHoraria(tokens);
   if (tokens.some((token) => ['hoy', 'today', 'aujourdhui'].includes(token))) {
-    return construirPeriodo(hoy.anio, hoy.mes, hoy.dia);
+    return {
+      ...aplicarFranja(construirPeriodo(hoy.anio, hoy.mes, hoy.dia)!, franja),
+      soloVigentes: true,
+    };
   }
-  if (tokens.some((token) => ['manana', 'tomorrow', 'demain'].includes(token))) {
+  if (
+    !mananaEsFranja(tokens) &&
+    tokens.some((token) => ['manana', 'tomorrow', 'demain'].includes(token))
+  ) {
     const manana = new Date(fechaBogotaEnUTC(hoy.anio, hoy.mes, hoy.dia).getTime() + 86_400_000);
-    return construirPeriodo(manana.getUTCFullYear(), manana.getUTCMonth(), manana.getUTCDate());
+    return aplicarFranja(
+      construirPeriodo(manana.getUTCFullYear(), manana.getUTCMonth(), manana.getUTCDate())!,
+      franja,
+    );
   }
   const semanaActual =
     (tokens.includes('semana') || tokens.includes('semaine') || tokens.includes('week')) &&
@@ -149,17 +231,39 @@ function periodoRelativo(tokens: string[], actual: Date): PeriodoEventos | undef
     const diaSemana = hoyUTC.getUTCDay();
     const lunes = new Date(hoyUTC.getTime() - ((diaSemana + 6) % 7) * 86_400_000);
     const siguienteLunes = new Date(lunes.getTime() + 7 * 86_400_000);
-    return { desde: lunes, hasta: siguienteLunes };
+    return { desde: lunes, hasta: siguienteLunes, rangoDias: true };
   }
   const finDeSemana =
+    tokens.includes('finde') ||
     (tokens.includes('semana') && tokens.includes('fin')) ||
-    (tokens.includes('weekend') && (tokens.includes('this') || tokens.includes('fin'))) ||
-    (tokens.includes('week') && tokens.includes('end') && (tokens.includes('this') || tokens.includes('ce')));
+    tokens.includes('weekend') ||
+    (tokens.includes('week') && tokens.includes('end'));
   if (finDeSemana) {
     const hoyUTC = fechaBogotaEnUTC(hoy.anio, hoy.mes, hoy.dia);
-    const diasHastaSabado = (6 - hoyUTC.getUTCDay() + 7) % 7;
+    const diaHoy = hoyUTC.getUTCDay();
+    const proximo = tokens.some((token) => ['proximo', 'next', 'prochain'].includes(token));
+    const diasHastaSabado = proximo
+      ? ((6 - diaHoy + 7) % 7 || 7)
+      : diaHoy === 0 ? -1 : (6 - diaHoy + 7) % 7;
     const sabado = new Date(hoyUTC.getTime() + diasHastaSabado * 86_400_000);
-    return { desde: sabado, hasta: new Date(sabado.getTime() + 2 * 86_400_000) };
+    return {
+      desde: sabado,
+      hasta: new Date(sabado.getTime() + 2 * 86_400_000),
+      rangoDias: true,
+    };
+  }
+  const diaConsultado = tokens
+    .map(obtenerDiaSemana)
+    .find((dia): dia is number => dia !== undefined);
+  if (diaConsultado !== undefined) {
+    const hoyUTC = fechaBogotaEnUTC(hoy.anio, hoy.mes, hoy.dia);
+    let diasHasta = (diaConsultado - hoyUTC.getUTCDay() + 7) % 7;
+    if (diasHasta === 0 && tokens.some((token) => ['proximo', 'next', 'prochain'].includes(token))) {
+      diasHasta = 7;
+    }
+    const fecha = new Date(hoyUTC.getTime() + diasHasta * 86_400_000);
+    const periodo = construirPeriodo(fecha.getUTCFullYear(), fecha.getUTCMonth(), fecha.getUTCDate());
+    return periodo ? aplicarFranja(periodo, franja) : undefined;
   }
   return undefined;
 }
@@ -179,8 +283,10 @@ export function extraerFiltroTemporal(
   if (indiceMes >= 0) {
     const mes = obtenerMes(tokens[indiceMes])!;
     const anio = anioDeConsulta(tokens, indiceMes, hoy.anio);
+    const dia = obtenerDia(tokens, indiceMes);
+    const periodo = construirPeriodo(anio, mes, dia);
     return {
-      periodo: construirPeriodo(anio, mes, obtenerDia(tokens, indiceMes)),
+      periodo: periodo && dia !== undefined ? aplicarFranja(periodo, franjaHoraria(tokens)) : periodo,
       soloFinalizados,
     };
   }
@@ -206,11 +312,15 @@ export function extraerFiltroTemporal(
 
 export function esTerminoTemporal(texto: string): boolean {
   const token = normalizar(texto);
-  return obtenerMes(token) !== undefined || [
+  return obtenerMes(token) !== undefined ||
+    obtenerDiaSemana(token) !== undefined ||
+    [
     'hoy', 'today', 'aujourdhui', 'manana', 'tomorrow', 'demain',
-    'semana', 'semaine', 'week', 'weekend', 'week-end', 'end', 'fin', 'this', 'cette', 'ce',
+    'semana', 'semaine', 'week', 'weekend', 'week-end', 'end', 'fin', 'finde', 'this', 'cette', 'ce',
+    'noche', 'night', 'soir', 'tarde', 'afternoon', 'apres', 'matin', 'morning',
+    'madrugada', 'dawn', 'por', 'en', 'la', 'el', 'proximo', 'next', 'prochain',
     'pasado', 'pasados', 'pasada', 'pasadas',
     'pasaron', 'anteriores', 'finalizados', 'finalizadas', 'terminados',
     'terminadas', 'historial', 'historicos',
-  ].includes(token);
+    ].includes(token);
 }

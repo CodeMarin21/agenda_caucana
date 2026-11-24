@@ -493,6 +493,24 @@
     actualizarEstadoCalificacion();
   }
 
+  async function mostrarEdicionAlPropietario() {
+    const enlace = document.querySelector('[data-editar-negocio]');
+    if (!enlace || !AC_API.getToken()) return;
+
+    try {
+      const respuesta = await AC_API.misNegocios();
+      const propios = Array.isArray(respuesta?.negocios) ? respuesta.negocios : [];
+      if (propios.some((item) => Number(item.id) === Number(negocio.id))) {
+        enlace.href = `publicar-negocio.html?editar=${encodeURIComponent(negocio.id)}`;
+        enlace.hidden = false;
+      }
+    } catch (error) {
+      if (error.status !== 401 && error.status !== 403) {
+        console.error('No se pudo verificar si el usuario puede editar este negocio:', error);
+      }
+    }
+  }
+
   function actualizarSeleccionEstrellas() {
     botonesEstrellas.forEach((boton) => {
       const numero = Number(boton.dataset.estrellas);
@@ -532,6 +550,7 @@
       negocio = await AC_API.obtenerNegocio(slug);
       if (!negocio || !negocio.id) throw new Error('La respuesta del negocio no tiene el formato esperado');
       renderizarNegocio();
+      void mostrarEdicionAlPropietario();
     } catch (error) {
       console.error('No se pudo cargar el negocio:', error);
       estado.textContent = error.status === 404

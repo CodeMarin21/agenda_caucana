@@ -14,7 +14,13 @@ function esUrlHttp(value: unknown): boolean {
   }
 }
 
-export const crearNegocioValidacion = [
+export const validarImagenPrincipalUrl = body('imagenPrincipalUrl')
+  .optional({ values: 'falsy' })
+  .custom(esUrlHttp)
+  .withMessage('La URL de la imagen principal no es válida');
+
+function validacionesNegocio(minPlatos: number) {
+  return [
   body('nombre')
     .trim()
     .notEmpty().withMessage('El nombre es obligatorio')
@@ -67,10 +73,7 @@ export const crearNegocioValidacion = [
     .isInt({ min: 0 }).withMessage('El precio promedio debe ser un entero mayor o igual a 0')
     .toInt(),
 
-  body('imagenPrincipalUrl')
-    .optional({ values: 'falsy' })
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('La URL de la imagen principal no es válida'),
+  validarImagenPrincipalUrl,
 
   body('imagenesAdicionales')
     .optional({ nullable: true })
@@ -81,7 +84,7 @@ export const crearNegocioValidacion = [
 
   body('platos')
     .optional()
-    .isArray({ min: 1, max: 5 })
+    .isArray({ min: minPlatos, max: 5 })
     .withMessage('Se requiere entre 1 y 5 platos')
     .bail()
     .custom((platos: unknown[]) => platos.every((plato) =>
@@ -116,7 +119,11 @@ export const crearNegocioValidacion = [
     .bail()
     .trim()
     .isLength({ max: 500 }).withMessage('La descripción de cada plato no puede superar 500 caracteres'),
-];
+  ];
+}
+
+export const crearNegocioValidacion = validacionesNegocio(1);
+export const actualizarNegocioValidacion = validacionesNegocio(0);
 
 export const calificarValidacion = [
   body('estrellas')

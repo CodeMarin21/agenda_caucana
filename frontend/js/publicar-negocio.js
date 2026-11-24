@@ -4,25 +4,56 @@
   const estadoCargando = document.getElementById('estado-cargando');
   const estadoNoAuth = document.getElementById('estado-no-auth');
   const estadoNoOrg = document.getElementById('estado-no-org');
+  const estadoYaPublicado = document.getElementById('estado-ya-publicado');
+  const estadoLimiteConsumido = document.getElementById('estado-limite-consumido');
+  const estadoEdicionNoDisponible = document.getElementById('estado-edicion-no-disponible');
   const estadoForm = document.getElementById('estado-form');
   const form = document.querySelector('[data-form-negocio]');
-  if (!estadoCargando || !estadoNoAuth || !estadoNoOrg || !estadoForm || !form) return;
+  if (
+    !estadoCargando || !estadoNoAuth || !estadoNoOrg || !estadoYaPublicado ||
+    !estadoLimiteConsumido ||
+    !estadoEdicionNoDisponible || !estadoForm || !form
+  ) return;
 
   const botonEnviar = form.querySelector('button[type="submit"]');
   const mensaje = form.querySelector('[data-mensaje]');
   const selectCiudad = form.querySelector('[name="ciudadId"]');
   const inputImagenPrincipal = form.querySelector('[name="imagenPrincipal"]');
   const previewImagenPrincipal = form.querySelector('[data-imagen-principal-preview]');
+  const botonQuitarImagenPrincipal = form.querySelector('[data-quitar-imagen-principal]');
+  const botonAgregarPlato = form.querySelector('[data-agregar-plato]');
+  const slotsPlato = [...form.querySelectorAll('[data-slot]')];
+  const enlaceEditarExistente = estadoYaPublicado.querySelector('[data-editar-negocio]');
+  const parametroEdicion = new URLSearchParams(window.location.search).get('editar');
   const tiposImagen = ['image/jpeg', 'image/png', 'image/webp'];
   const maxBytes = 5 * 1024 * 1024;
   let imagenPrincipalUrl = '';
+  let negocioEnEdicion = null;
   let colaSubidas = Promise.resolve();
+  let cantidadSlotsVisibles = 1;
 
   function mostrarEstado(estado) {
-    estadoCargando.hidden = estado !== estadoCargando;
-    estadoNoAuth.hidden = estado !== estadoNoAuth;
-    estadoNoOrg.hidden = estado !== estadoNoOrg;
-    estadoForm.hidden = estado !== estadoForm;
+    [
+      estadoCargando,
+      estadoNoAuth,
+      estadoNoOrg,
+      estadoYaPublicado,
+      estadoLimiteConsumido,
+      estadoEdicionNoDisponible,
+      estadoForm,
+    ].forEach((seccion) => {
+      seccion.hidden = estado !== seccion;
+    });
+  }
+
+  function actualizarVisibilidadSlots() {
+    slotsPlato.forEach((slot, index) => {
+      slot.hidden = index >= cantidadSlotsVisibles;
+    });
+    if (botonAgregarPlato) {
+      botonAgregarPlato.hidden = cantidadSlotsVisibles >= slotsPlato.length;
+      botonAgregarPlato.textContent = `Agregar otro plato (${cantidadSlotsVisibles}/${slotsPlato.length})`;
+    }
   }
 
   function listaDe(respuesta) {
@@ -30,6 +61,7 @@
     if (Array.isArray(respuesta?.value)) return respuesta.value;
     if (Array.isArray(respuesta?.data)) return respuesta.data;
     if (Array.isArray(respuesta?.ciudades)) return respuesta.ciudades;
+    if (Array.isArray(respuesta?.negocios)) return respuesta.negocios;
     return [];
   }
 
@@ -120,7 +152,7 @@
   }
 
   function inicializarSlots() {
-    form.querySelectorAll('[data-slot]').forEach((slot) => {
+    slotsPlato.forEach((slot) => {
       const nombre = slot.querySelector('[data-plato-nombre]');
       const precio = slot.querySelector('[data-plato-precio]');
       const inputImagen = slot.querySelector('[data-plato-imagen]');
@@ -153,6 +185,15 @@
         });
       });
     });
+
+    botonAgregarPlato?.addEventListener('click', () => {
+      if (cantidadSlotsVisibles >= slotsPlato.length) return;
+      const nuevoSlot = slotsPlato[cantidadSlotsVisibles];
+      cantidadSlotsVisibles += 1;
+      actualizarVisibilidadSlots();
+      nuevoSlot.querySelector('[data-plato-nombre]').focus();
+    });
+    actualizarVisibilidadSlots();
   }
 
   async function cargarCiudades() {
@@ -166,6 +207,59 @@
         return option.outerHTML;
       }).join('');
     selectCiudad.disabled = false;
+  }
+
+  function rellenarFormulario(negocio) {
+    ['nombre', 'descripcion', 'direccion', 'categoria'].forEach((nombre) => {
+      form.elements.namedItem(nombre).value = negocio[nombre] || '';
+    });
+    form.elements.namedItem('telefono').value = negocio.telefono || '';
+    form.elements.namedItem('whatsapp').value = negocio.whatsapp || '';
+    form.elements.namedItem('instagram').value = negocio.instagram || '';
+    form.elements.namedItem('horarioAtencion').value = negocio.horarioAtencion || '';
+    form.elements.namedItem('precioPromedio').value = negocio.precioPromedio ?? '';
+    selectCiudad.value = String(negocio.ciudadId || negocio.ciudad?.id || '');
+
+    imagenPrincipalUrl = negocio.imagenPrincipalUrl || '';
+    if (imagenPrincipalUrl) {
+      previewImagenPrincipal.src = imagenPrincipalUrl;
+      previewImagenPrincipal.hidden = false;
+      botonQuitarImagenPrincipal.hidden = false;
+    }
+
+    const platos = Array.isArray(negocio.platos) ? negocio.platos : [];
+    slotsPlato.forEach((slot, index) => {
+      const plato = platos[index];
+      if (!plato || typeof plato !== 'object') return;
+
+      slot.querySelector('[data-plato-nombre]').value = plato.nombre || '';
+      slot.querySelector('[data-plato-precio]').value = plato.precio ?? '';
+      slot.querySelector('[data-plato-descripcion]').value = plato.descripcion || '';
+      slot.dataset.imagenUrl = plato.imagenUrl || '';
+      const preview = slot.querySelector('[data-plato-preview]');
+      if (plato.imagenUrl) {
+        preview.src = plato.imagenUrl;
+        preview.hidden = false;
+      }
+    });
+    cantidadSlotsVisibles = Math.min(slotsPlato.length, Math.max(1, platos.length + 1));
+    actualizarVisibilidadSlots();
+  }
+
+  function configurarEdicion(negocio) {
+    negocioEnEdicion = negocio || null;
+    if (!negocioEnEdicion) {
+      mostrarEstado(estadoEdicionNoDisponible);
+      return false;
+    }
+
+    rellenarFormulario(negocioEnEdicion);
+    document.querySelector('[data-titulo-publicacion]').textContent = 'Edita tu negocio';
+    document.querySelector('[data-titulo-seccion]').textContent = 'Actualiza la información de tu negocio';
+    botonEnviar.textContent = 'Guardar cambios';
+    botonQuitarImagenPrincipal.hidden = !imagenPrincipalUrl;
+    document.querySelector('[data-cancelar-edicion]').hidden = false;
+    return true;
   }
 
   function validarCampo(nombre, predicado, error) {
@@ -239,24 +333,26 @@
 
   inputImagenPrincipal.addEventListener('change', () => {
     const file = inputImagenPrincipal.files?.[0];
-    if (!file) {
-      imagenPrincipalUrl = '';
-      previewImagenPrincipal.hidden = true;
-      previewImagenPrincipal.removeAttribute('src');
-      mostrarError(form.querySelector('[data-error="imagenPrincipal"]'), '');
-      return;
-    }
-    imagenPrincipalUrl = '';
-    previewImagenPrincipal.removeAttribute('src');
-    previewImagenPrincipal.hidden = true;
+    if (!file) return;
     encolarSubida(
       file,
       'negocios',
       inputImagenPrincipal,
       previewImagenPrincipal,
-      (url) => { imagenPrincipalUrl = url; },
+      (url) => {
+        imagenPrincipalUrl = url;
+        botonQuitarImagenPrincipal.hidden = false;
+      },
       (error) => mostrarError(form.querySelector('[data-error="imagenPrincipal"]'), error),
     );
+  });
+
+  botonQuitarImagenPrincipal.addEventListener('click', () => {
+    imagenPrincipalUrl = '';
+    inputImagenPrincipal.value = '';
+    previewImagenPrincipal.removeAttribute('src');
+    previewImagenPrincipal.hidden = true;
+    botonQuitarImagenPrincipal.hidden = true;
   });
 
   form.addEventListener('submit', async (event) => {
@@ -297,14 +393,31 @@
         ...(resultado.platos.length > 0 ? { platos: resultado.platos } : {}),
       };
 
-      mostrarMensaje('Publicando negocio...', 'info');
-      const respuesta = await AC_API.crearNegocio(payload);
-      mostrarMensaje(respuesta.mensaje || 'Negocio publicado correctamente.', 'ok');
+      mostrarMensaje(negocioEnEdicion ? 'Guardando cambios...' : 'Publicando negocio...', 'info');
+      const respuesta = negocioEnEdicion
+        ? await AC_API.actualizarNegocio(negocioEnEdicion.id, {
+          ...payload,
+          telefono: form.elements.namedItem('telefono').value.trim(),
+          whatsapp: form.elements.namedItem('whatsapp').value.trim(),
+          instagram: form.elements.namedItem('instagram').value.trim(),
+          horarioAtencion: form.elements.namedItem('horarioAtencion').value.trim(),
+          precioPromedio: form.elements.namedItem('precioPromedio').value === ''
+            ? null
+            : Number(form.elements.namedItem('precioPromedio').value),
+          imagenPrincipalUrl: imagenPrincipalUrl || null,
+          platos: resultado.platos,
+        })
+        : await AC_API.crearNegocio(payload);
+      mostrarMensaje(
+        respuesta.mensaje || (negocioEnEdicion ? 'Cambios guardados.' : 'Negocio publicado correctamente.'),
+        'ok',
+      );
       window.setTimeout(() => {
         window.location.href = 'organizador/mis-negocios.html';
       }, 1200);
     } catch (error) {
-      mostrarMensaje(`No se pudo publicar el negocio: ${error.message}`, 'error');
+      const accion = negocioEnEdicion ? 'actualizar' : 'publicar';
+      mostrarMensaje(`No se pudo ${accion} el negocio: ${error.message}`, 'error');
     } finally {
       botonEnviar.disabled = false;
       botonEnviar.removeAttribute('aria-busy');
@@ -350,20 +463,48 @@
         mostrarEstado(estadoNoOrg);
         return;
       }
-      mostrarEstado(estadoForm);
+
+      const respuestaNegocios = await AC_API.misNegocios();
+      const negocios = listaDe(respuestaNegocios);
+      if (parametroEdicion) {
+        const idEdicion = Number(parametroEdicion);
+        const negocio = negocios.find((item) => item.id === idEdicion);
+        if (!Number.isInteger(idEdicion) || !negocio) {
+          mostrarEstado(estadoEdicionNoDisponible);
+          return;
+        }
+        await cargarCiudades();
+        if (!configurarEdicion(negocio)) return;
+        mostrarEstado(estadoForm);
+        return;
+      }
+
+      if (negocios.length > 0) {
+        enlaceEditarExistente.href =
+          `publicar-negocio.html?editar=${encodeURIComponent(negocios[0].id)}`;
+        mostrarEstado(estadoYaPublicado);
+        return;
+      }
+
+      if (respuestaNegocios?.puedeCrear === false) {
+        mostrarEstado(estadoLimiteConsumido);
+        return;
+      }
+
       await cargarCiudades();
+      mostrarEstado(estadoForm);
     } catch (error) {
       if (error.status === 401) {
         window.location.href = 'login.html?next=publicar-negocio.html';
         return;
       }
-      if (error.status === 403) {
-        mostrarEstado(estadoNoOrg);
-        return;
-      }
-      mostrarEstado(estadoForm);
-      selectCiudad.innerHTML = '<option value="">Error al cargar ciudades</option>';
-      mostrarMensaje(`No se pudo validar la cuenta: ${error.message}`, 'error');
+      const titulo = estadoNoOrg.querySelector('h2');
+      const detalle = estadoNoOrg.querySelector('p');
+      const enlaceRegistro = estadoNoOrg.querySelector('a');
+      if (titulo) titulo.textContent = 'No se pudo verificar tu negocio';
+      if (detalle) detalle.textContent = `No podemos confirmar si ya tienes una publicación: ${error.message}`;
+      if (enlaceRegistro) enlaceRegistro.hidden = true;
+      mostrarEstado(estadoNoOrg);
     }
   })();
 })();

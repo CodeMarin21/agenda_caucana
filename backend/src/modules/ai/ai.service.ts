@@ -8,12 +8,19 @@ import { AiRepository } from './ai.repository';
 import { GeminiClient } from './gemini.client';
 import { buildSystemPrompt } from './prompt.builder';
 import { generarFallback } from './fallback.local';
-import { detectIntent } from './ai.intent';
+import {
+  detectIntent,
+  esPreguntaPrecioEntradaEvento,
+  esPreguntaSeguimientoEvento,
+} from './ai.intent';
 import {
   responderEvento,
   responderEventoNoEncontrado,
+  responderPrecioEntradaEvento,
   responderEventosPorPeriodo,
+  responderAclaracionRecomendacion,
   responderNegocios,
+  responderRecomendacionNegocios,
   responderComoLlegarNegocio,
   responderNegocioParaLlegarNoEncontrado,
 } from './catalogo.responses';
@@ -50,10 +57,17 @@ export class AiService {
   }
 
   async chat(req: ChatRequest): Promise<ChatResponse> {
-    const { pregunta, idioma, eventoId, negocioSlug, ip } = req;
+    const { pregunta, idioma, eventoId, negocioSlug, eventoSlug, contextoEventos, ip } = req;
 
     // 1. Caché: si hay hit, no gastamos cuota ni tocamos la BD
-    const cacheKey = this.buildCacheKey(pregunta, idioma, eventoId, negocioSlug);
+    const cacheKey = this.buildCacheKey(
+      pregunta,
+      idioma,
+      eventoId,
+      negocioSlug,
+      eventoSlug,
+      contextoEventos,
+    );
     const cached = this.cache.get<ChatResponse>(cacheKey);
     if (cached) {
       this.guardarLog(pregunta, cached.respuesta, idioma, ip);
@@ -68,15 +82,68 @@ export class AiService {
       return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
     }
 
+    if (eventoSlug && esPreguntaSeguimientoEvento(pregunta)) {
+      const evento = await this.repository.findEventoPublicadoPorSlug(eventoSlug);
+      if (!evento) {
+        const respuesta = generarFallback({
+          eventos: [],
+          idioma,
+          tipo: 'EVENTO_ESPECIFICO',
+          eventoNoEncontrado: true,
+        });
+        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'fallback');
+      }
+
+      if (esPreguntaPrecioEntradaEvento(pregunta)) {
+        return this.guardarRespuesta(
+          cacheKey,
+          pregunta,
+          responderPrecioEntradaEvento(evento, idioma),
+          idioma,
+          ip,
+          'catalogo',
+          TTL_EVENTO_MS,
+          evento.id,
+        );
+      }
+
+      const systemPrompt = buildSystemPrompt({
+        eventos: [evento],
+        idioma,
+        eventoEspecifico: evento,
+      });
+      const geminiResult = await this.gemini.generate(pregunta, systemPrompt);
+      const respuesta = geminiResult?.texto ?? generarFallback({
+        eventos: [evento],
+        idioma,
+        tipo: 'EVENTO_ESPECIFICO',
+        eventoEspecifico: evento,
+      });
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
+        idioma,
+        ip,
+        geminiResult ? 'gemini' : 'fallback',
+        TTL_EVENTO_MS,
+        evento.id,
+        geminiResult?.modelo,
+      );
+    }
+
     // 2. Pre-filtrado en PostgreSQL según intención
     const intent = detectIntent(pregunta, eventoId);
 
     if (intent.type === 'EVENTO_BUSQUEDA') {
+      const terminosEvento = intent.terminos.length > 0
+        ? intent.terminos
+        : (intent.periodo || intent.soloFinalizados ? contextoEventos ?? [] : []);
       if (intent.periodo || intent.soloFinalizados) {
         const eventos = intent.periodo
           ? await this.repository.findEventosEnPeriodo(
             intent.periodo,
-            intent.terminos,
+            terminosEvento,
             intent.soloFinalizados,
           )
           : await this.repository.findFinalizados();
@@ -85,22 +152,45 @@ export class AiService {
           idioma,
           intent.periodo,
           intent.soloFinalizados,
+          terminosEvento,
         );
-        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+        return this.guardarRespuesta(
+          cacheKey,
+          pregunta,
+          respuesta,
+          idioma,
+          ip,
+          'catalogo',
+          TTL_GENERAL_MS,
+          undefined,
+          undefined,
+          terminosEvento,
+        );
       }
 
-      if (intent.terminos.length === 0) {
+      if (terminosEvento.length === 0) {
         const eventos = await this.repository.findProximos();
         const respuesta = generarFallback({ eventos, idioma, tipo: 'GENERAL' });
         return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
       }
 
-      const eventos = await this.repository.findEventosPorTerminos(intent.terminos);
+      const eventos = await this.repository.findEventosPorTerminos(terminosEvento);
       const evento = eventos[0];
       const respuesta = evento
         ? responderEvento(evento, idioma)
-        : responderEventoNoEncontrado(intent.terminos, idioma);
-      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+        : responderEventoNoEncontrado(terminosEvento, idioma);
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
+        idioma,
+        ip,
+        'catalogo',
+        TTL_GENERAL_MS,
+        undefined,
+        undefined,
+        terminosEvento,
+      );
     }
 
     if (intent.type === 'NEGOCIO_BUSQUEDA') {
@@ -112,6 +202,31 @@ export class AiService {
         intent.presupuesto,
         intent.personas,
         intent.tipoPresupuesto,
+      );
+      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+    }
+
+    if (intent.type === 'NEGOCIO_RECOMENDACION') {
+      if (!negocioSlug) {
+        return this.guardarRespuesta(
+          cacheKey,
+          pregunta,
+          responderAclaracionRecomendacion(idioma),
+          idioma,
+          ip,
+          'catalogo',
+        );
+      }
+      const negocioContextual = negocioSlug
+        ? await this.repository.findNegocioPublicadoPorSlug(negocioSlug)
+        : null;
+      const negocios = negocioSlug
+        ? negocioContextual ? [negocioContextual] : []
+        : await this.repository.findNegociosPublicados();
+      const respuesta = responderRecomendacionNegocios(
+        negocios,
+        intent.personas,
+        idioma,
       );
       return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
     }
@@ -184,6 +299,7 @@ export class AiService {
     ttl = TTL_EVENTO_MS,
     eventoId?: number,
     modelo?: string,
+    contextoEventos?: string[],
   ): ChatResponse {
     const response: ChatResponse = {
       respuesta,
@@ -191,6 +307,7 @@ export class AiService {
       idioma,
       ...(eventoId && { eventoId }),
       ...(modelo && { modelo }),
+      ...(contextoEventos && { contextoEventos }),
     };
     this.cache.set(cacheKey, response, ttl);
     this.guardarLog(pregunta, respuesta, idioma, ip);
@@ -202,6 +319,8 @@ export class AiService {
     idioma: string,
     eventoId?: number,
     negocioSlug?: string,
+    eventoSlug?: string,
+    contextoEventos?: string[],
   ): string {
     const norm = pregunta
       .toLowerCase()
@@ -217,6 +336,8 @@ export class AiService {
       .attr('lang', idioma)
       .attr('evt', eventoId ?? 'general')
       .attr('biz', negocioSlug ?? 'general')
+      .attr('event', eventoSlug ?? 'general')
+      .attr('eventTerms', contextoEventos?.join('|') ?? 'general')
       .build();
   }
 

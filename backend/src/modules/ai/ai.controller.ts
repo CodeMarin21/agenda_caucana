@@ -24,7 +24,7 @@ function respuestaPorTiempo(idioma: ChatResponse['idioma']): ChatResponse {
 export async function chat(req: Request, res: Response): Promise<void> {
   let timeout: NodeJS.Timeout | undefined;
   try {
-    const { pregunta, idioma, eventoId, negocioSlug } = req.body as ChatRequestDTO;
+    const { pregunta, idioma, eventoId, negocioSlug, eventoSlug, contextoEventos } = req.body as ChatRequestDTO;
     const idiomaRespuesta = inferirIdiomaPregunta(pregunta) ?? idioma ?? normalizeIdioma(req.idioma);
 
     const result = await Promise.race([
@@ -33,6 +33,8 @@ export async function chat(req: Request, res: Response): Promise<void> {
         idioma: idiomaRespuesta,
         eventoId,
         negocioSlug,
+        eventoSlug,
+        contextoEventos,
         ip: req.ip,
       }),
       new Promise<ChatResponse>((resolve) => {

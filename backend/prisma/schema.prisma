@@ -170,7 +170,8 @@ model Organizador {
   creadoEn            DateTime          @default(now())
   actualizadoEn       DateTime          @updatedAt
   eventos             Evento[]
-  negocios            Negocio[]
+  negocio             Negocio?
+  negocioCreado       Boolean           @default(false)
 
   // ── Perfil ampliado (parámetros de seguridad) ────────
   direccion                 String? // Dirección física de la entidad
@@ -298,7 +299,7 @@ model Negocio {
   estadoPublicacion   EstadoNegocio    @default(PENDIENTE)
   motivoRechazo       String?
 
-  organizadorId Int?
+  organizadorId Int?         @unique
   organizador   Organizador? @relation(fields: [organizadorId], references: [id])
 
   creadoEn      DateTime @default(now())

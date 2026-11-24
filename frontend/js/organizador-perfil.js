@@ -85,7 +85,7 @@
       banner.className = 'aviso';
       bannerIcono.textContent = '🕒';
       bannerTitulo.textContent = 'Perfil en revisión';
-      bannerTexto.textContent = 'Puedes configurar este perfil y enviar negocios. Cada negocio se revisa por separado y solo aparece al público después de su aprobación.';
+      bannerTexto.textContent = 'Puedes completar este perfil y registrar un negocio desde Sabores. No necesitas aprobación administrativa para publicarlo; después podrás modificar esa misma ficha desde Mis negocios.';
       return;
     }
     if (perfil.estado === 'VERIFICADO') {

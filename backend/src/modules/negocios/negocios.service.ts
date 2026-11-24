@@ -4,7 +4,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { NegociosRepository, FiltrosNegocios } from './negocios.repository';
-import { inferirEspecialidad } from '../organizadores/especialidad.util';
+import { inferirEspecialidadOrganizador } from '../organizadores/especialidad.util';
 import {
   withCache,
   CacheKeyBuilder,
@@ -32,6 +32,20 @@ export interface CrearNegocioDTO {
   imagenPrincipalUrl?: string;
   imagenesAdicionales?: string[];
   platos?: PlatoDTO[];
+}
+
+export interface ActualizarNegocioDTO extends Omit<
+  CrearNegocioDTO,
+  'telefono' | 'whatsapp' | 'instagram' | 'horarioAtencion' | 'precioPromedio' | 'imagenPrincipalUrl' | 'platos'
+> {
+  telefono?: string | null;
+  whatsapp?: string | null;
+  instagram?: string | null;
+  horarioAtencion?: string | null;
+  categoria: CategoriaNegocio;
+  precioPromedio?: number | null;
+  imagenPrincipalUrl?: string | null;
+  platos: PlatoDTO[];
 }
 
 const repo = new NegociosRepository();
@@ -115,12 +129,15 @@ export class NegociosService {
   async crear(data: CrearNegocioDTO, usuarioId: number) {
     const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
     if (!organizador) throw new Error('No tienes perfil de organizador');
-    if (inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA') {
+    if (inferirEspecialidadOrganizador(organizador) !== 'GASTRONOMIA') {
       throw new Error('Tu cuenta no está habilitada para publicar negocios de comida');
     }
     if (organizador.vetado) throw new Error('La cuenta del organizador está vetada');
     if (organizador.estado === 'SUSPENDIDO') {
       throw new Error('La cuenta del organizador está suspendida');
+    }
+    if (organizador.negocioCreado || organizador.negocio) {
+      throw new Error('Ya tienes un negocio registrado. Edita el existente en Mis negocios.');
     }
     const datos: Prisma.NegocioCreateInput = {
       nombre: data.nombre.trim(),
@@ -147,19 +164,84 @@ export class NegociosService {
       ciudad: { connect: { id: data.ciudadId } },
       organizador: { connect: { id: organizador.id } },
     };
-    const negocio = await repo.create(datos);
+    let negocio: Awaited<ReturnType<NegociosRepository['create']>>;
+    try {
+      negocio = await repo.create(datos, organizador.id);
+    } catch (error) {
+      const target = error instanceof Prisma.PrismaClientKnownRequestError
+        ? error.meta?.target
+        : undefined;
+      const conflictoOrganizador = Array.isArray(target)
+        ? target.includes('organizadorId')
+        : typeof target === 'string' && target.includes('organizadorId');
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002' &&
+        conflictoOrganizador
+      ) {
+        throw new Error('Ya tienes un negocio registrado. Edita el existente en Mis negocios.');
+      }
+      throw error;
+    }
     this.invalidarCacheListado();
     this.invalidarCacheAsistente();
     return negocio;
   }
 
+  async actualizar(id: number, data: ActualizarNegocioDTO, usuarioId: number) {
+    const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
+    if (!organizador) throw new Error('No tienes perfil de organizador');
+    if (inferirEspecialidadOrganizador(organizador) !== 'GASTRONOMIA') {
+      throw new Error('Tu cuenta no está habilitada para gestionar negocios de comida');
+    }
+    if (organizador.vetado) throw new Error('La cuenta del organizador está vetada');
+    if (organizador.estado === 'SUSPENDIDO') {
+      throw new Error('La cuenta del organizador está suspendida');
+    }
+
+    const negocioExistente = await repo.findByIdAndOrganizador(id, organizador.id);
+    if (!negocioExistente) {
+      throw new Error('No tienes permiso para modificar este negocio');
+    }
+
+    const datos: Prisma.NegocioUpdateInput = {
+      nombre: data.nombre.trim(),
+      descripcion: data.descripcion.trim(),
+      direccion: data.direccion.trim(),
+      telefono: data.telefono?.trim() || null,
+      whatsapp: data.whatsapp?.trim() || null,
+      instagram: data.instagram?.trim() || null,
+      horarioAtencion: data.horarioAtencion?.trim() || null,
+      categoria: data.categoria,
+      precioPromedio: data.precioPromedio ?? null,
+      imagenPrincipalUrl: data.imagenPrincipalUrl ?? null,
+      ...(data.imagenesAdicionales !== undefined
+        ? { imagenesAdicionales: data.imagenesAdicionales }
+        : {}),
+      platos: data.platos.map((plato) => ({
+        nombre: plato.nombre,
+        precio: plato.precio,
+        imagenUrl: plato.imagenUrl,
+        ...(plato.descripcion ? { descripcion: plato.descripcion } : {}),
+      })),
+      ciudad: { connect: { id: data.ciudadId } },
+    };
+    const actualizado = await repo.update(id, datos);
+    this.invalidarCacheListado();
+    this.invalidarCacheAsistente();
+    return actualizado;
+  }
+
   async misNegocios(usuarioId: number) {
     const organizador = await repo.findOrganizadorByUsuarioId(usuarioId);
     if (!organizador) throw new Error('No tienes perfil de organizador');
-    if (inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA') {
+    if (inferirEspecialidadOrganizador(organizador) !== 'GASTRONOMIA') {
       throw new Error('Tu cuenta no está habilitada para gestionar negocios de comida');
     }
-    return repo.findByOrganizadorId(organizador.id);
+    return {
+      negocios: await repo.findByOrganizadorId(organizador.id),
+      puedeCrear: !organizador.negocioCreado && !organizador.negocio,
+    };
   }
 
   async eliminar(id: number, usuarioId?: number, esAdmin = false, motivo?: string) {
@@ -171,7 +253,7 @@ export class NegociosService {
       if (
         !organizador ||
         negocio.organizadorId !== organizador.id ||
-        inferirEspecialidad(organizador.especialidad, organizador._count, organizador) !== 'GASTRONOMIA'
+        inferirEspecialidadOrganizador(organizador) !== 'GASTRONOMIA'
       ) {
         throw new Error('No tienes permiso para eliminar este negocio');
       }
@@ -179,7 +261,7 @@ export class NegociosService {
         throw new Error('Tu cuenta no está habilitada para gestionar negocios de comida');
       }
     }
-    const resultado = await repo.delete(id, esAdmin ? motivo : undefined);
+    const resultado = await repo.delete(id, esAdmin ? motivo : undefined, !esAdmin);
     this.invalidarCacheListado();
     this.invalidarCacheAsistente();
     return resultado;

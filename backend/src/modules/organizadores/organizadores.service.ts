@@ -6,7 +6,10 @@ import {
   Prisma,
 } from '@prisma/client';
 import { OrganizadoresRepository } from './organizadores.repository';
-import { inferirEspecialidad } from './especialidad.util';
+import {
+  contarPublicacionesOrganizador,
+  inferirEspecialidadOrganizador,
+} from './especialidad.util';
 import {
   cifrar,
   descifrar,
@@ -118,18 +121,26 @@ export class OrganizadoresService {
   // ── Listados ───────────────────────────────────────────
   async listarTodos() {
     const organizadores = await this.repo.listarTodos();
-    return organizadores.map((organizador) => ({
-      ...organizador,
-      especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
-    }));
+    return organizadores.map((organizador) => {
+      const publicaciones = contarPublicacionesOrganizador(organizador);
+      return {
+        ...organizador,
+        _count: { ...organizador._count, negocios: publicaciones.negocios },
+        especialidad: inferirEspecialidadOrganizador(organizador),
+      };
+    });
   }
 
   async listarPendientes() {
     const organizadores = await this.repo.listarParaRevision();
-    return organizadores.map((organizador) => ({
-      ...organizador,
-      especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
-    }));
+    return organizadores.map((organizador) => {
+      const publicaciones = contarPublicacionesOrganizador(organizador);
+      return {
+        ...organizador,
+        _count: { ...organizador._count, negocios: publicaciones.negocios },
+        especialidad: inferirEspecialidadOrganizador(organizador),
+      };
+    });
   }
 
   private obtenerEstadoDocumento(org: {
@@ -247,7 +258,7 @@ export class OrganizadoresService {
       telefono: org.telefono,
       nit: org.nit,
       avatarUrl: org.avatarUrl,
-      especialidad: inferirEspecialidad(org.especialidad, org._count, org),
+      especialidad: inferirEspecialidadOrganizador(org),
       redesSociales: org.redesSociales,
       direccion: org.direccion,
       anioFundacion: org.anioFundacion,

@@ -22,7 +22,6 @@
     <nav class="nav-publico__links" aria-label="Navegación principal">
       <a href="index.html">Explorar</a>
       <a href="index.html#categorias">Categorías</a>
-      <a href="rutas.html">Rutas</a>
       <a href="sabores.html">Sabores</a>
     </nav>
     <div class="nav-publico__acciones">
@@ -42,7 +41,6 @@
   <div class="menu-movil" data-menu-movil>
     <a href="index.html">Explorar</a>
     <a href="index.html#categorias">Categorías</a>
-    <a href="rutas.html">Rutas</a>
     <a href="sabores.html">Sabores</a>
     <a href="login.html">Mi perfil</a>
     <a href="publicar-negocio.html" class="boton boton-primario">Publicar negocio</a>
@@ -54,7 +52,7 @@
     <a href="sabores.html">Sabores</a> &gt; <span aria-current="page">Publicar negocio</span>
   </nav>
   <header class="publicar-negocio__encabezado">
-    <h1>Publica tu negocio</h1>
+    <h1 data-titulo-publicacion>Publica tu negocio</h1>
     <p>Comparte tu cocina con quienes quieren descubrir los sabores del Cauca.</p>
   </header>
 
@@ -75,10 +73,28 @@
     <a class="boton boton-secundario" href="organizador/registro.html?especialidad=GASTRONOMIA&next=publicar-negocio.html">Registrarme en Sabores</a>
   </section>
 
+  <section id="estado-ya-publicado" class="publicar-negocio__estado" aria-labelledby="titulo-ya-publicado" hidden>
+    <h2 id="titulo-ya-publicado">Ya tienes un negocio registrado</h2>
+    <p>Solo puedes tener un negocio a la vez. Edita también tu menú desde la publicación actual o elimínala para registrar otro negocio.</p>
+    <a class="boton boton-primario" data-editar-negocio href="organizador/mis-negocios.html">Editar mi negocio</a>
+  </section>
+
+  <section id="estado-limite-consumido" class="publicar-negocio__estado" aria-labelledby="titulo-limite-consumido" hidden>
+    <h2 id="titulo-limite-consumido">Ya publicaste un negocio con esta cuenta</h2>
+    <p>El negocio ya no está disponible para editar. Cada organizador puede registrar un solo negocio; contacta al administrador si necesitas ayuda.</p>
+    <a class="boton boton-secundario" href="organizador/mis-negocios.html">Volver a Mis negocios</a>
+  </section>
+
+  <section id="estado-edicion-no-disponible" class="publicar-negocio__estado" aria-labelledby="titulo-edicion-no-disponible" hidden>
+    <h2 id="titulo-edicion-no-disponible">No encontramos ese negocio</h2>
+    <p>No se pudo cargar una publicación tuya para editar.</p>
+    <a class="boton boton-secundario" href="organizador/mis-negocios.html">Volver a Mis negocios</a>
+  </section>
+
   <section id="estado-form" hidden>
     <form class="publicar-negocio__formulario" data-form-negocio novalidate>
       <section>
-        <h2>Información del negocio</h2>
+        <h2 data-titulo-seccion>Información del negocio</h2>
         <div class="publicar-negocio__fila">
           <div class="campo">
             <label class="campo__etiqueta" for="nombre">Nombre del negocio</label>
@@ -153,12 +169,13 @@
           <span class="campo__ayuda">JPG, PNG o WebP, hasta 5 MB. Los flyers se muestran completos, sin recortar.</span>
           <span class="campo__error" data-error="imagenPrincipal"></span>
           <img class="publicar-negocio__preview" data-imagen-principal-preview alt="Vista previa de la imagen del negocio" hidden>
+          <button class="boton boton-secundario boton-sm" type="button" data-quitar-imagen-principal hidden>Quitar imagen actual</button>
         </div>
       </section>
 
       <section>
-        <h2>Platos (opcional, hasta 5)</h2>
-        <p class="campo__ayuda">Puedes agregar hasta 5 platos con su foto y precio. Solo se mostrarán los platos completos.</p>
+        <h2>Menú de platos (opcional, hasta 5)</h2>
+        <p class="campo__ayuda">Puedes agregar, editar o quitar platos de tu negocio. Cada plato debe tener nombre, precio y foto.</p>
         <fieldset class="slot-plato" data-slot="1">
           <legend>Plato 1</legend>
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
@@ -167,7 +184,7 @@
           <div class="campo"><label for="plato-1-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-1-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-1-imagen">Foto</label><input class="campo__input" id="plato-1-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 1" hidden></div>
         </fieldset>
-        <fieldset class="slot-plato" data-slot="2">
+        <fieldset class="slot-plato" data-slot="2" hidden>
           <legend>Plato 2</legend>
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-2-nombre">Nombre</label><input class="campo__input" id="plato-2-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
@@ -175,7 +192,7 @@
           <div class="campo"><label for="plato-2-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-2-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-2-imagen">Foto</label><input class="campo__input" id="plato-2-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 2" hidden></div>
         </fieldset>
-        <fieldset class="slot-plato" data-slot="3">
+        <fieldset class="slot-plato" data-slot="3" hidden>
           <legend>Plato 3</legend>
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-3-nombre">Nombre</label><input class="campo__input" id="plato-3-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
@@ -183,7 +200,7 @@
           <div class="campo"><label for="plato-3-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-3-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-3-imagen">Foto</label><input class="campo__input" id="plato-3-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 3" hidden></div>
         </fieldset>
-        <fieldset class="slot-plato" data-slot="4">
+        <fieldset class="slot-plato" data-slot="4" hidden>
           <legend>Plato 4</legend>
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-4-nombre">Nombre</label><input class="campo__input" id="plato-4-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
@@ -191,7 +208,7 @@
           <div class="campo"><label for="plato-4-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-4-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-4-imagen">Foto</label><input class="campo__input" id="plato-4-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 4" hidden></div>
         </fieldset>
-        <fieldset class="slot-plato" data-slot="5">
+        <fieldset class="slot-plato" data-slot="5" hidden>
           <legend>Plato 5</legend>
           <button class="boton boton-secundario boton-sm slot-plato__quitar" type="button" data-limpiar-plato>Quitar</button>
           <div class="campo"><label for="plato-5-nombre">Nombre</label><input class="campo__input" id="plato-5-nombre" data-plato-nombre type="text" maxlength="100" placeholder="Ej: Empanadas de pipián"><span class="campo__error" data-plato-error="nombre"></span></div>
@@ -199,11 +216,15 @@
           <div class="campo"><label for="plato-5-descripcion">Descripción (opcional)</label><textarea class="campo__input" id="plato-5-descripcion" data-plato-descripcion maxlength="500" placeholder="Ingredientes, tamaño o acompañamientos"></textarea></div>
           <div class="campo"><label for="plato-5-imagen">Foto</label><input class="campo__input" id="plato-5-imagen" data-plato-imagen type="file" accept="image/jpeg,image/png,image/webp"><span class="campo__error" data-plato-error="imagen"></span><img data-plato-preview alt="Vista previa del plato 5" hidden></div>
         </fieldset>
+        <button class="boton boton-secundario boton-sm" type="button" data-agregar-plato>
+          Agregar otro plato
+        </button>
       </section>
 
       <p class="publicar-negocio__mensaje" data-mensaje role="alert" aria-live="polite"></p>
       <div class="publicar-negocio__acciones">
-        <button class="boton boton-primario" type="submit">Publicar negocio</button>
+        <a class="boton boton-secundario" href="organizador/mis-negocios.html" data-cancelar-edicion hidden>Cancelar</a>
+        <button class="boton boton-primario" type="submit" data-boton-publicar>Publicar negocio</button>
       </div>
     </form>
   </section>

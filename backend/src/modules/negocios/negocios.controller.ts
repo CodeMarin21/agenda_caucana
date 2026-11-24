@@ -1,8 +1,13 @@
 import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { CategoriaNegocio } from '@prisma/client';
-import { NegociosService, PlatoDTO } from './negocios.service';
+import {
+  ActualizarNegocioDTO,
+  NegociosService,
+  PlatoDTO,
+} from './negocios.service';
 import { FiltrosNegocios } from './negocios.repository';
+import { logger } from '../../config/logger';
 
 const service = new NegociosService();
 const MAX_Q_LENGTH = 100;
@@ -16,6 +21,8 @@ function responderError(res: Response, error: unknown): void {
   const mensaje = error instanceof Error ? error.message : 'Error interno del servidor';
   const status = mensaje.includes('no encontrado')
     ? 404
+    : mensaje.includes('Ya tienes un negocio')
+      ? 409
     : mensaje.includes('Ya calificaste')
       ? 429
       : mensaje.includes('No tienes permiso') ||
@@ -23,6 +30,16 @@ function responderError(res: Response, error: unknown): void {
         mensaje.includes('vetada')
         ? 403
         : 500;
+  if (status === 500) {
+    logger.error({
+      mensaje: 'Error interno en el módulo de negocios',
+      error: error instanceof Error
+        ? { nombre: error.name, mensaje: error.message, stack: error.stack }
+        : error,
+    });
+    res.status(500).json({ error: 'No se pudo completar la solicitud. Intenta de nuevo.' });
+    return;
+  }
   res.status(status).json({ error: mensaje });
 }
 
@@ -133,13 +150,36 @@ export const crearNegocio = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+export const actualizarNegocio = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = parsearId(req.params.id);
+    if (!id) {
+      res.status(400).json({ error: 'ID de negocio inválido' });
+      return;
+    }
+    if (!req.usuarioId) {
+      res.status(401).json({ error: 'No autenticado' });
+      return;
+    }
+
+    const negocio = await service.actualizar(
+      id,
+      req.body as ActualizarNegocioDTO,
+      req.usuarioId,
+    );
+    res.json({ mensaje: 'Negocio actualizado correctamente', negocio });
+  } catch (error) {
+    responderError(res, error);
+  }
+};
+
 export const misNegocios = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.usuarioId) {
       res.status(401).json({ error: 'No autenticado' });
       return;
     }
-    res.json({ negocios: await service.misNegocios(req.usuarioId) });
+    res.json(await service.misNegocios(req.usuarioId));
   } catch (error) {
     responderError(res, error);
   }

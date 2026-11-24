@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { EventosService } from './eventos.service';
 import { prisma } from '../../config/database';
-import { inferirEspecialidad } from '../organizadores/especialidad.util';
+import { inferirEspecialidadOrganizador } from '../organizadores/especialidad.util';
 
 const service = new EventosService();
 
@@ -14,12 +14,15 @@ async function resolverOrganizadorDeJWT(
 ){
   const organizador = await prisma.organizador.findUnique({
     where: { usuarioId },
-    include: { _count: { select: { eventos: true, negocios: true } } },
+    include: {
+      negocio: { select: { id: true } },
+      _count: { select: { eventos: true } },
+    },
   });
   if (!organizador) return null;
   return {
     ...organizador,
-    especialidad: inferirEspecialidad(organizador.especialidad, organizador._count, organizador),
+    especialidad: inferirEspecialidadOrganizador(organizador),
   };
 }
 

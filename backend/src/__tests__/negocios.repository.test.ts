@@ -2,14 +2,22 @@ const mockQueryRaw = jest.fn();
 const mockCount = jest.fn();
 const mockFindMany = jest.fn();
 const mockGroupBy = jest.fn();
+const mockTransaction = jest.fn();
+const mockNegocioFindUnique = jest.fn();
+const mockNegocioDelete = jest.fn();
+const mockOrganizadorUpdate = jest.fn();
+const mockNotificacionCreate = jest.fn();
 
 jest.mock('../config/database', () => ({
   prisma: {
     $queryRaw: (...args: unknown[]) => mockQueryRaw(...args),
+    $transaction: (...args: unknown[]) => mockTransaction(...args),
     negocio: {
       count: (...args: unknown[]) => mockCount(...args),
       findMany: (...args: unknown[]) => mockFindMany(...args),
     },
+    organizador: { update: (...args: unknown[]) => mockOrganizadorUpdate(...args) },
+    notificacion: { create: (...args: unknown[]) => mockNotificacionCreate(...args) },
     calificacionNegocio: {
       groupBy: (...args: unknown[]) => mockGroupBy(...args),
     },
@@ -26,6 +34,18 @@ describe('NegociosRepository search and price filters', () => {
     mockCount.mockResolvedValue(0);
     mockFindMany.mockResolvedValue([]);
     mockGroupBy.mockResolvedValue([]);
+    mockNegocioFindUnique.mockResolvedValue(null);
+    mockNegocioDelete.mockResolvedValue({ id: 25 });
+    mockOrganizadorUpdate.mockResolvedValue({});
+    mockNotificacionCreate.mockResolvedValue({});
+    mockTransaction.mockImplementation((operation) => operation({
+      negocio: {
+        findUnique: mockNegocioFindUnique,
+        delete: mockNegocioDelete,
+      },
+      organizador: { update: mockOrganizadorUpdate },
+      notificacion: { create: mockNotificacionCreate },
+    }));
   });
 
   it('uses significant words when the full name query has a typo', async () => {
@@ -55,5 +75,36 @@ describe('NegociosRepository search and price filters', () => {
       gte: 10000,
       lte: 30000,
     });
+  });
+
+  it('releases the organizer business slot transactionally when the owner deletes it', async () => {
+    mockNegocioFindUnique.mockResolvedValue({
+      id: 25,
+      nombre: 'Negocio de prueba',
+      organizadorId: 8,
+      organizador: { id: 8, usuarioId: 12 },
+    });
+
+    await repository.delete(25, undefined, true);
+
+    expect(mockNegocioDelete).toHaveBeenCalledWith({ where: { id: 25 } });
+    expect(mockOrganizadorUpdate).toHaveBeenCalledWith({
+      where: { id: 8 },
+      data: { negocioCreado: false },
+    });
+  });
+
+  it('keeps the organizer slot consumed when an administrator deletes the business', async () => {
+    mockNegocioFindUnique.mockResolvedValue({
+      id: 25,
+      nombre: 'Negocio de prueba',
+      organizadorId: 8,
+      organizador: { id: 8, usuarioId: 12 },
+    });
+
+    await repository.delete(25, 'Motivo administrativo', false);
+
+    expect(mockOrganizadorUpdate).not.toHaveBeenCalled();
+    expect(mockNotificacionCreate).toHaveBeenCalled();
   });
 });

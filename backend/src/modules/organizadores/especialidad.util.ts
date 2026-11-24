@@ -5,6 +5,31 @@ type ContextoEspecialidad = {
   descripcion?: string | null;
 };
 
+type OrganizadorConPublicaciones = ContextoEspecialidad & {
+  especialidad: string;
+  _count: { eventos: number };
+  negocio?: unknown;
+};
+
+export function contarPublicacionesOrganizador(
+  organizador: Pick<OrganizadorConPublicaciones, '_count' | 'negocio'>,
+) {
+  return {
+    eventos: organizador._count.eventos,
+    negocios: organizador.negocio ? 1 : 0,
+  };
+}
+
+export function inferirEspecialidadOrganizador(
+  organizador: OrganizadorConPublicaciones,
+): EspecialidadEfectiva {
+  return inferirEspecialidad(
+    organizador.especialidad,
+    contarPublicacionesOrganizador(organizador),
+    organizador,
+  );
+}
+
 export function inferirEspecialidad(
   especialidad: string,
   publicaciones: { eventos: number; negocios: number },
