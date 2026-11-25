@@ -67,53 +67,92 @@
 <main class="contenedor">
 
   <!-- BUSCADOR -->
-  <section class="seccion-busqueda" style="text-align:center;">
+  <section class="seccion-busqueda">
     <form class="buscador" data-form-busqueda role="search">
       <label for="buscar" class="visualmente-oculto" data-i18n="busqueda.label">Buscar eventos</label>
-      <input id="buscar" type="text" data-input-busqueda placeholder="Buscar eventos, lugares o artistas..." data-i18n="busqueda.placeholder" data-i18n-placeholder>
+      <input id="buscar" type="search" data-input-busqueda placeholder="Buscar eventos, lugares o artistas..." data-i18n="busqueda.placeholder" data-i18n-placeholder autocomplete="off" aria-controls="eventos-lista" aria-describedby="ayuda-busqueda">
       <button type="submit" class="boton boton-primario" data-i18n="busqueda.boton">Buscar</button>
     </form>
+    <p class="busqueda-ayuda" id="ayuda-busqueda" data-i18n="home.ayudaBusqueda">Los resultados se actualizan automáticamente al escribir o cambiar un filtro.</p>
   </section>
 
-  <!-- FILTROS -->
-  <section class="filtros" data-pildoras id="categorias" role="group" aria-label="Filtrar por categoría" data-i18n-aria-label="filtros.filtrarCategoria">
-    <button class="pildora" type="button" data-categoria="" aria-pressed="true" data-i18n="filtros.todos">Todos</button>
-    <button class="pildora" type="button" data-categoria="musica" aria-pressed="false">Música</button>
-    <button class="pildora" type="button" data-categoria="arte" aria-pressed="false">Arte</button>
-    <button class="pildora" type="button" data-categoria="gastronomia" aria-pressed="false">Gastronomía</button>
-    <button class="pildora" type="button" data-categoria="teatro" aria-pressed="false">Teatro</button>
-    <button class="pildora" type="button" data-categoria="cine" aria-pressed="false">Cine</button>
-    <button class="pildora" type="button" data-categoria="talleres" aria-pressed="false">Talleres</button>
-    <button class="pildora" type="button" data-categoria="fiestas" aria-pressed="false">Fiestas</button>
-    <button class="pildora" type="button" data-categoria="historia" aria-pressed="false">Historia</button>
-    <button class="pildora" type="button" data-categoria="naturaleza" aria-pressed="false">Naturaleza</button>
-  </section>
-
-  <div class="barra-resultados">
-    <span data-contador-resultados>Cargando publicaciones...</span>
-    <div class="barra-resultados__orden barra-resultados__filtros">
-      <label><span data-i18n="explorar.filtros.desde">Desde</span> <input type="date" data-evento-desde></label>
-      <label><span data-i18n="explorar.filtros.hasta">Hasta</span> <input type="date" data-evento-hasta></label>
-      <label><span data-i18n="filtros.precio">Precio</span>
-        <select data-evento-precio>
-          <option value="" data-i18n="filtros.todos">Todos</option>
-          <option value="0" data-i18n="explorar.filtros.gratis">Gratis</option>
-          <option value="10000" data-i18n="explorar.filtros.hasta10">Hasta $10.000</option>
-          <option value="30000" data-i18n="explorar.filtros.hasta30">Hasta $30.000</option>
-        </select>
-      </label>
-      <label><span data-i18n="filtros.ordenar">Orden</span>
-        <select data-evento-orden>
-          <option value="fecha" data-i18n="filtros.proximos">Próximos</option>
-          <option value="recientes" data-i18n="filtros.masRecientes">Más recientes</option>
-        </select>
-      </label>
-      <button type="button" class="boton boton-secundario boton-sm" data-limpiar-filtros-eventos data-i18n="filtros.limpiar">Limpiar</button>
+  <section class="panel-filtros" aria-labelledby="titulo-filtros-eventos">
+    <div class="panel-filtros__encabezado">
+      <div>
+        <h2 id="titulo-filtros-eventos" data-i18n="filtros.titulo">Refinar resultados</h2>
+        <p data-i18n="home.ayudaFiltros">Combina categoría, fechas y precio para encontrar un plan.</p>
+      </div>
+      <button type="button" class="boton boton-secundario boton-sm" data-limpiar-filtros-eventos data-i18n="filtros.limpiar" disabled>Limpiar filtros</button>
     </div>
-  </div>
+
+    <div class="filtros-categoria">
+      <h3 data-i18n="filtros.categoria">Categoría</h3>
+      <div class="filtros" data-pildoras id="categorias" role="group" aria-label="Filtrar por categoría" data-i18n-aria-label="filtros.filtrarCategoria">
+        <button class="pildora" type="button" data-categoria="" aria-pressed="true" data-i18n="filtros.todos">Todos</button>
+        <button class="pildora" type="button" data-categoria="musica" aria-pressed="false">Música</button>
+        <button class="pildora" type="button" data-categoria="arte" aria-pressed="false">Arte</button>
+        <button class="pildora" type="button" data-categoria="gastronomia" aria-pressed="false">Gastronomía</button>
+        <button class="pildora" type="button" data-categoria="teatro" aria-pressed="false">Teatro</button>
+        <button class="pildora" type="button" data-categoria="cine" aria-pressed="false">Cine</button>
+        <button class="pildora" type="button" data-categoria="talleres" aria-pressed="false">Talleres</button>
+        <button class="pildora" type="button" data-categoria="fiestas" aria-pressed="false">Fiestas</button>
+        <button class="pildora" type="button" data-categoria="historia" aria-pressed="false">Historia</button>
+        <button class="pildora" type="button" data-categoria="naturaleza" aria-pressed="false">Naturaleza</button>
+      </div>
+    </div>
+
+    <p class="filtros-error" data-error-filtros role="alert" hidden></p>
+    <div class="barra-resultados">
+      <span data-contador-resultados aria-live="polite" aria-atomic="true">Cargando publicaciones...</span>
+      <div class="barra-resultados__filtros">
+        <label>
+          <span data-i18n="explorar.filtros.desde">Desde</span>
+          <input type="date" data-evento-desde>
+        </label>
+        <label>
+          <span data-i18n="explorar.filtros.hasta">Hasta</span>
+          <input type="date" data-evento-hasta>
+        </label>
+        <div class="control-precio">
+          <label>
+            <span data-i18n="filtros.precio">Precio</span>
+            <select data-evento-precio-modo>
+              <option value="todos" data-i18n="explorar.filtros.cualquierPrecio">Cualquier precio</option>
+              <option value="gratis" data-i18n="explorar.filtros.gratis">Gratis</option>
+              <option value="exacto" data-i18n="explorar.filtros.exacto">Precio exacto</option>
+              <option value="rango" data-i18n="explorar.filtros.rango">Rango</option>
+            </select>
+          </label>
+          <label data-evento-precio-exacto-contenedor hidden>
+            <span data-i18n="explorar.filtros.valorExacto">Valor exacto (COP)</span>
+            <input type="number" min="0" step="any" inputmode="decimal" data-evento-precio-exacto>
+          </label>
+          <div class="control-precio__rango" data-evento-precio-rango hidden>
+            <label>
+              <span data-i18n="explorar.filtros.minimo">Mínimo (COP)</span>
+              <input type="number" min="0" step="any" inputmode="decimal" data-evento-precio-min>
+            </label>
+            <label>
+              <span data-i18n="explorar.filtros.maximo">Máximo (COP)</span>
+              <input type="number" min="0" step="any" inputmode="decimal" data-evento-precio-max>
+            </label>
+          </div>
+        </div>
+        <label>
+          <span data-i18n="filtros.ordenar">Orden</span>
+          <select data-evento-orden>
+            <option value="fecha" data-i18n="filtros.proximos">Próximos</option>
+            <option value="recientes" data-i18n="filtros.masRecientes">Más recientes</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <p class="filtros-error" data-error-precio-eventos role="alert" hidden></p>
+    <p class="filtros-resumen" data-resumen-filtros aria-live="polite"></p>
+  </section>
 
   <!-- GRID DE EVENTOS -->
-  <section class="grid-eventos" data-grid-eventos aria-live="polite">
+  <section class="grid-eventos" id="eventos-lista" data-grid-eventos aria-live="polite" aria-busy="true">
     <p data-i18n="home.cargandoEventos" style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">Cargando publicaciones...</p>
   </section>
 

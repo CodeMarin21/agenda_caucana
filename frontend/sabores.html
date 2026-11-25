@@ -137,15 +137,33 @@
         <button class="pildora pildora-sabor" type="button" data-orden="destacados" aria-pressed="false" data-i18n="saboresPagina.destacados">Destacados</button>
         <button class="pildora pildora-sabor" type="button" data-orden="mejor-calificados" aria-pressed="false" data-i18n="saboresPagina.mejorCalificados">Mejor calificados</button>
       </div>
-      <div class="grupo-filtros-sabores" data-filtro-precio>
+      <div class="grupo-filtros-sabores grupo-filtros-sabores__precio" data-filtro-precio>
         <span class="grupo-filtros-sabores__etiqueta" data-i18n="saboresPagina.precio">Precio:</span>
-        <button class="pildora pildora-sabor" type="button" data-precio="todos" aria-pressed="true" data-i18n="saboresPagina.todos">Todos</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="hasta-10000" aria-pressed="false" data-i18n="saboresPagina.hasta10">Hasta $10.000</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="10000-30000" aria-pressed="false" data-i18n="saboresPagina.de10a30">$10.000–$30.000</button>
-        <button class="pildora pildora-sabor" type="button" data-precio="mas-30000" aria-pressed="false" data-i18n="saboresPagina.mas30">Más de $30.000</button>
+        <label class="visualmente-oculto" for="precio-modo-negocio" data-i18n="saboresPagina.modoPrecioLabel">Tipo de filtro de precio</label>
+        <select id="precio-modo-negocio" class="control-precio__select" data-modo-precio-negocio>
+          <option value="todos" data-i18n="explorar.filtros.cualquierPrecio">Cualquier precio</option>
+          <option value="gratis" data-i18n="explorar.filtros.gratis">Gratis</option>
+          <option value="exacto" data-i18n="explorar.filtros.exacto">Precio exacto</option>
+          <option value="rango" data-i18n="explorar.filtros.rango">Rango</option>
+        </select>
+        <label data-precio-exacto-contenedor hidden>
+          <span data-i18n="explorar.filtros.valorExacto">Valor exacto (COP)</span>
+          <input class="control-precio__input" type="number" min="0" step="1" inputmode="numeric" data-precio-exacto-negocio>
+        </label>
+        <div class="control-precio__rango" data-precio-rango-negocio hidden>
+          <label>
+            <span data-i18n="explorar.filtros.minimo">Mínimo (COP)</span>
+            <input class="control-precio__input" type="number" min="0" step="1" inputmode="numeric" data-precio-min-negocio>
+          </label>
+          <label>
+            <span data-i18n="explorar.filtros.maximo">Máximo (COP)</span>
+            <input class="control-precio__input" type="number" min="0" step="1" inputmode="numeric" data-precio-max-negocio>
+          </label>
+        </div>
       </div>
     </section>
 
+    <p class="filtros-error" data-error-precio-negocio role="alert" hidden></p>
     <p class="barra-resultados" data-contador-negocios aria-live="polite">Cargando negocios...</p>
     <section class="grid-negocios" data-grid-negocios aria-live="polite" aria-busy="true"></section>
     <div class="acciones-cargar-negocios">

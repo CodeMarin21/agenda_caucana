@@ -101,21 +101,28 @@
       }
       const negocioEncontrado = texto.match(/negocio\.html\?slug=([a-z0-9-]+)/i);
       const eventosEncontrados = [...texto.matchAll(/(?:evento\.html\?slug=|\/eventos\/)([a-z0-9-]+)/gi)];
-      contextoEventos = Array.isArray(respuesta.contextoEventos)
-        ? respuesta.contextoEventos
-        : [];
-      if (negocioEncontrado) {
+      if (respuesta.contextoDominio === 'negocios') {
+        ultimoNegocioSlug = negocioEncontrado?.[1] || null;
+        ultimoEventoSlug = null;
+        contextoEventos = [];
+      } else if (respuesta.contextoDominio === 'eventos') {
+        ultimoNegocioSlug = null;
+        ultimoEventoSlug = eventosEncontrados.length === 1
+          ? eventosEncontrados[0][1]
+          : null;
+        contextoEventos = Array.isArray(respuesta.contextoEventos)
+          ? respuesta.contextoEventos
+          : [];
+      } else if (negocioEncontrado) {
         ultimoNegocioSlug = negocioEncontrado[1];
         ultimoEventoSlug = null;
-      } else if (eventosEncontrados.length === 1) {
-        ultimoEventoSlug = eventosEncontrados[0][1];
+        contextoEventos = [];
+      } else if (eventosEncontrados.length > 0) {
+        ultimoEventoSlug = eventosEncontrados.length === 1 ? eventosEncontrados[0][1] : null;
         ultimoNegocioSlug = null;
-      } else if (eventosEncontrados.length > 1) {
-        ultimoEventoSlug = null;
-        ultimoNegocioSlug = null;
-      } else if (Array.isArray(respuesta.contextoEventos)) {
-        ultimoEventoSlug = null;
-        ultimoNegocioSlug = null;
+        contextoEventos = Array.isArray(respuesta.contextoEventos)
+          ? respuesta.contextoEventos
+          : [];
       }
       cargando.remove();
       agregarMensaje(texto, 'ia');

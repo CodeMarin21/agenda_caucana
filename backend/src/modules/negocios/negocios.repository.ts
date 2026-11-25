@@ -84,9 +84,52 @@ export class NegociosRepository {
     return parciales.map((fila) => fila.id);
   }
 
+  private async obtenerIdsPorPrecioDePlatos(
+    precioMin?: number,
+    precioMax?: number,
+  ): Promise<number[] | null> {
+    if (precioMin === undefined && precioMax === undefined) return null;
+
+    const condiciones: Prisma.Sql[] = [];
+    if (precioMin !== undefined) {
+      condiciones.push(Prisma.sql`CASE
+        WHEN (item.plato->>'precio') ~ '^[0-9]+([.][0-9]+)?$'
+        THEN (item.plato->>'precio')::numeric
+        ELSE NULL
+      END >= ${precioMin}`);
+    }
+    if (precioMax !== undefined) {
+      condiciones.push(Prisma.sql`CASE
+        WHEN (item.plato->>'precio') ~ '^[0-9]+([.][0-9]+)?$'
+        THEN (item.plato->>'precio')::numeric
+        ELSE NULL
+      END <= ${precioMax}`);
+    }
+
+    const filas = await prisma.$queryRaw<Array<{ id: number }>>`
+      SELECT negocio."id"
+      FROM "Negocio" AS negocio
+      WHERE jsonb_typeof(negocio."platos") = 'array'
+        AND EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(
+            CASE
+              WHEN jsonb_typeof(negocio."platos") = 'array' THEN negocio."platos"
+              ELSE '[]'::jsonb
+            END
+          ) AS item(plato)
+          WHERE jsonb_typeof(item.plato) = 'object'
+            AND coalesce(item.plato->>'precio', '') ~ '^[0-9]+([.][0-9]+)?$'
+            AND ${Prisma.join(condiciones, ' AND ')}
+        )
+    `;
+    return filas.map((fila) => fila.id);
+  }
+
   private construirWhere(
     filtros: Partial<FiltrosNegocios> = {},
     idsBusqueda: number[] | null = null,
+    idsPlatosPrecio: number[] | null = null,
   ): Prisma.NegocioWhereInput {
     const where: Prisma.NegocioWhereInput = {
       estadoPublicacion: EstadoNegocio.APROBADO,
@@ -105,15 +148,21 @@ export class NegociosRepository {
       ],
       ...(filtros.categoria ? { categoria: filtros.categoria } : {}),
       ...(filtros.ciudadId ? { ciudadId: filtros.ciudadId } : {}),
-      ...(filtros.precioMin !== undefined || filtros.precioMax !== undefined
-        ? {
-          precioPromedio: {
-            ...(filtros.precioMin !== undefined ? { gte: filtros.precioMin } : {}),
-            ...(filtros.precioMax !== undefined ? { lte: filtros.precioMax } : {}),
-          },
-        }
-        : {}),
     };
+
+    if (filtros.precioMin !== undefined || filtros.precioMax !== undefined) {
+      where.AND = [{
+        OR: [
+          {
+            precioPromedio: {
+              ...(filtros.precioMin !== undefined ? { gte: filtros.precioMin } : {}),
+              ...(filtros.precioMax !== undefined ? { lte: filtros.precioMax } : {}),
+            },
+          },
+          { id: { in: idsPlatosPrecio ?? [] } },
+        ],
+      }];
+    }
 
     if (idsBusqueda) {
       where.id = { in: idsBusqueda };
@@ -123,8 +172,11 @@ export class NegociosRepository {
   }
 
   async findAll(filtros: FiltrosNegocios) {
-    const idsBusqueda = await this.obtenerIdsPorBusqueda(filtros.q);
-    const where = this.construirWhere(filtros, idsBusqueda);
+    const [idsBusqueda, idsPlatosPrecio] = await Promise.all([
+      this.obtenerIdsPorBusqueda(filtros.q),
+      this.obtenerIdsPorPrecioDePlatos(filtros.precioMin, filtros.precioMax),
+    ]);
+    const where = this.construirWhere(filtros, idsBusqueda, idsPlatosPrecio);
     const skip = (filtros.pagina - 1) * filtros.limite;
     const total = await prisma.negocio.count({ where });
 

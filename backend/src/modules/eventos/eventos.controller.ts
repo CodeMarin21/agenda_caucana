@@ -33,7 +33,12 @@ export const listarEventos = async (req: Request, res: Response): Promise<void> 
     const categoriaSlug = typeof query.categoriaSlug === 'string' ? query.categoriaSlug : undefined;
     const desde = typeof query.desde === 'string' ? query.desde : undefined;
     const hasta = typeof query.hasta === 'string' ? query.hasta : undefined;
-    const precioMax = typeof query.precioMax === 'string' ? query.precioMax : undefined;
+    const precioMin = typeof query.precioMin === 'number' || typeof query.precioMin === 'string'
+      ? Number(query.precioMin)
+      : undefined;
+    const precioMax = typeof query.precioMax === 'number' || typeof query.precioMax === 'string'
+      ? Number(query.precioMax)
+      : undefined;
     const pagina = typeof query.pagina === 'string' ? query.pagina : undefined;
     const limite = typeof query.limite === 'string' ? query.limite : undefined;
     const orden = query.orden === 'recientes' ? 'recientes' : 'fecha';
@@ -43,7 +48,8 @@ export const listarEventos = async (req: Request, res: Response): Promise<void> 
       categoriaSlug,
       desde,
       hasta,
-      precioMax: precioMax ? parseFloat(precioMax) : undefined,
+      precioMin,
+      precioMax,
       q: q?.trim().slice(0, 100) || undefined,
       pagina:    pagina    ? parseInt(pagina)       : 1,
       limite:    limite    ? parseInt(limite)        : 12,

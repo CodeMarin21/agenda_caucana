@@ -1,12 +1,22 @@
 const mockFindMany = jest.fn();
 const mockFindFirst = jest.fn();
 const mockQueryRaw = jest.fn();
+const mockNegocioFindMany = jest.fn();
+const mockNegocioFindFirst = jest.fn();
+const mockCalificacionGroupBy = jest.fn();
 
 jest.mock('../config/database', () => ({
   prisma: {
     evento: {
       findMany: mockFindMany,
       findFirst: mockFindFirst,
+    },
+    negocio: {
+      findMany: mockNegocioFindMany,
+      findFirst: mockNegocioFindFirst,
+    },
+    calificacionNegocio: {
+      groupBy: mockCalificacionGroupBy,
     },
     $queryRaw: (...args: unknown[]) => mockQueryRaw(...args),
   },
@@ -22,6 +32,9 @@ describe('AiRepository event visibility and date filters', () => {
     mockFindMany.mockResolvedValue([]);
     mockFindFirst.mockResolvedValue(null);
     mockQueryRaw.mockResolvedValue([]);
+    mockNegocioFindMany.mockResolvedValue([]);
+    mockNegocioFindFirst.mockResolvedValue(null);
+    mockCalificacionGroupBy.mockResolvedValue([]);
   });
 
   it('finds events overlapping the requested local-day interval and keeps only public publishers', async () => {
@@ -81,6 +94,63 @@ describe('AiRepository event visibility and date filters', () => {
     ]));
   });
 
+  it('filters upcoming venue searches by zero admission price', async () => {
+    await repository.findEventosPorTerminos([], true);
+
+    const consulta = mockFindMany.mock.calls[0][0];
+    expect(consulta.where.AND).toEqual(expect.arrayContaining([
+      { precioReferencial: 0 },
+      expect.objectContaining({ OR: expect.arrayContaining([
+        { fechaFin: { gte: expect.any(Date) } },
+      ]) }),
+    ]));
+  });
+
+  it('orders recent-event searches by publication creation time', async () => {
+    await repository.findEventosRecientes();
+
+    expect(mockFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      orderBy: { creadoEn: 'desc' },
+      where: expect.objectContaining({ AND: expect.any(Array) }),
+    }));
+  });
+
+  it('loads published-business review averages and review counts in one aggregate query', async () => {
+    mockNegocioFindMany.mockResolvedValue([{
+      id: 8,
+      slug: 'cafe-popayan',
+      nombre: 'Café Popayán',
+      descripcion: 'Café tradicional',
+      direccion: 'Centro',
+      telefono: null,
+      whatsapp: null,
+      horarioAtencion: null,
+      categoria: 'CAFETERIA',
+      precioPromedio: 8000,
+      platos: [],
+      ciudad: { nombre: 'Popayán' },
+      creadoEn: new Date('2026-11-20T12:00:00.000Z'),
+    }]);
+    mockCalificacionGroupBy.mockResolvedValue([{
+      negocioId: 8,
+      _avg: { estrellas: 4.7 },
+      _count: { _all: 14 },
+    }]);
+
+    const negocios = await repository.findNegociosPublicados(true);
+
+    expect(negocios[0]).toMatchObject({
+      promedioEstrellas: 4.7,
+      totalCalificaciones: 14,
+    });
+    expect(mockCalificacionGroupBy).toHaveBeenCalledWith(expect.objectContaining({
+      by: ['negocioId'],
+      where: { negocioId: { in: [8] } },
+      _avg: { estrellas: true },
+      _count: { _all: true },
+    }));
+  });
+
   it('finds published events when search terms omit accents', async () => {
     mockQueryRaw.mockResolvedValue([{ id: 15 }]);
 
@@ -94,10 +164,12 @@ describe('AiRepository event visibility and date filters', () => {
     expect(condicion?.strings.join('')).toContain('unaccent(evento."titulo")');
     expect(condicion?.strings.join('')).toContain('unaccent(categoria."nombre")');
     expect(mockFindMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        estadoPublicacion: 'APROBADO',
-        id: { in: [15] },
-      }),
+      where: { AND: expect.arrayContaining([
+        expect.objectContaining({
+          estadoPublicacion: 'APROBADO',
+        }),
+        { id: { in: [15] } },
+      ]) },
     }));
   });
 

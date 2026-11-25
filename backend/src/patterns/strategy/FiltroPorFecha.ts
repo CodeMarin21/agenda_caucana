@@ -6,10 +6,7 @@ export class FiltroPorFecha implements IEstrategiaFiltro {
 
   aplicar(): Prisma.EventoWhereInput {
     return {
-      fechaInicio: {
-        gte: this.desde,
-        lte: this.hasta,
-      },
+      fechaInicio: { gte: this.desde, lte: this.hasta },
     };
   }
 }

@@ -1,0 +1,86 @@
+PROMPT PARA CLAUDE — DIAGRAMAS DE AGENDA CAUCANA EN DRAW.IO
+
+Actúa como arquitecto de software y especialista en UML y diagrams.net (draw.io). Analiza el estado ACTUAL del repositorio Agenda Caucana y crea un único archivo editable de draw.io que represente fielmente el sistema.
+
+ARCHIVO DE SALIDA
+- Crea en la raíz del repositorio un solo archivo llamado `agenda_caucana.drawio`.
+- El archivo debe abrirse directamente en diagrams.net/draw.io.
+- Dentro del archivo crea exactamente dos páginas (pestañas), con estos nombres:
+  1. `Arquitectura del sistema`
+  2. `Diagrama de clases`
+- No generes páginas adicionales, diagramas de secuencia, diagramas ER separados, imágenes, PDF, Mermaid ni PlantUML.
+- No modifiques código, base de datos ni documentación existente. El único archivo nuevo debe ser `agenda_caucana.drawio`.
+- Si no tienes acceso al repositorio, no inventes la arquitectura: solicita el código fuente o un ZIP antes de crear los diagramas.
+
+ANÁLISIS DEL REPOSITORIO
+Antes de dibujar, inspecciona el código actual, incluyendo cambios locales sin commit. Usa como fuentes principales:
+- `backend/prisma/schema.prisma` para entidades, enums y relaciones persistentes.
+- `backend/src/app.ts` y `backend/src/modules/**` para API, controladores, servicios, repositorios e integraciones.
+- `backend/src/patterns/**`, `backend/src/cache/**` y `backend/src/jobs/**` para patrones y tareas transversales.
+- `frontend/README.md`, `frontend/js/config.js`, `frontend/js/api.js`, páginas HTML y scripts del frontend.
+- Los manifiestos de dependencias para identificar tecnologías reales.
+
+Si una documentación antigua contradice el código actual, representa el código actual. No infieras servicios de despliegue, colas, microservicios, tablas ni funcionalidades que no estén implementadas. No incluyas credenciales, secretos, direcciones IP privadas ni datos personales.
+
+CONTEXTO ACTUAL QUE DEBES VERIFICAR EN EL CÓDIGO
+- Frontend estático con HTML, CSS y JavaScript vanilla; contiene experiencias públicas, paneles de administración y organizadores, catálogo de Sabores, fichas de negocio/evento y chat.
+- El cliente `frontend/js/api.js` consume la API configurada en `frontend/js/config.js`.
+- Backend Node.js/TypeScript con Express, API REST, controladores, servicios, repositorios y middleware.
+- Persistencia PostgreSQL mediante Prisma.
+- Módulos de API existentes incluyen autenticación, eventos, chat/IA, categorías, ciudades/lugares, organizadores, notificaciones, suscripciones, uploads y negocios.
+- La IA consulta el catálogo publicado y puede usar Gemini; las recomendaciones de comidas consideran las calificaciones agregadas de los negocios. La agenda no tiene calificaciones/reseñas de eventos.
+- Las cartas de los negocios se guardan en `Negocio.platos` como JSON; no asumas una entidad/tabla `Plato`.
+- Los uploads usan Cloudinary cuando está configurado; el almacenamiento local solo está permitido en desarrollo.
+- El envío de correos usa Nodemailer con SMTP configurado o Ethereal en modo de pruebas.
+- El caché actual es en memoria; no lo representes como Redis.
+- La aprobación de eventos usa `EventoAprobadoSubject` y `NotificacionSuscriptoresObserver`; verifica el flujo real en servicios.
+- Hay tareas programadas de limpieza de tokens y eventos finalizados.
+- Hay interfaces/implementaciones de Strategy y Observer. El repositorio contiene una interfaz `IRepository`; verifica implementaciones concretas antes de dibujar relaciones de realización.
+
+PÁGINA 1 — ARQUITECTURA DEL SISTEMA
+Dibuja una vista de componentes/contenedores clara, no un diagrama de despliegue inventado. Usa límites visuales para distinguir:
+1. Actores: visitante/usuario, organizador y administrador.
+2. Frontend web: páginas públicas, Sabores, panel admin y panel organizador; HTML/CSS/Vanilla JS; cliente `api.js`; chat.
+3. API backend: Express/TypeScript y sus middleware reales (seguridad HTTP, CORS, limitación de peticiones, validación, i18n y manejo de errores).
+4. Módulos funcionales: Auth, Eventos, Negocios, Organizadores, Categorías/Ciudades/Lugares, Chat IA, Uploads, Suscripciones y Notificaciones. Agrupa módulos si mejora la legibilidad.
+5. Acceso a datos: servicios/repositorios → Prisma → PostgreSQL.
+6. Integraciones externas/condicionales confirmadas: Gemini, Cloudinary o almacenamiento local de desarrollo, correo SMTP/Ethereal y caché en memoria.
+7. Observer de aprobación de eventos y tareas programadas, mostrando qué componentes reales los activan/consumen.
+
+Etiqueta las flechas con el protocolo o responsabilidad cuando aplique (por ejemplo, HTTPS/JSON REST, JWT, Prisma, SMTP). Muestra el navegador como cliente que llama a la API; no sugieras que el frontend está servido por Express si el código no lo confirma. Distingue las integraciones externas de los componentes internos y señala con una nota breve las dependencias condicionales (Cloudinary/local, SMTP/Ethereal).
+
+PÁGINA 2 — DIAGRAMA DE CLASES
+Construye un UML de clases legible, organizado por paquetes o capas. Incluye:
+- Las entidades principales definidas en Prisma y sus atributos relevantes (no hace falta copiar todos los campos).
+- Relaciones, cardinalidades, opcionalidad y composición/cascada solo cuando el esquema las sustente.
+- Enums importantes para estados, roles, especialidad del organizador, categorías de negocio y notificaciones.
+- Clases centrales reales de aplicación (controlador/servicio/repositorio) para los flujos principales y las interfaces/patrones realmente usados.
+- Para la IA, muestra las clases reales de servicio/repositorio/cliente de Gemini y los tipos de solicitud/respuesta solo si existen en el código.
+
+Relaciones del dominio que debes comprobar y representar correctamente:
+- `Usuario` — `Organizador` es uno a uno (el organizador requiere un usuario).
+- `Organizador` puede relacionarse con muchos `Evento` y con cero o un `Negocio`; revisa las claves únicas y opcionales.
+- `Evento` pertenece a `Ciudad`, `Categoria` y `Lugar`; su organizador puede ser nulo.
+- `Lugar` pertenece a `Ciudad`; `Negocio` pertenece a `Ciudad`.
+- `CalificacionNegocio` pertenece a `Negocio`; sus estrellas/comentario califican al negocio, no a cada plato.
+- `Suscripcion` enlaza `Usuario` y `Categoria`.
+- `RefreshToken`, `PasswordResetToken` y `Notificacion` se relacionan con `Usuario`.
+- `Categoria` es la categoría de eventos; `Negocio.categoria` es el enum `CategoriaNegocio`, no una relación a `Categoria`.
+- `Negocio.platos` es JSON y no una clase/tabla separada.
+- `Evento` no tiene relación de reseñas ni estrellas en el esquema actual.
+
+No dupliques todas las clases de infraestructura si vuelve ilegible el diagrama. Prioriza las entidades de negocio y las clases que explican los flujos principales. Separa visualmente entidades Prisma y clases de aplicación; etiqueta los estereotipos (`<<model>>`, `<<service>>`, `<<repository>>`, `<<controller>>`, `<<interface>>`) cuando ayuden. Verifica los nombres de clases y métodos directamente en el código.
+
+DISEÑO Y CALIDAD
+- Todo el texto y nombres de las páginas en español.
+- Diseño limpio, con buena jerarquía, agrupaciones, alineación y espacio; evita cruces de conectores.
+- Usa conectores UML adecuados: asociaciones con multiplicidades para el dominio, dependencia para llamadas entre capas, realización para interfaces implementadas y flechas etiquetadas para integración.
+- Mantén las dos páginas legibles al abrirlas en draw.io al 100%; divide el contenido en paquetes dentro de la misma página en lugar de crear más páginas.
+- Añade una pequeña leyenda solo si es necesaria para interpretar colores/estereotipos.
+- Conserva los nombres técnicos reales de clases, módulos, tablas y endpoints; no traduzcas identificadores del código.
+
+VALIDACIÓN Y ENTREGA
+- Genera XML `.drawio` válido (`mxfile`) con exactamente dos elementos `diagram`, uno por cada página indicada.
+- Verifica que el XML esté bien formado, que no existan referencias a celdas inexistentes y que ambos diagramas tengan contenido visible y conectores válidos.
+- Comprueba que las cardinalidades y relaciones coincidan con `schema.prisma`, y que ninguna integración, entidad o capacidad sea inventada.
+- No pegues el XML completo en la respuesta si pudiste crear el archivo. Entrega un enlace/ruta a `agenda_caucana.drawio` y un resumen de una o dos frases confirmando que contiene solo las dos páginas solicitadas.

@@ -18,6 +18,7 @@ export interface ChatResponse {
   modelo?: string;
   eventoId?: number;
   contextoEventos?: string[];
+  contextoDominio?: 'eventos' | 'negocios';
 }
 
 export interface EventoContexto {
@@ -34,6 +35,8 @@ export interface EventoContexto {
   categoria: { nombre: string };
   lugar: { nombre: string; direccion: string };
   ciudad: { nombre: string };
+  destacado?: boolean;
+  creadoEn?: Date;
 }
 
 export interface NegocioContexto {
@@ -49,6 +52,9 @@ export interface NegocioContexto {
   precioPromedio: number | null;
   platos: import('@prisma/client').Prisma.JsonValue;
   ciudad: { nombre: string };
+  promedioEstrellas?: number | null;
+  totalCalificaciones?: number;
+  creadoEn?: Date;
 }
 
 export function normalizeIdioma(input: unknown): Idioma {

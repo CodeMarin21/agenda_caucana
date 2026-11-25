@@ -1,9 +1,64 @@
 import { prisma } from '../../config/database';
 import { Prisma, TipoNotificacion } from '@prisma/client';
 
+const PALABRAS_IGNORADAS_BUSQUEDA = new Set([
+  'a', 'al', 'algo', 'como', 'con', 'cual', 'cuales', 'de', 'del', 'donde',
+  'el', 'ella', 'en', 'entre', 'es', 'esta', 'este', 'la', 'las', 'lo', 'los',
+  'mas', 'mi', 'mis', 'o', 'para', 'por', 'que', 'se', 'su', 'sus', 'un',
+  'una', 'unas', 'uno', 'unos', 'y', 'the', 'and', 'for', 'in', 'of', 'to',
+]);
+
 // Patrón Repository — toda consulta a Evento pasa por aquí
 // El servicio nunca toca prisma directamente
 export class EventosRepository {
+
+  private async findIdsPorTerminos(termino?: string): Promise<number[] | null> {
+    const texto = termino?.trim();
+    if (!texto) return null;
+
+    const palabras = [...new Set(
+      texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((palabra) => palabra.length >= 2 && !PALABRAS_IGNORADAS_BUSQUEDA.has(palabra)),
+    )];
+    if (palabras.length === 0) return [];
+
+    const condiciones = palabras.map((palabra) => {
+      const patron = `%${palabra}%`;
+      return Prisma.sql`(
+        unaccent(evento."titulo") ILIKE unaccent(${patron})
+        OR unaccent(evento."slug") ILIKE unaccent(${patron})
+        OR unaccent(evento."descripcion") ILIKE unaccent(${patron})
+        OR unaccent(evento."direccion") ILIKE unaccent(${patron})
+        OR unaccent(categoria."nombre") ILIKE unaccent(${patron})
+        OR unaccent(lugar."nombre") ILIKE unaccent(${patron})
+        OR unaccent(lugar."direccion") ILIKE unaccent(${patron})
+        OR unaccent(ciudad."nombre") ILIKE unaccent(${patron})
+      )`;
+    });
+    const filas = await prisma.$queryRaw<Array<{ id: number }>>`
+      SELECT evento."id"
+      FROM "Evento" AS evento
+      LEFT JOIN "Categoria" AS categoria ON categoria."id" = evento."categoriaId"
+      LEFT JOIN "Lugar" AS lugar ON lugar."id" = evento."lugarId"
+      LEFT JOIN "Ciudad" AS ciudad ON ciudad."id" = evento."ciudadId"
+      LEFT JOIN "Organizador" AS organizador ON organizador."id" = evento."organizadorId"
+      WHERE evento."estadoPublicacion" = 'APROBADO'
+        AND (
+          evento."organizadorId" IS NULL
+          OR (
+            organizador."especialidad" = 'EVENTOS'
+            AND organizador."estado" = 'VERIFICADO'
+            AND organizador."vetado" = false
+          )
+        )
+        AND ${Prisma.join(condiciones, ' AND ')}
+    `;
+    return filas.map((fila) => fila.id);
+  }
 
   async findAprobados(
     where: Prisma.EventoWhereInput = {},
@@ -13,7 +68,7 @@ export class EventosRepository {
     q?: string,
   ) {
     const skip = (pagina - 1) * limite;
-    const termino = q?.trim();
+    const idsBusqueda = await this.findIdsPorTerminos(q);
     const filtroPublico: Prisma.EventoWhereInput = {
       AND: [
         { estadoPublicacion: 'APROBADO' },
@@ -28,18 +83,7 @@ export class EventosRepository {
           ],
         },
         where,
-        ...(termino ? [{
-          OR: [
-            { titulo: { contains: termino, mode: 'insensitive' as const } },
-            { slug: { contains: termino, mode: 'insensitive' as const } },
-            { descripcion: { contains: termino, mode: 'insensitive' as const } },
-            { direccion: { contains: termino, mode: 'insensitive' as const } },
-            { lugar: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
-            { lugar: { is: { direccion: { contains: termino, mode: 'insensitive' as const } } } },
-            { categoria: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
-            { ciudad: { is: { nombre: { contains: termino, mode: 'insensitive' as const } } } },
-          ],
-        }] : []),
+        ...(idsBusqueda ? [{ id: { in: idsBusqueda } }] : []),
       ],
     };
 

@@ -145,10 +145,23 @@ export const filtrosNegociosValidacion = [
     .optional({ values: 'falsy' })
     .isInt({ min: 1 }).withMessage('Ciudad inválida')
     .toInt(),
+  query('precioMin')
+    .optional({ values: 'falsy' })
+    .isInt({ min: 0 }).withMessage('Precio mínimo inválido')
+    .toInt(),
   query('precioMax')
     .optional({ values: 'falsy' })
     .isInt({ min: 0 }).withMessage('Precio máximo inválido')
     .toInt(),
+  query().custom((_, { req }) => {
+    const parametros = req.query ?? {};
+    const minimo = Number(parametros.precioMin);
+    const maximo = Number(parametros.precioMax);
+    if (parametros.precioMin !== undefined && parametros.precioMax !== undefined && minimo > maximo) {
+      throw new Error('El precio mínimo no puede superar el precio máximo');
+    }
+    return true;
+  }),
   query('orden')
     .optional({ values: 'falsy' })
     .isIn(ordenesNegocios).withMessage('Ordenamiento inválido'),

@@ -14,13 +14,13 @@ import {
   esPreguntaSeguimientoEvento,
 } from './ai.intent';
 import {
-  responderEvento,
-  responderEventoNoEncontrado,
   responderPrecioEntradaEvento,
   responderEventosPorPeriodo,
   responderAclaracionRecomendacion,
   responderNegocios,
   responderRecomendacionNegocios,
+  responderNegociosRecientes,
+  responderListaEventos,
   responderComoLlegarNegocio,
   responderNegocioParaLlegarNoEncontrado,
 } from './catalogo.responses';
@@ -79,7 +79,19 @@ export class AiService {
       const respuesta = negocio
         ? responderComoLlegarNegocio(negocio, idioma)
         : responderNegocioParaLlegarNoEncontrado(idioma);
-      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
+        idioma,
+        ip,
+        'catalogo',
+        TTL_GENERAL_MS,
+        undefined,
+        undefined,
+        undefined,
+        'negocios',
+      );
     }
 
     if (eventoSlug && esPreguntaSeguimientoEvento(pregunta)) {
@@ -91,7 +103,19 @@ export class AiService {
           tipo: 'EVENTO_ESPECIFICO',
           eventoNoEncontrado: true,
         });
-        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'fallback');
+        return this.guardarRespuesta(
+          cacheKey,
+          pregunta,
+          respuesta,
+          idioma,
+          ip,
+          'fallback',
+          TTL_EVENTO_MS,
+          undefined,
+          undefined,
+          undefined,
+          'eventos',
+        );
       }
 
       if (esPreguntaPrecioEntradaEvento(pregunta)) {
@@ -104,6 +128,9 @@ export class AiService {
           'catalogo',
           TTL_EVENTO_MS,
           evento.id,
+          undefined,
+          undefined,
+          'eventos',
         );
       }
 
@@ -129,6 +156,8 @@ export class AiService {
         TTL_EVENTO_MS,
         evento.id,
         geminiResult?.modelo,
+        undefined,
+        'eventos',
       );
     }
 
@@ -139,12 +168,39 @@ export class AiService {
       const terminosEvento = intent.terminos.length > 0
         ? intent.terminos
         : (intent.periodo || intent.soloFinalizados ? contextoEventos ?? [] : []);
+      if (intent.orden) {
+        const eventos = intent.orden === 'recientes'
+          ? await this.repository.findEventosRecientes(intent.terminos, Boolean(intent.soloGratuitos))
+          : await this.repository.findEventosRecomendados(intent.terminos, Boolean(intent.soloGratuitos));
+        const respuesta = responderListaEventos(
+          eventos,
+          idioma,
+          intent.orden,
+          intent.terminos,
+          Boolean(intent.soloGratuitos),
+        );
+        return this.guardarRespuesta(
+          cacheKey,
+          pregunta,
+          respuesta,
+          idioma,
+          ip,
+          'catalogo',
+          TTL_GENERAL_MS,
+          undefined,
+          undefined,
+          intent.terminos,
+          'eventos',
+        );
+      }
       if (intent.periodo || intent.soloFinalizados) {
         const eventos = intent.periodo
           ? await this.repository.findEventosEnPeriodo(
             intent.periodo,
             terminosEvento,
             intent.soloFinalizados,
+            undefined,
+            Boolean(intent.soloGratuitos),
           )
           : await this.repository.findFinalizados();
         const respuesta = responderEventosPorPeriodo(
@@ -153,6 +209,7 @@ export class AiService {
           intent.periodo,
           intent.soloFinalizados,
           terminosEvento,
+          Boolean(intent.soloGratuitos),
         );
         return this.guardarRespuesta(
           cacheKey,
@@ -165,20 +222,21 @@ export class AiService {
           undefined,
           undefined,
           terminosEvento,
+          'eventos',
         );
       }
 
-      if (terminosEvento.length === 0) {
-        const eventos = await this.repository.findProximos();
-        const respuesta = generarFallback({ eventos, idioma, tipo: 'GENERAL' });
-        return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
-      }
-
-      const eventos = await this.repository.findEventosPorTerminos(terminosEvento);
-      const evento = eventos[0];
-      const respuesta = evento
-        ? responderEvento(evento, idioma)
-        : responderEventoNoEncontrado(terminosEvento, idioma);
+      const eventos = await this.repository.findEventosPorTerminos(
+        terminosEvento,
+        Boolean(intent.soloGratuitos),
+      );
+      const respuesta = responderListaEventos(
+        eventos,
+        idioma,
+        'proximos',
+        terminosEvento,
+        Boolean(intent.soloGratuitos),
+      );
       return this.guardarRespuesta(
         cacheKey,
         pregunta,
@@ -190,6 +248,7 @@ export class AiService {
         undefined,
         undefined,
         terminosEvento,
+        'eventos',
       );
     }
 
@@ -203,11 +262,23 @@ export class AiService {
         intent.personas,
         intent.tipoPresupuesto,
       );
-      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
+        idioma,
+        ip,
+        'catalogo',
+        TTL_GENERAL_MS,
+        undefined,
+        undefined,
+        undefined,
+        'negocios',
+      );
     }
 
     if (intent.type === 'NEGOCIO_RECOMENDACION') {
-      if (!negocioSlug) {
+      if (!intent.global && !negocioSlug) {
         return this.guardarRespuesta(
           cacheKey,
           pregunta,
@@ -217,18 +288,62 @@ export class AiService {
           'catalogo',
         );
       }
-      const negocioContextual = negocioSlug
-        ? await this.repository.findNegocioPublicadoPorSlug(negocioSlug)
+      const negocioContextual = !intent.global && negocioSlug
+        ? await this.repository.findNegocioPublicadoPorSlug(negocioSlug, true)
         : null;
-      const negocios = negocioSlug
+      const negocios = !intent.global && negocioSlug
         ? negocioContextual ? [negocioContextual] : []
-        : await this.repository.findNegociosPublicados();
-      const respuesta = responderRecomendacionNegocios(
-        negocios,
-        intent.personas,
+        : await this.repository.findNegociosPublicados(true);
+      const respuesta = intent.criterio === 'recientes'
+        ? responderNegociosRecientes(negocios, idioma, intent.terminos)
+        : responderRecomendacionNegocios(
+          negocios,
+          intent.personas,
+          idioma,
+          intent.criterio,
+          intent.terminos,
+          intent.global,
+        );
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
         idioma,
+        ip,
+        'catalogo',
+        TTL_GENERAL_MS,
+        undefined,
+        undefined,
+        undefined,
+        'negocios',
       );
-      return this.guardarRespuesta(cacheKey, pregunta, respuesta, idioma, ip, 'catalogo');
+    }
+
+    if (intent.type === 'GRATIS') {
+      const terminosEvento = contextoEventos ?? [];
+      const eventos = terminosEvento.length > 0
+        ? await this.repository.findEventosPorTerminos(terminosEvento, true)
+        : await this.repository.findGratuitos();
+      const respuesta = responderListaEventos(
+        eventos,
+        idioma,
+        'proximos',
+        terminosEvento,
+        true,
+      );
+      return this.guardarRespuesta(
+        cacheKey,
+        pregunta,
+        respuesta,
+        idioma,
+        ip,
+        'catalogo',
+        TTL_GENERAL_MS,
+        undefined,
+        undefined,
+        terminosEvento,
+        'eventos',
+      );
     }
 
     const { eventos, eventoEspecifico, eventoNoEncontrado } =
@@ -300,6 +415,7 @@ export class AiService {
     eventoId?: number,
     modelo?: string,
     contextoEventos?: string[],
+    contextoDominio?: 'eventos' | 'negocios',
   ): ChatResponse {
     const response: ChatResponse = {
       respuesta,
@@ -308,6 +424,7 @@ export class AiService {
       ...(eventoId && { eventoId }),
       ...(modelo && { modelo }),
       ...(contextoEventos && { contextoEventos }),
+      ...(contextoDominio && { contextoDominio }),
     };
     this.cache.set(cacheKey, response, ttl);
     this.guardarLog(pregunta, respuesta, idioma, ip);
@@ -362,9 +479,6 @@ export class AiService {
       // El evento no existe o no está APROBADO. NO caemos a findProximos,
       // porque eso confundiría al usuario respondiendo como pregunta general.
       return { eventos: [], eventoNoEncontrado: true };
-    }
-    if (intent.type === 'GRATIS') {
-      return { eventos: await this.repository.findGratuitos() };
     }
     if (intent.type === 'CATEGORIA') {
       return { eventos: await this.repository.findPorCategoria(intent.categoria) };

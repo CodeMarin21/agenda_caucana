@@ -222,6 +222,32 @@
     contenedor.appendChild(imagen);
   }
 
+  function configurarInclinacionTarjeta(tarjeta) {
+    const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const punteroPreciso = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (movimientoReducido || !punteroPreciso) return;
+
+    const restablecer = () => {
+      tarjeta.style.setProperty('--plato-rotacion-x', '0deg');
+      tarjeta.style.setProperty('--plato-rotacion-y', '0deg');
+      tarjeta.style.setProperty('--plato-imagen-x', '0px');
+      tarjeta.style.setProperty('--plato-imagen-y', '0px');
+    };
+
+    tarjeta.addEventListener('pointermove', (evento) => {
+      if (evento.pointerType === 'touch') return;
+      const limites = tarjeta.getBoundingClientRect();
+      const posicionX = (evento.clientX - limites.left) / limites.width;
+      const posicionY = (evento.clientY - limites.top) / limites.height;
+      tarjeta.style.setProperty('--plato-rotacion-x', `${(0.5 - posicionY) * 10}deg`);
+      tarjeta.style.setProperty('--plato-rotacion-y', `${(posicionX - 0.5) * 12}deg`);
+      tarjeta.style.setProperty('--plato-imagen-x', `${(0.5 - posicionX) * 16}px`);
+      tarjeta.style.setProperty('--plato-imagen-y', `${(0.5 - posicionY) * 16}px`);
+    });
+    tarjeta.addEventListener('pointerleave', restablecer);
+    tarjeta.addEventListener('pointercancel', restablecer);
+  }
+
   function renderizarPlatos() {
     const seccion = document.querySelector('[data-negocio-carta-seccion]');
     const contenedor = document.querySelector('[data-negocio-platos]');
@@ -235,6 +261,7 @@
     negocio.platos.forEach((plato) => {
       const tarjeta = document.createElement('article');
       tarjeta.className = 'plato-card';
+      configurarInclinacionTarjeta(tarjeta);
 
       let imagenContenedor = document.createElement('div');
       imagenContenedor.className = 'plato-card__imagen';

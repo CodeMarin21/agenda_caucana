@@ -5,7 +5,9 @@ import {
   responderEventoNoEncontrado,
   responderPrecioEntradaEvento,
   responderEventosPorPeriodo,
+  responderListaEventos,
   responderRecomendacionNegocios,
+  responderNegociosRecientes,
   responderNegocios,
 } from '../modules/ai/catalogo.responses';
 import { NegocioContexto } from '../modules/ai/ai.types';
@@ -183,5 +185,92 @@ describe('respuestas de negocios', () => {
 
     expect(respuesta).toContain('No encontré un plato cuya ficha indique');
     expect(respuesta).not.toContain('te recomiendo');
+  });
+
+  it('ranks menu recommendations by the business review average and review count', () => {
+    const mejorCalificado = {
+      ...negocio,
+      id: 2,
+      slug: 'cocina-caucana',
+      nombre: 'Cocina Caucana',
+      promedioEstrellas: 4.9,
+      totalCalificaciones: 38,
+      platos: [{ nombre: 'Empanadas de pipián', precio: 5000 }] as Prisma.JsonValue,
+    };
+    const menosCalificado = {
+      ...negocio,
+      promedioEstrellas: 4.1,
+      totalCalificaciones: 12,
+    };
+
+    const respuesta = responderRecomendacionNegocios(
+      [menosCalificado, mejorCalificado],
+      undefined,
+      'es',
+    );
+
+    expect(respuesta.indexOf('Empanadas de pipián')).toBeLessThan(respuesta.indexOf('Salchipapa sencilla'));
+    expect(respuesta).toContain('4,9/5');
+    expect(respuesta).toContain('38 reseñas');
+    expect(respuesta).toContain('no de cada plato');
+  });
+
+  it('sorts dishes from every category by their published prices', () => {
+    const platoCaro = {
+      ...negocio,
+      platos: [{ nombre: 'Bandeja de la casa', precio: 28000 }] as Prisma.JsonValue,
+    };
+    const respuesta = responderRecomendacionNegocios(
+      [platoCaro, negocio],
+      undefined,
+      'es',
+      'baratos',
+    );
+
+    expect(respuesta.indexOf('Salchipapa sencilla')).toBeLessThan(respuesta.indexOf('Bandeja de la casa'));
+    expect(respuesta).toContain('ordenados por precio');
+  });
+
+  it('orders recent businesses by their stored creation date and clarifies that dish dates are unavailable', () => {
+    const anterior = {
+      ...negocio,
+      creadoEn: new Date('2026-10-01T12:00:00.000Z'),
+    };
+    const reciente = {
+      ...negocio,
+      id: 2,
+      slug: 'cafe-reciente',
+      nombre: 'Café Reciente',
+      creadoEn: new Date('2026-11-20T12:00:00.000Z'),
+    };
+
+    const respuesta = responderNegociosRecientes([anterior, reciente], 'es');
+
+    expect(respuesta.indexOf('Café Reciente')).toBeLessThan(respuesta.indexOf('Suculentas de Juanita'));
+    expect(respuesta).toContain('no se guarda una fecha por cada plato');
+  });
+
+  it('explains that event recommendations use featured and upcoming listings, not reviews', () => {
+    const evento: EventoContexto = {
+      id: 16,
+      titulo: 'Festival Caucano',
+      slug: 'festival-caucano',
+      descripcion: 'Festival de música local.',
+      fechaInicio: new Date('2026-11-28T15:00:00.000Z'),
+      fechaFin: null,
+      horaApertura: null,
+      direccion: 'Centro',
+      precioReferencial: 0,
+      esMayorDeEdad: false,
+      categoria: { nombre: 'Música' },
+      lugar: { nombre: 'Teatro', direccion: 'Centro' },
+      ciudad: { nombre: 'Popayán' },
+    };
+
+    const respuesta = responderListaEventos([evento], 'es', 'recomendados');
+
+    expect(respuesta).toContain('no tiene reseñas');
+    expect(respuesta).toContain('Entrada libre');
+    expect(respuesta).toContain('evento.html?slug=festival-caucano');
   });
 });

@@ -160,11 +160,17 @@ export function responderEventosPorPeriodo(
   periodo?: PeriodoEventos,
   soloFinalizados = false,
   terminos: string[] = [],
+  soloGratuitos = false,
 ): string {
   const periodoTexto = periodo ? formatearPeriodo(periodo, idioma) : '';
   const periodoFrase = periodo ? frasePeriodo(periodo, idioma) : '';
   const tema = terminos.length > 0 ? temaEnIdioma(terminos, idioma) : '';
   if (eventos.length === 0) {
+    if (soloGratuitos) {
+      if (idioma === 'en') return `I found no upcoming free-entry events${tema ? ` matching ${tema}` : ''}${periodoTexto ? ` ${periodoTexto}` : ''}.`;
+      if (idioma === 'fr') return `Je n’ai trouvé aucun événement à entrée gratuite${tema ? ` correspondant à ${tema}` : ''}${periodoTexto ? ` ${periodoTexto}` : ''}.`;
+      return `No encontré eventos próximos con entrada libre${tema ? ` que coincidan con ${tema}` : ''}${periodoTexto ? ` ${periodoTexto}` : ''}.`;
+    }
     if (soloFinalizados && !periodo) {
       return {
         es: 'No encontré eventos publicados que ya hayan finalizado.',
@@ -190,6 +196,12 @@ export function responderEventosPorPeriodo(
       en: periodoTexto ? `Events that ended in ${periodoTexto}:` : 'These published events have ended:',
       fr: periodoTexto ? `Événements terminés en ${periodoTexto} :` : 'Ces événements publiés sont terminés :',
     }[idioma]
+    : soloGratuitos
+      ? {
+        es: periodoTexto ? `Estos son los eventos próximos con entrada libre${tema ? ` en ${tema}` : ''} ${periodoFrase}:` : `Estos son los eventos próximos con entrada libre${tema ? ` en ${tema}` : ''}:`,
+        en: periodoTexto ? `These are the upcoming free-entry events${tema ? ` in ${tema}` : ''} ${periodoFrase}:` : `Here are the upcoming free-entry events${tema ? ` in ${tema}` : ''}:`,
+        fr: periodoTexto ? `Voici les événements à entrée gratuite${tema ? ` à ${tema}` : ''} ${periodoFrase} :` : `Voici les événements à entrée gratuite${tema ? ` à ${tema}` : ''} :`,
+      }[idioma]
     : {
       es: periodoTexto
         ? `Estos son los eventos publicados${tema ? ` de ${tema}` : ''} ${periodoFrase}:`
@@ -223,6 +235,76 @@ export function responderEventosPorPeriodo(
     }[idioma]
     : '';
   return `${titulo}\n\n${lista.join('\n')}${masResultados}`;
+}
+
+export function responderListaEventos(
+  eventos: EventoContexto[],
+  idioma: Idioma,
+  orden: 'recomendados' | 'recientes' | 'proximos',
+  terminos: string[] = [],
+  soloGratuitos = false,
+): string {
+  const tema = terminos.length > 0 ? terminos.join(' ') : '';
+  if (eventos.length === 0) {
+    if (soloGratuitos) {
+      if (idioma === 'en') return `I found no upcoming free-entry events${tema ? ` at ${tema}` : ''}.`;
+      if (idioma === 'fr') return `Je n’ai trouvé aucun événement à entrée gratuite${tema ? ` à ${tema}` : ''}.`;
+      return `No encontré eventos próximos con entrada libre${tema ? ` en ${tema}` : ''}.`;
+    }
+    if (orden === 'recientes') {
+      return {
+        es: 'No encontré eventos publicados recientemente que todavía estén próximos.',
+        en: 'I could not find recently published events that are still upcoming.',
+        fr: 'Je n’ai trouvé aucun événement publié récemment qui soit encore à venir.',
+      }[idioma];
+    }
+    if (tema) {
+      if (idioma === 'en') return `I couldn't find upcoming published events matching “${tema}”.`;
+      if (idioma === 'fr') return `Je n’ai trouvé aucun événement publié à venir correspondant à « ${tema} ».`;
+      return `No encontré eventos próximos publicados que coincidan con «${tema}».`;
+    }
+    return {
+      es: 'No encontré eventos próximos publicados en la agenda.',
+      en: 'I could not find upcoming published events in the agenda.',
+      fr: 'Je n’ai trouvé aucun événement publié à venir dans l’agenda.',
+    }[idioma];
+  }
+
+  const encabezado = soloGratuitos
+    ? {
+      es: `Estos son los próximos eventos con entrada libre${tema ? ` en ${tema}` : ''}:`,
+      en: `Here are the upcoming free-entry events${tema ? ` in ${tema}` : ''}:`,
+      fr: `Voici les événements à entrée gratuite à venir${tema ? ` à ${tema}` : ''} :`,
+    }[idioma]
+    : orden === 'recientes'
+    ? {
+      es: `Estos son los eventos próximos publicados más recientemente${tema ? ` en ${tema}` : ''}:`,
+      en: `These are the most recently published upcoming events${tema ? ` in ${tema}` : ''}:`,
+      fr: `Voici les événements à venir publiés le plus récemment${tema ? ` à ${tema}` : ''} :`,
+    }[idioma]
+    : orden === 'recomendados'
+      ? {
+        es: `La agenda no tiene reseñas para comparar eventos; te comparto próximos eventos destacados primero${tema ? ` en ${tema}` : ''}:`,
+        en: `The agenda has no event reviews to compare, so here are upcoming events with featured listings first${tema ? ` in ${tema}` : ''}:`,
+        fr: `L’agenda ne contient pas d’avis pour comparer les événements; voici les événements à venir, avec les sélections mises en avant d’abord${tema ? ` à ${tema}` : ''} :`,
+      }[idioma]
+      : {
+        es: `Estos son los próximos eventos publicados${tema ? ` en ${tema}` : ''}:`,
+        en: `Here are the upcoming published events${tema ? ` in ${tema}` : ''}:`,
+        fr: `Voici les événements publiés à venir${tema ? ` à ${tema}` : ''} :`,
+      }[idioma];
+  const lista = eventos.slice(0, 5).map((evento) => {
+    const enlace = `[${evento.titulo}](evento.html?slug=${encodeURIComponent(evento.slug)})`;
+    const fecha = formatearRangoEvento(evento, idioma);
+    const precio = evento.precioReferencial === 0
+      ? { es: 'Entrada libre', en: 'Free entry', fr: 'Entrée libre' }[idioma]
+      : evento.precioReferencial === null
+        ? { es: 'Precio no informado', en: 'Price not listed', fr: 'Prix non indiqué' }[idioma]
+        : formatearPrecio(evento.precioReferencial);
+    const direccion = evento.direccion || evento.lugar.direccion;
+    return `• ${enlace}\n  📅 ${fecha}\n  📍 ${evento.lugar.nombre}, ${direccion}, ${evento.ciudad.nombre}\n  💰 ${precio}`;
+  });
+  return `${encabezado}\n\n${lista.join('\n\n')}`;
 }
 
 interface PlatoContexto {
@@ -292,20 +374,82 @@ function textoOpcion(negocio: NegocioContexto, plato: PlatoContexto): string {
   return `${enlace} · ${formatearPrecio(plato.precio)}`;
 }
 
+function calificacionNegocio(negocio: NegocioContexto): number {
+  return negocio.promedioEstrellas ?? 0;
+}
+
+function cantidadResenas(negocio: NegocioContexto): number {
+  return negocio.totalCalificaciones ?? 0;
+}
+
+function calificacionTexto(negocio: NegocioContexto, idioma: Idioma): string {
+  const cantidad = cantidadResenas(negocio);
+  if (cantidad === 0) {
+    return { es: 'Sin reseñas', en: 'No reviews yet', fr: 'Aucun avis' }[idioma];
+  }
+  const promedio = calificacionNegocio(negocio).toLocaleString(LOCALE[idioma], {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  const resenas = { es: 'reseñas', en: 'reviews', fr: 'avis' }[idioma];
+  return `★ ${promedio}/5 · ${cantidad} ${resenas}`;
+}
+
+function ordenarOpciones(
+  a: { negocio: NegocioContexto; plato: PlatoContexto },
+  b: { negocio: NegocioContexto; plato: PlatoContexto },
+  criterio: 'recomendados' | 'baratos' | 'recientes',
+): number {
+  if (criterio === 'baratos') return a.plato.precio - b.plato.precio;
+  if (criterio === 'recientes') {
+    const fechaA = a.negocio.creadoEn ? new Date(a.negocio.creadoEn).getTime() : 0;
+    const fechaB = b.negocio.creadoEn ? new Date(b.negocio.creadoEn).getTime() : 0;
+    if (fechaA !== fechaB) return fechaB - fechaA;
+  }
+  return calificacionNegocio(b.negocio) - calificacionNegocio(a.negocio) ||
+    cantidadResenas(b.negocio) - cantidadResenas(a.negocio) ||
+    a.plato.precio - b.plato.precio;
+}
+
+function unaOpcionPorNegocio(
+  opciones: Array<{ negocio: NegocioContexto; plato: PlatoContexto }>,
+): Array<{ negocio: NegocioContexto; plato: PlatoContexto }> {
+  const negociosIncluidos = new Set<number>();
+  return opciones.filter(({ negocio }) => {
+    if (negociosIncluidos.has(negocio.id)) return false;
+    negociosIncluidos.add(negocio.id);
+    return true;
+  });
+}
+
 export function responderRecomendacionNegocios(
   negocios: NegocioContexto[],
   personas: number | undefined,
   idioma: Idioma,
+  criterio: 'recomendados' | 'baratos' | 'recientes' = 'recomendados',
+  terminos: string[] = [],
+  global = false,
 ): string {
   if (negocios.length === 0) {
+    if (global) {
+      if (idioma === 'en') return 'There are no published food businesses to recommend right now.';
+      if (idioma === 'fr') return 'Il n’y a pas de commerce alimentaire publié à recommander pour le moment.';
+      return 'No hay negocios gastronómicos publicados para recomendar en este momento.';
+    }
     if (idioma === 'en') return 'I couldn’t find the business from the previous question. Search for it again and I’ll help you choose.';
     if (idioma === 'fr') return 'Je n’ai pas retrouvé le commerce de la question précédente. Recherchez-le à nouveau et je vous aiderai à choisir.';
     return 'No encontré el negocio de la consulta anterior. Búscalo de nuevo y te ayudo a elegir.';
   }
 
-  const opciones = negocios.flatMap((negocio) =>
+  const opcionesPublicadas = negocios.flatMap((negocio) =>
     extraerPlatos(negocio).map((plato) => ({ negocio, plato })),
-  ).sort((a, b) => a.plato.precio - b.plato.precio);
+  ).filter(({ negocio, plato }) =>
+    terminos.length === 0 ||
+    coincidencias(terminos, `${plato.nombre} ${negocio.nombre} ${negocio.categoria} ${negocio.descripcion}`) > 0,
+  ).sort((a, b) => ordenarOpciones(a, b, criterio));
+  const opciones = criterio === 'baratos'
+    ? opcionesPublicadas
+    : unaOpcionPorNegocio(opcionesPublicadas);
 
   if (opciones.length === 0) {
     if (idioma === 'en') return 'The published listing does not include menu items to recommend. Please check the business page or contact the business.';
@@ -314,7 +458,7 @@ export function responderRecomendacionNegocios(
   }
 
   if (personas !== undefined) {
-    const opcionesParaGrupo = opciones.filter(
+    const opcionesParaGrupo = opcionesPublicadas.filter(
       ({ plato }) => personasIndicadas(plato.descripcion) === personas,
     );
     if (opcionesParaGrupo.length > 0) {
@@ -329,9 +473,9 @@ export function responderRecomendacionNegocios(
       return `Para ${personas} personas te recomiendo ${texto}. La descripción publicada indica que alcanza para ${personas}; confirma la porción con el local.`;
     }
 
-    const opcionesTexto = opciones.slice(0, 3)
-      .map(({ negocio, plato }) => textoOpcion(negocio, plato))
-      .join(' | ');
+    const opcionesTexto = opciones.slice(0, 3).map(({ negocio, plato }) =>
+      `• ${textoOpcion(negocio, plato)} · ${calificacionTexto(negocio, idioma)}`,
+    ).join('\n');
     const negocioNombre = negocios.length === 1 ? negocios[0].nombre : null;
     if (idioma === 'en') {
       return `I couldn't confirm a dish listed for ${personas} people${negocioNombre ? ` at ${negocioNombre}` : ''}. I don't want to guess the portions. Published menu options: ${opcionesTexto}. Please confirm serving sizes with the business.`;
@@ -342,12 +486,73 @@ export function responderRecomendacionNegocios(
     return `No encontré un plato cuya ficha indique que alcanza para ${personas} personas${negocioNombre ? ` en ${negocioNombre}` : ''}. No quiero suponer las porciones. Opciones publicadas: ${opcionesTexto}. Confirma las cantidades con el local.`;
   }
 
-  const opcionesTexto = opciones.slice(0, 3)
-    .map(({ negocio, plato }) => textoOpcion(negocio, plato))
-    .join(' | ');
-  if (idioma === 'en') return `I don't know your preferences yet. From the published menu, you could consider: ${opcionesTexto}. Which sounds good to you?`;
-  if (idioma === 'fr') return `Je ne connais pas encore vos préférences. D’après le menu publié, vous pouvez considérer : ${opcionesTexto}. Qu’est-ce qui vous tente ?`;
-  return `Aún no conozco tus gustos. Según la carta publicada, puedes considerar: ${opcionesTexto}. ¿Cuál te llama más la atención?`;
+  const seleccionadas = opciones.slice(0, criterio === 'baratos' ? 5 : 3);
+  const opcionesTexto = seleccionadas.map(({ negocio, plato }) =>
+    `• ${textoOpcion(negocio, plato)} · ${calificacionTexto(negocio, idioma)}`,
+  ).join('\n');
+  if (criterio === 'baratos') {
+    if (idioma === 'en') return `These published dishes are sorted by lowest listed price:\n${opcionesTexto}\n\nPlease confirm current prices with the business.`;
+    if (idioma === 'fr') return `Ces plats publiés sont classés du moins cher au plus cher :\n${opcionesTexto}\n\nVérifiez les prix actuels auprès du commerce.`;
+    return `Estos platos publicados están ordenados por precio, del menor al mayor:\n${opcionesTexto}\n\nConfirma el precio vigente con el local.`;
+  }
+  if (criterio === 'recientes') {
+    if (idioma === 'en') return `Recently listed food businesses and a dish from each menu:\n${opcionesTexto}`;
+    if (idioma === 'fr') return `Commerces alimentaires récemment publiés et un plat de leur menu :\n${opcionesTexto}`;
+    return `Negocios de comida publicados más recientemente y una opción de su carta:\n${opcionesTexto}`;
+  }
+
+  const hayResenas = seleccionadas.some(({ negocio }) => cantidadResenas(negocio) > 0);
+  if (idioma === 'en') {
+    return hayResenas
+      ? `I ranked these menu options by each business’s overall rating and review count. Reviews are for the business, not individual dishes:\n${opcionesTexto}`
+      : `There aren’t enough published reviews to compare these businesses, so I’m showing listed dishes with prices instead:\n${opcionesTexto}`;
+  }
+  if (idioma === 'fr') {
+    return hayResenas
+      ? `J’ai classé ces plats selon la note générale et le nombre d’avis de chaque commerce. Les avis concernent le commerce, pas chaque plat :\n${opcionesTexto}`
+      : `Il n’y a pas assez d’avis publiés pour comparer les commerces; voici plutôt des plats et leurs prix :\n${opcionesTexto}`;
+  }
+  return hayResenas
+    ? `Ordené estas opciones por la calificación general y el número de reseñas de cada negocio. Las reseñas son del local, no de cada plato:\n${opcionesTexto}`
+    : `Aún no hay reseñas suficientes para comparar los negocios; te muestro platos publicados con precio para que elijas:\n${opcionesTexto}`;
+}
+
+export function responderNegociosRecientes(
+  negocios: NegocioContexto[],
+  idioma: Idioma,
+  terminos: string[] = [],
+): string {
+  const negociosFiltrados = negocios.filter((negocio) =>
+    terminos.length === 0 ||
+    coincidencias(
+      terminos,
+      `${negocio.nombre} ${negocio.descripcion} ${negocio.categoria} ${negocio.ciudad.nombre} ${extraerPlatos(negocio).map(({ nombre }) => nombre).join(' ')}`,
+    ) > 0,
+  ).sort((a, b) =>
+    new Date(b.creadoEn ?? 0).getTime() - new Date(a.creadoEn ?? 0).getTime(),
+  );
+  if (negociosFiltrados.length === 0) {
+    return {
+      es: 'Todavía no hay negocios gastronómicos publicados para mostrar.',
+      en: 'There are no published food businesses to show yet.',
+      fr: 'Aucun commerce alimentaire publié à afficher pour le moment.',
+    }[idioma];
+  }
+  const categoria = (negocio: NegocioContexto) =>
+    negocio.categoria.replace(/_/g, ' ').toLocaleLowerCase(LOCALE[idioma]);
+  const opciones = negociosFiltrados.slice(0, 5).map((negocio) => {
+    const enlace = `[${negocio.nombre}](negocio.html?slug=${encodeURIComponent(negocio.slug)})`;
+    const ciudad = negocio.ciudad.nombre;
+    const rating = calificacionTexto(negocio, idioma);
+    const plato = extraerPlatos(negocio)[0];
+    const opcionCarta = plato
+      ? ` · ${plato.nombre} · ${formatearPrecio(plato.precio)}`
+      : '';
+    return `• ${enlace} · ${categoria(negocio)} · ${ciudad}${opcionCarta} · ${rating}`;
+  }).join('\n');
+  if (idioma === 'en') return `Recently created, currently published food businesses and a listed dish when available:\n${opciones}\n\nThe platform stores business creation dates, not the upload date of each dish.`;
+  if (idioma === 'fr') return `Commerces alimentaires publiés récemment et un plat de leur carte si disponible :\n${opciones}\n\nLa plateforme conserve la date de création du commerce, pas celle de chaque plat.`;
+  return `Negocios gastronómicos publicados más recientemente y un plato de su carta cuando está disponible:\n${opciones}\n\nEl orden usa la fecha de creación del negocio, porque no se guarda una fecha por cada plato.`;
 }
 
 interface OpcionNegocio {

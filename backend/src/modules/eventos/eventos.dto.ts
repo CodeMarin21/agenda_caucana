@@ -99,7 +99,17 @@ export const filtrosEventoValidacion = [
   query('categoriaSlug').optional().isString(),
   query('desde').optional().isISO8601().withMessage('Fecha desde inválida'),
   query('hasta').optional().isISO8601().withMessage('Fecha hasta inválida'),
-  query('precioMax').optional().isFloat({ min: 0 }).withMessage('Precio máximo inválido'),
+  query('precioMin').optional().isFloat({ min: 0 }).withMessage('Precio mínimo inválido').toFloat(),
+  query('precioMax').optional().isFloat({ min: 0 }).withMessage('Precio máximo inválido').toFloat(),
+  query().custom((_, { req }) => {
+    const parametros = req.query ?? {};
+    const minimo = Number(parametros.precioMin);
+    const maximo = Number(parametros.precioMax);
+    if (parametros.precioMin !== undefined && parametros.precioMax !== undefined && minimo > maximo) {
+      throw new Error('El precio mínimo no puede superar el precio máximo');
+    }
+    return true;
+  }),
   query('pagina').optional().isInt({ min: 1 }).withMessage('Página inválida'),
   query('limite').optional().isInt({ min: 1, max: 50 }).withMessage('Límite entre 1 y 50'),
   query('orden').optional().isIn(['fecha', 'recientes']).withMessage('Orden inválido'),

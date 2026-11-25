@@ -7,6 +7,8 @@ export type Intent =
     terminos: string[];
     periodo?: PeriodoEventos;
     soloFinalizados: boolean;
+    soloGratuitos?: boolean;
+    orden?: 'recomendados' | 'recientes';
   }
   | {
     type: 'NEGOCIO_BUSQUEDA';
@@ -15,7 +17,13 @@ export type Intent =
     tipoPresupuesto?: 'maximo' | 'objetivo';
     personas?: number;
   }
-  | { type: 'NEGOCIO_RECOMENDACION'; personas?: number }
+  | {
+    type: 'NEGOCIO_RECOMENDACION';
+    personas?: number;
+    terminos: string[];
+    criterio: 'recomendados' | 'baratos' | 'recientes';
+    global: boolean;
+  }
   | { type: 'GRATIS' }
   | { type: 'CATEGORIA'; categoria: string }
   | { type: 'GENERAL' };
@@ -27,8 +35,10 @@ const CATEGORIAS_CONOCIDAS = [
 
 const PALABRAS_VACIAS = new Set([
   'a', 'al', 'algun', 'algunos', 'algunas', 'alguien', 'algun', 'alrededor',
-  'alguien', 'como', 'con', 'cual', 'cuales', 'cuando', 'cuanto', 'cuanta',
-  'de', 'del', 'dime', 'donde', 'el', 'ella', 'en', 'es', 'esta', 'este',
+  'alguien', 'como', 'con', 'cual', 'cuales', 'cuando', 'cuanto', 'cuanta', 'dia',
+  'dame',
+  'de', 'del', 'dime', 'muestrame', 'muestra', 'mostrar', 'mostrarme', 'donde',
+  'el', 'ella', 'en', 'es', 'esta', 'este',
   'estoy', 'hay', 'ir', 'la', 'las', 'lo', 'los', 'me', 'mi', 'mis', 'por',
   'para', 'que', 'quiero', 'quisiera', 'saber', 'ser', 'si', 'sobre', 'un',
   'una', 'unos', 'unas', 'ubicada', 'ubicado', 'ubicacion', 'visitar',
@@ -43,6 +53,22 @@ const PALABRAS_VACIAS = new Set([
   'concierto', 'conciertos', 'sabado', 'sabados', 'viernes', 'jueves',
   'miercoles', 'martes', 'lunes', 'domingo', 'tarde', 'madrugada',
   'estan', 'disponible', 'disponibles',
+  'quedan', 'queda', 'quedar', 'lugar', 'lugares', 'sitio', 'sitios',
+  'son',
+  'mejor', 'mejores', 'best', 'top', 'mas', 'menos', 'barato', 'barata',
+  'baratos', 'baratas', 'economico', 'economica', 'economicos', 'economicas',
+  'ultimo', 'ultima', 'ultimos', 'ultimas', 'reciente', 'recientes', 'nuevo',
+  'nueva', 'nuevos', 'nuevas', 'publicado', 'publicada', 'publicados',
+  'publicadas', 'subido', 'subida', 'subidos', 'subidas', 'recien', 'fueron',
+  'recomendacion', 'recomendaciones', 'recomienda', 'recomiendas', 'recomiendo',
+  'recomendar', 'sugerencia', 'sugerencias', 'sugiere', 'sugieres',
+  'resena', 'resenas', 'opinion', 'opiniones', 'valoracion',
+  'valoraciones', 'calificacion', 'calificaciones', 'base', 'basada', 'basadas',
+  'basado', 'basados', 'ambito', 'cualquier',
+  'tipo', 'somos',
+  'plato', 'platos', 'platillo', 'platillos', 'alimento', 'alimentos', 'menu', 'menus',
+  'han', 'sido', 'se', 'gratis', 'libre', 'free', 'gratuit', 'latest', 'newest', 'recent', 'recently',
+  'featured', 'derniers', 'dernier',
   'where', 'what', 'which', 'please', 'find', 'looking', 'for', 'under',
   'less', 'than', 'around', 'about', 'cheap', 'near', 'me', 'eat', 'food',
   'restaurant', 'restaurants', 'meal', 'price', 'budget', 'how', 'get',
@@ -53,12 +79,14 @@ const PALABRAS_VACIAS = new Set([
   'une', 'pour', 'avec', 'sur', 'dans', 'est', 'sont', 'je', 'voudrais',
 ]);
 
-const TERMINOS_EVENTO_EXPLICITO = /\b(feria|festival|conciert\w*|concert\w*|exposicion|obra|teatro|evento|eventos|torneo|conferencia|libro|literatura|musica|musical\w*|music\w*|musique\w*|danza|cine|show)\b/;
-const TERMINOS_NEGOCIO = /\b(comer|comida|comidas|restaurante|restaurantes|negocio|salchipapa|salchipapas|salchippa|pizza|pizzeria|hamburguesa|hamburguesas|plato|platos|almuerzo|cena|desayuno|cafe|cafeteria|antojo|presupuesto|pesos|cop|eat|food|meal|restaurant|restaurants|coffee|price|budget|manger|repas|restaurant|restaurants|prix|budget)\b/;
-const TERMINOS_RECOMENDACION = /\b(recomiend\w*|sugier\w*|recommend\w*|suggest\w*|conseill\w*|best|mejor)\b/;
+const TERMINOS_EVENTO_EXPLICITO = /\b(feria|festival|conciert\w*|concert\w*|exposicion|obra|teatro|evento|eventos|events?|torneo|conferencia|libro|literatura|musica|musical\w*|music\w*|musique\w*|danza|cine|show)\b/;
+const TERMINOS_NEGOCIO = /\b(comer|comida|comidas|alimento\w*|plat\w*|menu|menus|restaurante\w*|negocio\w*|salchipapa\w*|salchippa|pizza|pizzeria|hamburguesa\w*|almuerzo|cena|desayuno|cafe|cafeteria|antojo|presupuesto|pesos|cop|eat|food|meal|restaurant\w*|coffee|price|budget|manger|repas|prix)\b/;
+const TERMINOS_RECOMENDACION = /\b(recomend\w*|recomiend\w*|sugier\w*|recommend\w*|suggest\w*|conseill\w*|best|mejor\w*)\b/;
+const TERMINOS_BARATOS = /\b(barat\w*|economi\w*|cheap(?:est)?|affordable|low cost|moins cher|pas cher)\b/;
+const TERMINOS_RECIENTES = /\b(ultim\w*|recient\w*|recien|nuev\w*|publicad\w*|sub\w*|latest|newest|recent(?:ly)?|dernier\w*)\b/;
 const PRESUPUESTO_MAXIMO = /\b(menos de|por debajo de|hasta|máximo|maximo|no más de|no mas de|under|less than|up to|maximum|at most|moins de|jusqu.?à|maximum)\b/;
 const PREGUNTA_SEGUIMIENTO_EVENTO = /\b(cuando|fecha|hora|inicia|iniciar|empieza|comienza|termina|finaliza|duracion|dura|precio|cuesta|costo|entrada|libre|gratis|admission|free|gratuit|direccion|ubicacion|donde|como llegar|cuentame mas|mas informacion|detalles|when|date|time|start|starts|begin|begins|end|ends|finish|finishes|duration|price|cost|address|location|directions|more details|more information|quand|date|heure|commence|debute|termine|finit|duree|prix|adresse|lieu|itineraire)\b/;
-const PREGUNTA_NUEVA_BUSQUEDA_EVENTOS = /\b(que|cuales|hay|busco|buscar|buscando|muestrame|encuentra|find|show|what)\b.*\b(evento|eventos|concierto|conciertos|festival|festivales|events|concerts)\b/;
+const PREGUNTA_NUEVA_BUSQUEDA_EVENTOS = /\b(que|cuales|hay|busco|buscar|buscando|muestrame|encuentra|find|show|what)\b.*\b(evento|eventos|concierto|conciertos|festival|festivales|events|concerts)\b|\b(eventos|conciertos|festivales|events|concerts)\b.*\b(hay|gratis|libre|free|gratuit|en|at)\b/;
 
 function normalizar(texto: string): string {
   return texto
@@ -81,6 +109,9 @@ export function extraerTerminos(texto: string): string[] {
       termino.length > 2 &&
       !/^\d+$/.test(termino) &&
       !PALABRAS_VACIAS.has(termino) &&
+      !TERMINOS_RECOMENDACION.test(termino) &&
+      !TERMINOS_BARATOS.test(termino) &&
+      !TERMINOS_RECIENTES.test(termino) &&
       !esTerminoTemporal(termino)
     );
   return [...new Set(terminos)].slice(0, 5);
@@ -140,20 +171,34 @@ export function detectIntent(pregunta: string, eventoId?: number, ahora = new Da
   const temporal = extraerFiltroTemporal(pregunta, ahora);
   const terminos = extraerTerminos(pregunta);
   const buscaNegocio = TERMINOS_NEGOCIO.test(q);
+  const buscaEvento = TERMINOS_EVENTO_EXPLICITO.test(q);
+  const soloGratuitos = /\b(gratis|libre|free|gratuit)\b/.test(q);
+  const pideBaratos = TERMINOS_BARATOS.test(q);
+  const pideRecientes = TERMINOS_RECIENTES.test(q);
+  const pideRecomendacion = TERMINOS_RECOMENDACION.test(q);
 
-  if (
-    ((!buscaNegocio) && (temporal.periodo || temporal.soloFinalizados)) ||
-    (TERMINOS_EVENTO_EXPLICITO.test(q) && terminos.length === 0)
-  ) {
+  if (buscaEvento) {
     return {
       type: 'EVENTO_BUSQUEDA',
       terminos,
       periodo: temporal.periodo,
       soloFinalizados: temporal.soloFinalizados,
+      ...(soloGratuitos && { soloGratuitos: true }),
+      ...(pideRecientes && { orden: 'recientes' as const }),
+      ...(!pideRecientes && pideRecomendacion && { orden: 'recomendados' as const }),
     };
   }
 
-  if (buscaNegocio && !TERMINOS_EVENTO_EXPLICITO.test(q)) {
+  if (buscaNegocio) {
+    if (pideBaratos || pideRecientes || pideRecomendacion) {
+      return {
+        type: 'NEGOCIO_RECOMENDACION',
+        personas: extraerPersonas(pregunta),
+        terminos,
+        criterio: pideBaratos ? 'baratos' : pideRecientes ? 'recientes' : 'recomendados',
+        global: true,
+      };
+    }
     return {
       type: 'NEGOCIO_BUSQUEDA',
       terminos,
@@ -163,20 +208,27 @@ export function detectIntent(pregunta: string, eventoId?: number, ahora = new Da
     };
   }
 
-  if (
-    !TERMINOS_EVENTO_EXPLICITO.test(q) &&
-    TERMINOS_RECOMENDACION.test(q)
-  ) {
+  if (temporal.periodo || temporal.soloFinalizados) {
     return {
-      type: 'NEGOCIO_RECOMENDACION',
-      personas: extraerPersonas(pregunta),
+      type: 'EVENTO_BUSQUEDA',
+      terminos,
+      periodo: temporal.periodo,
+      soloFinalizados: temporal.soloFinalizados,
+      ...(soloGratuitos && { soloGratuitos: true }),
     };
   }
 
-  if (
-    TERMINOS_EVENTO_EXPLICITO.test(q) ||
-    (!buscaNegocio && /\b(cuando|donde|ubicacion|direccion)\b/.test(q))
-  ) {
+  if (pideBaratos || pideRecientes || pideRecomendacion) {
+    return {
+      type: 'NEGOCIO_RECOMENDACION',
+      personas: extraerPersonas(pregunta),
+      terminos,
+      criterio: pideBaratos ? 'baratos' : pideRecientes ? 'recientes' : 'recomendados',
+      global: false,
+    };
+  }
+
+  if (!buscaNegocio && /\b(cuando|donde|ubicacion|direccion)\b/.test(q)) {
     return { type: 'EVENTO_BUSQUEDA', terminos, soloFinalizados: false };
   }
 

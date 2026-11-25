@@ -53,6 +53,7 @@ const EVENTO_SELECT = {
   titulo: true,
   slug: true,
   descripcion: true,
+  destacado: true,
   fechaInicio: true,
   fechaFin: true,
   horaApertura: true,
@@ -62,6 +63,7 @@ const EVENTO_SELECT = {
   categoria: { select: { nombre: true } },
   lugar: { select: { nombre: true, direccion: true } },
   ciudad: { select: { nombre: true } },
+  creadoEn: true,
 } as const;
 
 export class AiRepository {
@@ -70,6 +72,8 @@ export class AiRepository {
     limite: number,
     periodo?: PeriodoEventos,
     soloFinalizados = false,
+    soloGratuitos = false,
+    orden: 'proximos' | 'recomendados' | 'recientes' = 'proximos',
   ): Promise<number[] | null> {
     const palabras = terminos
       .filter((termino) => termino.length >= 3)
@@ -128,6 +132,24 @@ export class AiRepository {
         )
       )`);
     }
+    if (!periodo && !soloFinalizados) {
+      const ahora = new Date();
+      condiciones.push(Prisma.sql`(
+        evento."fechaFin" >= ${ahora}
+        OR (
+          evento."fechaFin" IS NULL
+          AND evento."fechaInicio" >= ${ahora}
+        )
+      )`);
+    }
+    if (soloGratuitos) {
+      condiciones.push(Prisma.sql`evento."precioReferencial" = 0`);
+    }
+    const ordenSql = orden === 'recientes'
+      ? Prisma.sql`evento."creadoEn" DESC`
+      : orden === 'recomendados'
+        ? Prisma.sql`evento."destacado" DESC, evento."fechaInicio" ASC`
+        : Prisma.sql`evento."fechaInicio" ASC`;
     const filas = await prisma.$queryRaw<Array<{ id: number }>>`
       SELECT evento."id"
       FROM "Evento" AS evento
@@ -136,29 +158,94 @@ export class AiRepository {
       LEFT JOIN "Ciudad" AS ciudad ON ciudad."id" = evento."ciudadId"
       LEFT JOIN "Organizador" AS organizador ON organizador."id" = evento."organizadorId"
       WHERE ${Prisma.join(condiciones, ' AND ')}
-      ORDER BY evento."fechaInicio" ASC
+      ORDER BY ${ordenSql}
       LIMIT ${limite}
     `;
     return filas.map((fila) => fila.id);
   }
 
-  async findEventosPorTerminos(terminos: string[]): Promise<EventoContexto[]> {
-    const ids = await this.findIdsEventosPublicosPorTerminos(terminos, 8);
-    if (!ids || ids.length === 0) return [];
-
+  private async findEventosProximosFiltrados(
+    terminos: string[],
+    soloGratuitos: boolean,
+    orden: 'proximos' | 'recomendados' | 'recientes',
+    limite: number,
+  ): Promise<EventoContexto[]> {
+    const ids = await this.findIdsEventosPublicosPorTerminos(
+      terminos,
+      limite,
+      undefined,
+      false,
+      soloGratuitos,
+      orden,
+    );
+    if (ids?.length === 0) return [];
     return prisma.evento.findMany({
-      where: {
-        ...FILTROS_PUBLICOS,
-        id: { in: ids },
-      },
+      where: { AND: [
+        FILTROS_PUBLICOS,
+        filtroFechaProximos(),
+        ...(ids ? [{ id: { in: ids } }] : []),
+        ...(soloGratuitos ? [{ precioReferencial: 0 }] : []),
+      ] },
       select: EVENTO_SELECT,
-      take: 8,
-      orderBy: { fechaInicio: 'asc' },
+      take: limite,
+      orderBy: orden === 'recientes'
+        ? { creadoEn: 'desc' }
+        : orden === 'recomendados'
+          ? [{ destacado: 'desc' }, { fechaInicio: 'asc' }]
+          : { fechaInicio: 'asc' },
     });
   }
 
-  async findNegociosPublicados(): Promise<NegocioContexto[]> {
-    return prisma.negocio.findMany({
+  async findEventosPorTerminos(
+    terminos: string[],
+    soloGratuitos = false,
+    limite = 8,
+  ): Promise<EventoContexto[]> {
+    return this.findEventosProximosFiltrados(terminos, soloGratuitos, 'proximos', limite);
+  }
+
+  async findEventosRecomendados(
+    terminos: string[] = [],
+    soloGratuitos = false,
+    limite = 10,
+  ): Promise<EventoContexto[]> {
+    return this.findEventosProximosFiltrados(terminos, soloGratuitos, 'recomendados', limite);
+  }
+
+  async findEventosRecientes(
+    terminos: string[] = [],
+    soloGratuitos = false,
+    limite = 10,
+  ): Promise<EventoContexto[]> {
+    return this.findEventosProximosFiltrados(terminos, soloGratuitos, 'recientes', limite);
+  }
+
+  private async agregarCalificaciones(
+    negocios: NegocioContexto[],
+  ): Promise<NegocioContexto[]> {
+    if (negocios.length === 0) return [];
+    const calificaciones = await prisma.calificacionNegocio.groupBy({
+      by: ['negocioId'],
+      where: { negocioId: { in: negocios.map(({ id }) => id) } },
+      _avg: { estrellas: true },
+      _count: { _all: true },
+    });
+    const porNegocio = new Map(calificaciones.map((calificacion) => [
+      calificacion.negocioId,
+      {
+        promedioEstrellas: calificacion._avg.estrellas,
+        totalCalificaciones: calificacion._count._all,
+      },
+    ]));
+    return negocios.map((negocio) => ({
+      ...negocio,
+      promedioEstrellas: porNegocio.get(negocio.id)?.promedioEstrellas ?? null,
+      totalCalificaciones: porNegocio.get(negocio.id)?.totalCalificaciones ?? 0,
+    }));
+  }
+
+  async findNegociosPublicados(incluirCalificaciones = false): Promise<NegocioContexto[]> {
+    const negocios = await prisma.negocio.findMany({
       where: {
         estadoPublicacion: 'APROBADO',
         activo: true,
@@ -177,14 +264,19 @@ export class AiRepository {
         precioPromedio: true,
         platos: true,
         ciudad: { select: { nombre: true } },
+        creadoEn: true,
       },
       take: 100,
       orderBy: { creadoEn: 'desc' },
     });
+    return incluirCalificaciones ? this.agregarCalificaciones(negocios) : negocios;
   }
 
-  async findNegocioPublicadoPorSlug(slug: string): Promise<NegocioContexto | null> {
-    return prisma.negocio.findFirst({
+  async findNegocioPublicadoPorSlug(
+    slug: string,
+    incluirCalificaciones = false,
+  ): Promise<NegocioContexto | null> {
+    const negocio = await prisma.negocio.findFirst({
       where: {
         slug,
         estadoPublicacion: 'APROBADO',
@@ -204,8 +296,12 @@ export class AiRepository {
         precioPromedio: true,
         platos: true,
         ciudad: { select: { nombre: true } },
+        creadoEn: true,
       },
     });
+    if (!negocio) return null;
+    if (!incluirCalificaciones) return negocio;
+    return (await this.agregarCalificaciones([negocio]))[0];
   }
 
   async findEventoById(id: number): Promise<EventoContexto | null> {
@@ -272,12 +368,14 @@ export class AiRepository {
     terminos: string[] = [],
     soloFinalizados = false,
     limit = 20,
+    soloGratuitos = false,
   ): Promise<EventoContexto[]> {
     const ids = await this.findIdsEventosPublicosPorTerminos(
       terminos,
       limit,
       periodo,
       soloFinalizados,
+      soloGratuitos,
     );
     if (ids?.length === 0) return [];
 
@@ -291,6 +389,7 @@ export class AiRepository {
         ],
       },
       ...(ids ? [{ id: { in: ids } }] : []),
+      ...(soloGratuitos ? [{ precioReferencial: 0 }] : []),
     ];
 
     if (periodo.soloVigentes) {

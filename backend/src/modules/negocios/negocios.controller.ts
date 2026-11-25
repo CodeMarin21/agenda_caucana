@@ -54,8 +54,8 @@ export const listarNegocios = async (req: Request, res: Response): Promise<void>
     const filtros: FiltrosNegocios = {
       categoria: query.categoria as CategoriaNegocio | undefined,
       ciudadId: query.ciudadId ? Number(query.ciudadId) : undefined,
-      precioMin: query.precioMin ? Number(query.precioMin) : undefined,
-      precioMax: query.precioMax ? Number(query.precioMax) : undefined,
+      precioMin: query.precioMin !== undefined ? Number(query.precioMin) : undefined,
+      precioMax: query.precioMax !== undefined ? Number(query.precioMax) : undefined,
       orden: (query.orden as FiltrosNegocios['orden']) || 'recientes',
       pagina: query.pagina ? Number(query.pagina) : 1,
       limite: query.limite ? Number(query.limite) : 12,

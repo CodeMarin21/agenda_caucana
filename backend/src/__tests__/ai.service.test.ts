@@ -21,6 +21,9 @@ class FakeAiRepository extends AiRepository {
     soloFinalizados: boolean;
   }> = [];
   eventosFinalizados: EventoContexto[] = [];
+  eventosRecomendados: EventoContexto[] = [];
+  eventosRecientes: EventoContexto[] = [];
+  negociosPublicados: NegocioContexto[] = [];
   negocioPublicado: NegocioContexto | null = null;
   eventoPublicado: EventoContexto | null = null;
   slugConsultado: string | null = null;
@@ -48,15 +51,43 @@ class FakeAiRepository extends AiRepository {
     });
   }
 
-  override async findEventosPorTerminos(terminos: string[]): Promise<EventoContexto[]> {
+  override async findEventosPorTerminos(
+    terminos: string[],
+    soloGratuitos = false,
+  ): Promise<EventoContexto[]> {
     this.terminosDirectosConsultados.push(terminos);
     return this.eventosFinalizados.filter((evento) => {
-      const texto = `${evento.titulo} ${evento.descripcion} ${evento.categoria.nombre}`
+      const texto = `${evento.titulo} ${evento.descripcion} ${evento.categoria.nombre} ${evento.lugar.nombre} ${evento.lugar.direccion}`
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
-      return terminos.every((termino) => texto.includes(termino));
+      return terminos.every((termino) => texto.includes(termino)) &&
+        (!soloGratuitos || evento.precioReferencial === 0);
     });
+  }
+
+  override async findEventosRecomendados(
+    terminos: string[] = [],
+    soloGratuitos = false,
+  ): Promise<EventoContexto[]> {
+    return this.eventosRecomendados.filter((evento) =>
+      terminos.every((termino) => `${evento.titulo} ${evento.lugar.nombre}`.toLowerCase().includes(termino)) &&
+      (!soloGratuitos || evento.precioReferencial === 0),
+    );
+  }
+
+  override async findEventosRecientes(
+    terminos: string[] = [],
+    soloGratuitos = false,
+  ): Promise<EventoContexto[]> {
+    return this.eventosRecientes.filter((evento) =>
+      terminos.every((termino) => `${evento.titulo} ${evento.lugar.nombre}`.toLowerCase().includes(termino)) &&
+      (!soloGratuitos || evento.precioReferencial === 0),
+    );
+  }
+
+  override async findNegociosPublicados(): Promise<NegocioContexto[]> {
+    return this.negociosPublicados;
   }
 
   override async findFinalizados(): Promise<EventoContexto[]> {
@@ -166,6 +197,27 @@ describe('AiService temporal queries', () => {
     expect(gemini.llamadas).toBe(0);
   });
 
+  it('finds events for “today” and a specific date without treating “día” as a search term', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-11-24T12:00:00.000Z'));
+    repository.eventosFinalizados = [
+      evento(11, 'SalchiFest 2026 Popayán', '2026-11-01T14:34:00.000Z', '2026-12-16T02:34:00.000Z'),
+    ];
+
+    const hoy = await service.chat({
+      pregunta: 'que eventos hay el dia de hoy?',
+      idioma: 'es',
+    });
+    const primeroDeNoviembre = await service.chat({
+      pregunta: 'que eventos hay el dia 1 de noviembre',
+      idioma: 'es',
+    });
+
+    expect(repository.periodosConsultados.map(({ terminos }) => terminos)).toEqual([[], []]);
+    expect(hoy.respuesta).toContain('SalchiFest 2026 Popayán');
+    expect(primeroDeNoviembre.respuesta).toContain('SalchiFest 2026 Popayán');
+    expect(gemini.llamadas).toBe(0);
+  });
+
   it('uses the previous business context for a directions follow-up', async () => {
     repository.negocioPublicado = {
       id: 8,
@@ -226,6 +278,156 @@ describe('AiService temporal queries', () => {
     expect(response.respuesta).not.toContain('SalchiFest');
     expect(repository.slugConsultado).toBe('forno-urbano-pizza');
     expect(repository.consultasEventosProximos).toBe(0);
+    expect(gemini.llamadas).toBe(0);
+  });
+
+  it('recommends menu dishes across published businesses using review ratings and switches to event results', async () => {
+    repository.negociosPublicados = [{
+      id: 20,
+      slug: 'cocina-caucana',
+      nombre: 'Cocina Caucana',
+      descripcion: 'Comida tradicional',
+      direccion: 'Centro',
+      telefono: null,
+      whatsapp: null,
+      horarioAtencion: null,
+      categoria: 'TRADICIONAL_CAUCANA',
+      precioPromedio: 12000,
+      platos: [{ nombre: 'Empanadas de pipián', precio: 5000 }],
+      promedioEstrellas: 4.9,
+      totalCalificaciones: 38,
+      creadoEn: new Date('2026-11-20T12:00:00.000Z'),
+      ciudad: { nombre: 'Popayán' },
+    }];
+    repository.eventosRecomendados = [
+      evento(21, 'Festival Caucano', '2026-11-28T15:00:00.000Z', '2026-11-28T19:00:00.000Z'),
+    ];
+
+    const comidas = await service.chat({
+      pregunta: 'dame recomendaciones de comidas basadas en las reseñas',
+      idioma: 'es',
+      negocioSlug: 'forno-urbano-pizza',
+      contextoEventos: ['musica'],
+    });
+
+    expect(comidas.respuesta).toContain('Empanadas de pipián');
+    expect(comidas.respuesta).toContain('4,9/5');
+    expect(comidas.respuesta).toContain('no de cada plato');
+    expect(comidas.contextoDominio).toBe('negocios');
+    expect(repository.slugConsultado).toBeNull();
+
+    const eventos = await service.chat({
+      pregunta: '¿Cuáles son los mejores eventos?',
+      idioma: 'es',
+      negocioSlug: 'forno-urbano-pizza',
+      contextoEventos: ['comida'],
+    });
+
+    expect(eventos.respuesta).toContain('Festival Caucano');
+    expect(eventos.respuesta).not.toContain('Empanadas');
+    expect(eventos.contextoDominio).toBe('eventos');
+    expect(gemini.llamadas).toBe(0);
+  });
+
+  it('lists only free upcoming events matching the requested venue', async () => {
+    repository.eventosFinalizados = [
+      {
+        ...evento(22, 'Recital gratuito', '2026-11-28T15:00:00.000Z', '2026-11-28T18:00:00.000Z'),
+        lugar: { nombre: 'Teatro Municipal', direccion: 'Centro' },
+      },
+      {
+        ...evento(23, 'Concierto pago', '2026-11-29T15:00:00.000Z', '2026-11-29T18:00:00.000Z'),
+        precioReferencial: 25000,
+        lugar: { nombre: 'Teatro Municipal', direccion: 'Centro' },
+      },
+      {
+        ...evento(24, 'Feria libre', '2026-11-30T15:00:00.000Z', '2026-11-30T18:00:00.000Z'),
+        lugar: { nombre: 'Parque Caldas', direccion: 'Centro' },
+      },
+    ];
+
+    const respuesta = await service.chat({
+      pregunta: '¿Qué eventos quedan en el Teatro Municipal y son gratis?',
+      idioma: 'es',
+    });
+
+    expect(respuesta.respuesta).toContain('Recital gratuito');
+    expect(respuesta.respuesta).toContain('Entrada libre');
+    expect(respuesta.respuesta).not.toContain('Concierto pago');
+    expect(respuesta.respuesta).not.toContain('Feria libre');
+    expect(repository.terminosDirectosConsultados).toEqual([['teatro', 'municipal']]);
+    expect(respuesta.contextoDominio).toBe('eventos');
+  });
+
+  it('keeps the previous venue when the user asks a free-entry follow-up', async () => {
+    repository.eventosFinalizados = [
+      {
+        ...evento(25, 'Recital gratuito', '2026-11-28T15:00:00.000Z', '2026-11-28T18:00:00.000Z'),
+        lugar: { nombre: 'Teatro Municipal', direccion: 'Centro' },
+      },
+      {
+        ...evento(26, 'Feria libre', '2026-11-30T15:00:00.000Z', '2026-11-30T18:00:00.000Z'),
+        lugar: { nombre: 'Parque Caldas', direccion: 'Centro' },
+      },
+    ];
+
+    const respuesta = await service.chat({
+      pregunta: '¿Hay alguno gratis?',
+      idioma: 'es',
+      contextoEventos: ['teatro', 'municipal'],
+    });
+
+    expect(respuesta.respuesta).toContain('Recital gratuito');
+    expect(respuesta.respuesta).not.toContain('Feria libre');
+    expect(respuesta.respuesta).toContain('Teatro Municipal');
+    expect(respuesta.contextoDominio).toBe('eventos');
+  });
+
+  it('lists recently created businesses across the food catalog instead of reusing one old listing', async () => {
+    repository.negociosPublicados = [{
+      id: 26,
+      slug: 'cafe-nuevo',
+      nombre: 'Café Nuevo',
+      descripcion: 'Cafetería',
+      direccion: 'Centro',
+      telefono: null,
+      whatsapp: null,
+      horarioAtencion: null,
+      categoria: 'CAFETERIA',
+      precioPromedio: 8000,
+      platos: [{ nombre: 'Café de origen', precio: 5000 }],
+      creadoEn: new Date('2026-11-20T12:00:00.000Z'),
+      ciudad: { nombre: 'Popayán' },
+    }];
+
+    const respuesta = await service.chat({
+      pregunta: '¿Cuáles son los últimos platos que fueron publicados?',
+      idioma: 'es',
+      negocioSlug: 'forno-urbano-pizza',
+    });
+
+    expect(respuesta.respuesta).toContain('Café Nuevo');
+    expect(respuesta.respuesta).toContain('Café de origen');
+    expect(respuesta.respuesta).toContain('no se guarda una fecha por cada plato');
+    expect(respuesta.contextoDominio).toBe('negocios');
+    expect(repository.slugConsultado).toBeNull();
+  });
+
+  it('switches from a previous food topic to recently published events', async () => {
+    repository.eventosRecientes = [
+      evento(27, 'Festival Publicado Recientemente', '2026-11-28T15:00:00.000Z', '2026-11-28T19:00:00.000Z'),
+    ];
+
+    const respuesta = await service.chat({
+      pregunta: '¿Cuáles son los últimos eventos publicados?',
+      idioma: 'es',
+      negocioSlug: 'forno-urbano-pizza',
+      contextoEventos: ['pizza'],
+    });
+
+    expect(respuesta.respuesta).toContain('Festival Publicado Recientemente');
+    expect(respuesta.respuesta).not.toContain('pizza');
+    expect(respuesta.contextoDominio).toBe('eventos');
     expect(gemini.llamadas).toBe(0);
   });
 

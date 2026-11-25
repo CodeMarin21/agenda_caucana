@@ -7,6 +7,13 @@
   const listaCategorias = document.querySelector('[data-categorias-negocios]');
   const botonCargarMas = document.querySelector('[data-cargar-mas-negocios]');
   const lugaresDestacados = document.querySelector('[data-lugares-destacados]');
+  const modoPrecio = document.querySelector('[data-modo-precio-negocio]');
+  const precioExacto = document.querySelector('[data-precio-exacto-negocio]');
+  const contenedorPrecioExacto = document.querySelector('[data-precio-exacto-contenedor]');
+  const precioMinimo = document.querySelector('[data-precio-min-negocio]');
+  const precioMaximo = document.querySelector('[data-precio-max-negocio]');
+  const contenedorRangoPrecio = document.querySelector('[data-precio-rango-negocio]');
+  const errorPrecio = document.querySelector('[data-error-precio-negocio]');
   if (!grid || !formBusqueda || !inputBusqueda || !selectorCiudad || !listaCategorias) return;
 
   const texto = (_clave, respaldo) => respaldo;
@@ -40,6 +47,7 @@
   let totalPaginas = 1;
   let totalServidor = 0;
   let solicitudActual = 0;
+  let temporizadorBusqueda;
 
   function normalizar(texto) {
     return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-CO');
@@ -52,6 +60,78 @@
       currency: 'COP',
       maximumFractionDigits: 0,
     }).format(Number(precio));
+  }
+
+  function leerPrecio(input) {
+    if (!input?.value.trim()) return undefined;
+    const valor = Number(input.value);
+    return Number.isInteger(valor) && valor >= 0 ? valor : null;
+  }
+
+  function obtenerRangoPrecio() {
+    if (precioActivo === 'gratis') return { minimo: 0, maximo: 0 };
+    if (precioActivo === 'exacto') {
+      const precio = leerPrecio(precioExacto);
+      return precio === undefined || precio === null
+        ? null
+        : { minimo: precio, maximo: precio };
+    }
+    if (precioActivo === 'rango') {
+      return {
+        minimo: leerPrecio(precioMinimo),
+        maximo: leerPrecio(precioMaximo),
+      };
+    }
+    return null;
+  }
+
+  function actualizarControlesPrecio() {
+    if (contenedorPrecioExacto) contenedorPrecioExacto.hidden = precioActivo !== 'exacto';
+    if (contenedorRangoPrecio) contenedorRangoPrecio.hidden = precioActivo !== 'rango';
+    if (precioActivo === 'todos' || precioActivo === 'gratis') {
+      if (precioExacto) precioExacto.value = '';
+      if (precioMinimo) precioMinimo.value = '';
+      if (precioMaximo) precioMaximo.value = '';
+    }
+  }
+
+  function validarPrecio() {
+    const exacto = leerPrecio(precioExacto);
+    const minimo = leerPrecio(precioMinimo);
+    const maximo = leerPrecio(precioMaximo);
+    let mensaje = '';
+    if (precioActivo === 'exacto' && (exacto === undefined || exacto === null)) {
+      mensaje = exacto === null
+        ? texto('saboresPagina.precioInvalido', 'Ingresa un precio exacto válido en pesos colombianos.')
+        : texto('saboresPagina.precioExactoRequerido', 'Ingresa el precio exacto que buscas.');
+    } else if (precioActivo === 'rango' && (minimo === null || maximo === null)) {
+      mensaje = texto('saboresPagina.rangoPrecioInvalido', 'Ingresa límites de precio válidos en pesos colombianos.');
+    } else if (precioActivo === 'rango' && minimo === undefined && maximo === undefined) {
+      mensaje = texto('saboresPagina.rangoPrecioRequerido', 'Ingresa al menos un límite para el rango de precios.');
+    } else if (precioActivo === 'rango' && minimo !== undefined && maximo !== undefined && minimo > maximo) {
+      mensaje = texto('saboresPagina.rangoPrecioInvertido', 'El precio mínimo no puede superar el precio máximo.');
+    }
+    if (errorPrecio) {
+      errorPrecio.hidden = !mensaje;
+      errorPrecio.textContent = mensaje;
+    }
+    [precioExacto, precioMinimo, precioMaximo].forEach((input) => {
+      if (!input) return;
+      if (mensaje && !input.closest('[hidden]')) input.setAttribute('aria-invalid', 'true');
+      else input.removeAttribute('aria-invalid');
+    });
+    return !mensaje;
+  }
+
+  function precioDePlatoCoincidente(negocio) {
+    const rango = obtenerRangoPrecio();
+    if (!rango || !Array.isArray(negocio.platos)) return null;
+    return negocio.platos.find((plato) => {
+      const precio = Number(plato?.precio);
+      if (!Number.isInteger(precio) || precio < 0) return false;
+      return (rango.minimo === undefined || precio >= rango.minimo) &&
+        (rango.maximo === undefined || precio <= rango.maximo);
+    }) || null;
   }
 
   function crearEstrellas(promedio) {
@@ -124,7 +204,12 @@
     rating.append(estrellas, numero, total);
     const precio = document.createElement('p');
     precio.className = 'tarjeta-negocio__precio';
-    precio.textContent = `${formatearPrecio(negocio.precioPromedio)}${negocio.precioPromedio == null ? '' : ` ${texto('saboresPagina.promedio', 'promedio')}`}`;
+    const platoCoincidente = precioDePlatoCoincidente(negocio);
+    precio.textContent = platoCoincidente
+      ? texto('saboresPagina.precioPlatoCoincidente', '{plato}: {precio}')
+        .replace('{plato}', platoCoincidente.nombre || texto('saboresPagina.plato', 'Plato'))
+        .replace('{precio}', formatearPrecio(platoCoincidente.precio))
+      : `${formatearPrecio(negocio.precioPromedio)}${negocio.precioPromedio == null ? '' : ` ${texto('saboresPagina.promedio', 'promedio')}`}`;
     cuerpo.append(titulo, direccion, rating, precio);
     tarjeta.append(imagen, cuerpo);
     return tarjeta;
@@ -207,16 +292,8 @@
     }
   }
 
-  function filtrarNegocios() {
-    return negocios.filter((negocio) => {
-      if (precioActivo === '10000-30000' && (negocio.precioPromedio == null || negocio.precioPromedio < 10000)) return false;
-      if (precioActivo === 'mas-30000' && (negocio.precioPromedio == null || negocio.precioPromedio <= 30000)) return false;
-      return true;
-    });
-  }
-
   function renderizar() {
-    const visibles = filtrarNegocios();
+    const visibles = negocios;
     grid.replaceChildren();
     if (visibles.length === 0) {
       const mensaje = document.createElement('p');
@@ -242,6 +319,13 @@
   }
 
   async function cargarNegocios(reiniciar = true) {
+    if (!validarPrecio()) {
+      solicitudActual += 1;
+      grid.setAttribute('aria-busy', 'false');
+      botonCargarMas.disabled = false;
+      contador.textContent = errorPrecio.textContent;
+      return;
+    }
     if (reiniciar) {
       pagina = 1;
       totalPaginas = 1;
@@ -261,12 +345,17 @@
     };
     if (categoriaActiva) params.categoria = categoriaActiva;
     if (selectorCiudad.value) params.ciudadId = selectorCiudad.value;
-    if (precioActivo === 'hasta-10000') params.precioMax = '10000';
-    if (precioActivo === '10000-30000') {
-      params.precioMin = '10000';
-      params.precioMax = '30000';
+    const rangoPrecio = obtenerRangoPrecio();
+    if (precioActivo === 'gratis') {
+      params.precioMin = '0';
+      params.precioMax = '0';
+    } else if (precioActivo === 'exacto' && rangoPrecio) {
+      params.precioMin = String(rangoPrecio.minimo);
+      params.precioMax = String(rangoPrecio.maximo);
+    } else if (precioActivo === 'rango' && rangoPrecio) {
+      if (rangoPrecio.minimo !== undefined) params.precioMin = String(rangoPrecio.minimo);
+      if (rangoPrecio.maximo !== undefined) params.precioMax = String(rangoPrecio.maximo);
     }
-    if (precioActivo === 'mas-30000') params.precioMin = '30001';
     if (qActivo) params.q = qActivo;
 
     try {
@@ -350,8 +439,16 @@
 
   formBusqueda.addEventListener('submit', (evento) => {
     evento.preventDefault();
+    clearTimeout(temporizadorBusqueda);
     qActivo = inputBusqueda.value.trim();
     cargarNegocios(true);
+  });
+  inputBusqueda.addEventListener('input', () => {
+    clearTimeout(temporizadorBusqueda);
+    temporizadorBusqueda = setTimeout(() => {
+      qActivo = inputBusqueda.value.trim();
+      cargarNegocios(true);
+    }, 300);
   });
   selectorCiudad.addEventListener('change', () => cargarNegocios());
   document.querySelectorAll('[data-orden]').forEach((boton) => {
@@ -363,18 +460,21 @@
       cargarNegocios();
     });
   });
-  document.querySelectorAll('[data-precio]').forEach((boton) => {
-    boton.addEventListener('click', () => {
-      precioActivo = boton.dataset.precio;
-      document.querySelectorAll('[data-precio]').forEach((otro) => {
-        otro.setAttribute('aria-pressed', String(otro === boton));
-      });
-      cargarNegocios();
+  modoPrecio?.addEventListener('change', () => {
+    precioActivo = modoPrecio.value;
+    actualizarControlesPrecio();
+    cargarNegocios();
+  });
+  [precioExacto, precioMinimo, precioMaximo].forEach((input) => {
+    input?.addEventListener('input', () => {
+      clearTimeout(temporizadorBusqueda);
+      temporizadorBusqueda = setTimeout(() => cargarNegocios(), 300);
     });
   });
   botonCargarMas.addEventListener('click', () => cargarNegocios(false));
   document.addEventListener('ac:locale-cambiado', () => {
     crearFiltrosCategoria();
+    actualizarControlesPrecio();
     cargarLugaresDestacados();
     cargarNegocios();
   });

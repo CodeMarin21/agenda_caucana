@@ -31,6 +31,7 @@ describe('NegociosRepository search and price filters', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockQueryRaw.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
     mockFindMany.mockResolvedValue([]);
     mockGroupBy.mockResolvedValue([]);
@@ -62,7 +63,7 @@ describe('NegociosRepository search and price filters', () => {
     expect(mockCount.mock.calls[0][0].where.id).toEqual({ in: [18] });
   });
 
-  it('applies both ends of a selected price range in the database query', async () => {
+  it('applies a selected price range to the average price and exact menu prices', async () => {
     await repository.findAll({
       precioMin: 10000,
       precioMax: 30000,
@@ -71,10 +72,31 @@ describe('NegociosRepository search and price filters', () => {
       limite: 20,
     });
 
-    expect(mockCount.mock.calls[0][0].where.precioPromedio).toEqual({
-      gte: 10000,
-      lte: 30000,
+    expect(mockCount.mock.calls[0][0].where.AND).toEqual([{
+      OR: [
+        { precioPromedio: { gte: 10000, lte: 30000 } },
+        { id: { in: [] } },
+      ],
+    }]);
+  });
+
+  it('matches an exact published dish price even when the business average differs', async () => {
+    mockQueryRaw.mockResolvedValue([{ id: 33 }]);
+
+    await repository.findAll({
+      precioMin: 15000,
+      precioMax: 15000,
+      orden: 'recientes',
+      pagina: 1,
+      limite: 20,
     });
+
+    expect(mockCount.mock.calls[0][0].where.AND).toEqual([{
+      OR: [
+        { precioPromedio: { gte: 15000, lte: 15000 } },
+        { id: { in: [33] } },
+      ],
+    }]);
   });
 
   it('releases the organizer business slot transactionally when the owner deletes it', async () => {

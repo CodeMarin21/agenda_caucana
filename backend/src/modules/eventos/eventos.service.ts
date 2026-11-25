@@ -54,6 +54,7 @@ export class EventosService {
     categoriaSlug?: string;
     desde?: string;
     hasta?: string;
+    precioMin?: number;
     precioMax?: number;
     q?: string;
     pagina?: number;
@@ -74,19 +75,29 @@ export class EventosService {
         : undefined;
       if (inicio && fin) {
         estrategias.push(new FiltroPorFecha(inicio, fin));
+      } else if (inicio) {
+        estrategias.push({
+          aplicar: () => ({ fechaInicio: { gte: inicio } }),
+        });
       } else {
         estrategias.push({
-          aplicar: () => ({
-            fechaInicio: {
-              ...(inicio ? { gte: inicio } : {}),
-              ...(fin ? { lte: fin } : {}),
-            },
-          }),
+          aplicar: () => ({ fechaInicio: { lte: fin } }),
         });
       }
     }
-    if (filtros.precioMax !== undefined) {
-      estrategias.push(new FiltroPorPrecio(filtros.precioMax));
+    if (!filtros.desde && !filtros.hasta && (filtros.orden || 'fecha') === 'fecha') {
+      const ahora = new Date();
+      estrategias.push({
+        aplicar: () => ({
+          OR: [
+            { fechaFin: { gte: ahora } },
+            { fechaFin: null, fechaInicio: { gte: ahora } },
+          ],
+        }),
+      });
+    }
+    if (filtros.precioMin !== undefined || filtros.precioMax !== undefined) {
+      estrategias.push(new FiltroPorPrecio(filtros.precioMin, filtros.precioMax));
     }
 
     const whereCombinado: Prisma.EventoWhereInput = estrategias.length > 0

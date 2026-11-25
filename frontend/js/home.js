@@ -36,9 +36,17 @@
   const inputBusqueda = document.querySelector('[data-input-busqueda]');
   const filtroDesde = document.querySelector('[data-evento-desde]');
   const filtroHasta = document.querySelector('[data-evento-hasta]');
-  const filtroPrecio = document.querySelector('[data-evento-precio]');
+  const modoPrecio = document.querySelector('[data-evento-precio-modo]');
+  const precioExacto = document.querySelector('[data-evento-precio-exacto]');
+  const contenedorPrecioExacto = document.querySelector('[data-evento-precio-exacto-contenedor]');
+  const precioMinimo = document.querySelector('[data-evento-precio-min]');
+  const precioMaximo = document.querySelector('[data-evento-precio-max]');
+  const contenedorRangoPrecio = document.querySelector('[data-evento-precio-rango]');
+  const errorPrecio = document.querySelector('[data-error-precio-eventos]');
   const filtroOrden = document.querySelector('[data-evento-orden]');
   const limpiarFiltros = document.querySelector('[data-limpiar-filtros-eventos]');
+  const errorFiltros = document.querySelector('[data-error-filtros]');
+  const resumenFiltros = document.querySelector('[data-resumen-filtros]');
 
   function crearTarjetaNegocio(negocio) {
     const tarjeta = document.createElement('a');
@@ -130,6 +138,142 @@
   let categoriaActiva = null;
   let terminoBusqueda = '';
   let ultimaSolicitudEventos = 0;
+  let temporizadorBusqueda;
+
+  function sincronizarLimitesFechas() {
+    if (filtroHasta) filtroHasta.min = filtroDesde?.value || '';
+    if (filtroDesde) filtroDesde.max = filtroHasta?.value || '';
+  }
+
+  function validarRangoFechas() {
+    const rangoInvalido = Boolean(
+      filtroDesde?.value &&
+      filtroHasta?.value &&
+      filtroDesde.value > filtroHasta.value,
+    );
+    if (errorFiltros) {
+      errorFiltros.hidden = !rangoInvalido;
+      errorFiltros.textContent = rangoInvalido
+        ? 'La fecha “Desde” debe ser anterior o igual a la fecha “Hasta”.'
+        : '';
+    }
+    [filtroDesde, filtroHasta].forEach((filtro) => {
+      if (!filtro) return;
+      if (rangoInvalido) filtro.setAttribute('aria-invalid', 'true');
+      else filtro.removeAttribute('aria-invalid');
+    });
+    return !rangoInvalido;
+  }
+
+  function leerPrecio(input) {
+    if (!input?.value.trim()) return undefined;
+    const valor = Number(input.value);
+    return Number.isFinite(valor) && valor >= 0 ? valor : null;
+  }
+
+  function actualizarControlesPrecio() {
+    const modo = modoPrecio?.value || 'todos';
+    if (contenedorPrecioExacto) contenedorPrecioExacto.hidden = modo !== 'exacto';
+    if (contenedorRangoPrecio) contenedorRangoPrecio.hidden = modo !== 'rango';
+    if (modo === 'todos' || modo === 'gratis') {
+      if (precioExacto) precioExacto.value = '';
+      if (precioMinimo) precioMinimo.value = '';
+      if (precioMaximo) precioMaximo.value = '';
+    }
+  }
+
+  function validarPrecio() {
+    const modo = modoPrecio?.value || 'todos';
+    const exacto = leerPrecio(precioExacto);
+    const minimo = leerPrecio(precioMinimo);
+    const maximo = leerPrecio(precioMaximo);
+    let mensaje = '';
+    if (modo === 'exacto' && (exacto === undefined || exacto === null)) {
+      mensaje = exacto === null
+        ? 'Ingresa un precio exacto válido en pesos colombianos.'
+        : 'Ingresa el precio exacto que buscas.';
+    } else if (modo === 'rango' && (minimo === null || maximo === null)) {
+      mensaje = 'Ingresa límites de precio válidos en pesos colombianos.';
+    } else if (modo === 'rango' && minimo === undefined && maximo === undefined) {
+      mensaje = 'Ingresa al menos un límite para el rango de precios.';
+    } else if (modo === 'rango' && minimo !== undefined && maximo !== undefined && minimo > maximo) {
+      mensaje = 'El precio mínimo no puede superar el precio máximo.';
+    }
+    if (errorPrecio) {
+      errorPrecio.hidden = !mensaje;
+      errorPrecio.textContent = mensaje;
+    }
+    [precioExacto, precioMinimo, precioMaximo].forEach((input) => {
+      if (!input) return;
+      if (mensaje && !input.closest('[hidden]')) input.setAttribute('aria-invalid', 'true');
+      else input.removeAttribute('aria-invalid');
+    });
+    return !mensaje;
+  }
+
+  function obtenerParametrosPrecio() {
+    const modo = modoPrecio?.value || 'todos';
+    if (modo === 'gratis') return { precioMin: 0, precioMax: 0 };
+    if (modo === 'exacto') {
+      const precio = leerPrecio(precioExacto);
+      return { precioMin: precio, precioMax: precio };
+    }
+    if (modo === 'rango') {
+      const minimo = leerPrecio(precioMinimo);
+      const maximo = leerPrecio(precioMaximo);
+      return {
+        ...(minimo !== undefined ? { precioMin: minimo } : {}),
+        ...(maximo !== undefined ? { precioMax: maximo } : {}),
+      };
+    }
+    return {};
+  }
+
+  function fechaLegible(fecha) {
+    if (!fecha) return '';
+    const locale = { es: 'es-CO', en: 'en-US', fr: 'fr-FR' }[AC_API.getLocale()] || 'es-CO';
+    return new Date(`${fecha}T12:00:00`).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  function actualizarResumenFiltros() {
+    const filtrosActivos = [];
+    if (terminoBusqueda) filtrosActivos.push(`Búsqueda: “${terminoBusqueda}”`);
+    if (categoriaActiva) {
+      const categoria = contenedorPildoras?.querySelector('.pildora[aria-pressed="true"]');
+      filtrosActivos.push(`Categoría: ${categoria?.textContent.trim() || categoriaActiva}`);
+    }
+    if (filtroDesde?.value) filtrosActivos.push(`Desde: ${fechaLegible(filtroDesde.value)}`);
+    if (filtroHasta?.value) filtrosActivos.push(`Hasta: ${fechaLegible(filtroHasta.value)}`);
+    const modo = modoPrecio?.value || 'todos';
+    if (modo === 'gratis') filtrosActivos.push('Precio: Gratis');
+    if (modo === 'exacto' && precioExacto?.value) {
+      filtrosActivos.push(`Precio exacto: ${formatoPrecio(precioExacto.value)}`);
+    }
+    if (modo === 'rango' && (precioMinimo?.value || precioMaximo?.value)) {
+      filtrosActivos.push(`Precio: ${precioMinimo?.value ? formatoPrecio(precioMinimo.value) : 'sin mínimo'} – ${precioMaximo?.value ? formatoPrecio(precioMaximo.value) : 'sin máximo'}`);
+    }
+    if (filtroOrden?.value && filtroOrden.value !== 'fecha') {
+      filtrosActivos.push(`Orden: ${filtroOrden.selectedOptions[0]?.textContent.trim() || filtroOrden.value}`);
+    }
+    if (limpiarFiltros) limpiarFiltros.disabled = filtrosActivos.length === 0;
+    if (resumenFiltros) {
+      resumenFiltros.textContent = filtrosActivos.length
+        ? `Filtros activos: ${filtrosActivos.join(' · ')}`
+        : 'Mostrando próximos eventos. Puedes combinar los filtros para afinar la búsqueda.';
+    }
+  }
+
+  function buscarEventosAhora() {
+    clearTimeout(temporizadorBusqueda);
+    terminoBusqueda = inputBusqueda?.value.trim() || '';
+    sincronizarLimitesFechas();
+    actualizarResumenFiltros();
+    cargarEventos();
+  }
 
   function formatearFecha(iso) {
     try {
@@ -165,6 +309,15 @@
 
   async function cargarEventos() {
     const solicitud = ++ultimaSolicitudEventos;
+    const fechasValidas = validarRangoFechas();
+    const precioValido = validarPrecio();
+    if (!fechasValidas || !precioValido) {
+      grid.setAttribute('aria-busy', 'false');
+      if (contadorResultados) contadorResultados.textContent = 'Revisa los filtros de fecha y precio.';
+      return;
+    }
+    grid.setAttribute('aria-busy', 'true');
+    if (contadorResultados) contadorResultados.textContent = 'Buscando eventos...';
     try {
       const params = {};
       params.orden = filtroOrden?.value || 'fecha';
@@ -172,7 +325,7 @@
       if (terminoBusqueda) params.q = terminoBusqueda;
       if (filtroDesde?.value) params.desde = filtroDesde.value;
       if (filtroHasta?.value) params.hasta = filtroHasta.value;
-      if (filtroPrecio?.value) params.precioMax = filtroPrecio.value;
+      Object.assign(params, obtenerParametrosPrecio());
       const respuesta = await AC_API.listarEventos(params);
       if (solicitud !== ultimaSolicitudEventos) return;
       const eventos = respuesta.eventos || respuesta.data || respuesta;
@@ -184,7 +337,10 @@
       grid.innerHTML = eventos.map(tarjetaHtml).join('');
       if (contadorResultados) {
         const clave = eventos.length === 1 ? 'home.unEvento' : 'home.variosEventos';
-        contadorResultados.textContent = traducir(clave, `${eventos.length} eventos destacados encontrados`)
+        const respaldo = eventos.length === 1
+          ? '1 evento encontrado'
+          : `${eventos.length} eventos encontrados`;
+        contadorResultados.textContent = traducir(clave, respaldo)
           .replace('{n}', String(eventos.length));
       }
     } catch (error) {
@@ -192,6 +348,8 @@
       console.error('No se pudieron cargar las publicaciones desde la API:', error);
       grid.innerHTML = `<p style="grid-column:1/-1;color:var(--tinta-55);padding:2rem 0;">${traducir('home.errorCarga', 'No se pudieron cargar las publicaciones. Verifica que el backend esté iniciado e intenta recargar la página.')}</p>`;
       if (contadorResultados) contadorResultados.textContent = traducir('home.errorContador', 'Error al cargar publicaciones');
+    } finally {
+      if (solicitud === ultimaSolicitudEventos) grid.setAttribute('aria-busy', 'false');
     }
   }
 
@@ -205,9 +363,9 @@
         return;
       }
 
-      const pildoraTodos = `<button class="pildora" type="button" data-categoria="" aria-pressed="true">${traducir('filtros.todos', 'Todos')}</button>`;
+      const pildoraTodos = `<button class="pildora" type="button" data-categoria="" aria-pressed="${categoriaActiva ? 'false' : 'true'}">${traducir('filtros.todos', 'Todos')}</button>`;
       const resto = categorias.map((cat) => {
-        return `<button class="pildora" type="button" data-categoria="${cat.slug}" aria-pressed="false">${cat.nombre}</button>`;
+        return `<button class="pildora" type="button" data-categoria="${cat.slug}" aria-pressed="${cat.slug === categoriaActiva ? 'true' : 'false'}">${cat.nombre}</button>`;
       }).join('');
       contenedorPildoras.innerHTML = pildoraTodos + resto;
       activarEscuchaPildoras();
@@ -222,37 +380,64 @@
         contenedorPildoras.querySelectorAll('.pildora').forEach((b) => b.setAttribute('aria-pressed', 'false'));
         boton.setAttribute('aria-pressed', 'true');
         categoriaActiva = boton.dataset.categoria || null;
-        cargarEventos();
+        buscarEventosAhora();
       });
     });
   }
 
+  inputBusqueda?.addEventListener('input', () => {
+    terminoBusqueda = inputBusqueda.value.trim();
+    actualizarResumenFiltros();
+    clearTimeout(temporizadorBusqueda);
+    temporizadorBusqueda = setTimeout(cargarEventos, 300);
+  });
+
   if (formBusqueda) {
     formBusqueda.addEventListener('submit', (evento) => {
       evento.preventDefault();
-      terminoBusqueda = inputBusqueda.value.trim();
-      cargarEventos();
+      buscarEventosAhora();
     });
   }
 
-  [filtroDesde, filtroHasta, filtroPrecio, filtroOrden].forEach((filtro) => {
-    filtro?.addEventListener('change', cargarEventos);
+  [filtroDesde, filtroHasta, filtroOrden].forEach((filtro) => {
+    filtro?.addEventListener('change', buscarEventosAhora);
+  });
+  modoPrecio?.addEventListener('change', () => {
+    actualizarControlesPrecio();
+    buscarEventosAhora();
+  });
+  [precioExacto, precioMinimo, precioMaximo].forEach((input) => {
+    input?.addEventListener('input', () => {
+      clearTimeout(temporizadorBusqueda);
+      actualizarResumenFiltros();
+      temporizadorBusqueda = setTimeout(cargarEventos, 300);
+    });
   });
   limpiarFiltros?.addEventListener('click', () => {
+    categoriaActiva = null;
+    contenedorPildoras?.querySelectorAll('.pildora').forEach((boton) => {
+      boton.setAttribute('aria-pressed', boton.dataset.categoria ? 'false' : 'true');
+    });
     if (filtroDesde) filtroDesde.value = '';
     if (filtroHasta) filtroHasta.value = '';
-    if (filtroPrecio) filtroPrecio.value = '';
+    if (modoPrecio) modoPrecio.value = 'todos';
+    if (precioExacto) precioExacto.value = '';
+    if (precioMinimo) precioMinimo.value = '';
+    if (precioMaximo) precioMaximo.value = '';
+    actualizarControlesPrecio();
     if (filtroOrden) filtroOrden.value = 'fecha';
     if (inputBusqueda) inputBusqueda.value = '';
-    terminoBusqueda = '';
-    cargarEventos();
+    buscarEventosAhora();
   });
   document.addEventListener('ac:locale-cambiado', () => {
     cargarNegociosDestacados();
     cargarCategorias();
-    cargarEventos();
+    buscarEventosAhora();
   });
 
+  sincronizarLimitesFechas();
+  actualizarControlesPrecio();
+  actualizarResumenFiltros();
   cargarCategorias();
   cargarEventos();
 })();
